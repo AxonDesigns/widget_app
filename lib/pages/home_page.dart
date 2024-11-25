@@ -1,5 +1,8 @@
 import 'package:go_router/go_router.dart';
+import 'package:widget_app/components/button.dart';
+import 'package:widget_app/components/dark_mode_state.dart';
 import 'package:widget_app/components/generic.dart';
+import 'package:widget_app/components/tooltip.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -8,7 +11,8 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
+class _HomePageState extends State<HomePage>
+    with AutomaticKeepAliveClientMixin {
   final _controller = TextEditingController();
 
   @override
@@ -31,11 +35,32 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
               TextInput(
                 controller: _controller,
               ),
-              GestureDetector(
-                onTap: () async {
-                  await context.push('/about');
+              Tooltip(
+                message: "Example tooltip",
+                child: Button.primary(
+                  onPressed: () async {
+                    await context.push('/about');
+                  },
+                  children: [Text("Go to About Page")],
+                ),
+              ),
+              Button.outline(
+                onPressed: () async {
+                  context.setThemeMode(ThemeMode.light);
                 },
-                child: const Text('Home Page'),
+                children: [Text("Change to Light Mode")],
+              ),
+              Button.outline(
+                onPressed: () async {
+                  context.setThemeMode(ThemeMode.dark);
+                },
+                children: [Text("Change to Dark Mode")],
+              ),
+              Button.outline(
+                onPressed: () async {
+                  context.setThemeMode(ThemeMode.system);
+                },
+                children: [Text("Change to System Mode")],
               ),
             ],
           ),

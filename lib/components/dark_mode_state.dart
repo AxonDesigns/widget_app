@@ -1,30 +1,40 @@
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class ThemeModeState extends StatefulWidget {
-  const ThemeModeState({
+class ThemeModeStateProvider extends StatefulWidget {
+  const ThemeModeStateProvider({
     super.key,
     required this.child,
-    required this.initial,
+    this.initial,
+    this.storageKey = 'theme_mode',
   });
 
   final Widget child;
-  final ThemeMode initial;
+  final ThemeMode? initial;
+  final String storageKey;
 
   @override
-  State<ThemeModeState> createState() => _ThemeModeStateState();
+  State<ThemeModeStateProvider> createState() => ThemeModeStateProviderState();
 }
 
-class _ThemeModeStateState extends State<ThemeModeState> with WidgetsBindingObserver {
-  late bool isDarkMode;
+class ThemeModeStateProviderState extends State<ThemeModeStateProvider>
+    with WidgetsBindingObserver {
+  var _isDarkMode = false;
+
+  ThemeMode? _themeMode;
 
   @override
   void initState() {
     super.initState();
+    _themeMode = widget.initial;
+
     WidgetsBinding.instance.addObserver(this);
     final mode = WidgetsBinding.instance.platformDispatcher.platformBrightness;
-    isDarkMode = widget.initial == ThemeMode.system ? mode == Brightness.dark : widget.initial == ThemeMode.dark;
+    _isDarkMode = _themeMode == ThemeMode.system
+        ? mode == Brightness.dark
+        : _themeMode == ThemeMode.dark;
   }
 
   @override
@@ -36,18 +46,34 @@ class _ThemeModeStateState extends State<ThemeModeState> with WidgetsBindingObse
   @override
   void didChangePlatformBrightness() {
     super.didChangePlatformBrightness();
+    if (_themeMode != ThemeMode.system) return;
     setState(() {
-      final mode = WidgetsBinding.instance.platformDispatcher.platformBrightness;
-      isDarkMode = widget.initial == ThemeMode.system ? mode == Brightness.dark : widget.initial == ThemeMode.dark;
+      _updateIsDarkMode();
     });
+  }
+
+  void _updateIsDarkMode() {
+    final mode = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    _isDarkMode = _themeMode == ThemeMode.system
+        ? mode == Brightness.dark
+        : _themeMode == ThemeMode.dark;
   }
 
   @override
   Widget build(BuildContext context) {
-    return _ThemeModeState(
+    return ThemeModeState(
       data: ThemeModeStateData(
-        themeMode: widget.initial,
-        isDarkMode: isDarkMode,
+        themeMode: _themeMode ?? ThemeMode.system,
+        isDarkMode: _isDarkMode,
+        setThemeMode: (mode) {
+          setState(() {
+            _themeMode = mode;
+            _updateIsDarkMode();
+          });
+          SharedPreferences.getInstance().then(
+            (value) => value.setInt(widget.storageKey, _themeMode?.index ?? 0),
+          );
+        },
       ),
       child: widget.child,
     );
@@ -55,8 +81,8 @@ class _ThemeModeStateState extends State<ThemeModeState> with WidgetsBindingObse
 }
 
 /// A theme that uses the [GenericThemeData] as its [ThemeData].
-class _ThemeModeState extends InheritedWidget {
-  const _ThemeModeState({
+class ThemeModeState extends InheritedWidget {
+  const ThemeModeState({
     super.key,
     required super.child,
     required this.data,
@@ -65,16 +91,16 @@ class _ThemeModeState extends InheritedWidget {
   final ThemeModeStateData data;
 
   @override
-  bool updateShouldNotify(covariant _ThemeModeState oldWidget) {
+  bool updateShouldNotify(covariant ThemeModeState oldWidget) {
     return oldWidget.data != data;
   }
 
   static ThemeModeStateData of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_ThemeModeState>()!.data;
+    return context.dependOnInheritedWidgetOfExactType<ThemeModeState>()!.data;
   }
 
   static ThemeModeStateData? maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_ThemeModeState>()?.data;
+    return context.dependOnInheritedWidgetOfExactType<ThemeModeState>()?.data;
   }
 }
 
@@ -82,10 +108,12 @@ class ThemeModeStateData {
   ThemeModeStateData({
     required this.themeMode,
     required this.isDarkMode,
+    required this.setThemeMode,
   });
 
   final ThemeMode themeMode;
   final bool isDarkMode;
+  final Function(ThemeMode mode) setThemeMode;
 }
 
 enum ThemeMode {
@@ -96,10 +124,14 @@ enum ThemeMode {
 
 extension ThemeModeStateExtension on BuildContext {
   ThemeMode get themeMode {
-    return _ThemeModeState.maybeOf(this)?.themeMode ?? ThemeMode.system;
+    return ThemeModeState.maybeOf(this)?.themeMode ?? ThemeMode.system;
   }
 
   bool get isDarkMode {
-    return _ThemeModeState.maybeOf(this)?.isDarkMode ?? false;
+    return ThemeModeState.maybeOf(this)?.isDarkMode ?? false;
+  }
+
+  void setThemeMode(ThemeMode mode) {
+    ThemeModeState.maybeOf(this)?.setThemeMode(mode);
   }
 }

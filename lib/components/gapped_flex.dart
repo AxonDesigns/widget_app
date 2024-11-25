@@ -48,9 +48,10 @@ class GappedRow extends Flex {
 
   static List<Widget> _buildChildren(List<Widget> base, {double gap = 0.0}) {
     final result = <Widget>[];
+    final length = base.length;
     for (var (index, child) in base.indexed) {
       result.add(child);
-      if (index != base.length - 1) {
+      if (index != length - 1) {
         result.add(SizedBox(width: gap));
       }
     }

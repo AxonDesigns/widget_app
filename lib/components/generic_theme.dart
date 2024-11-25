@@ -38,10 +38,12 @@ class AnimatedGenericTheme extends ImplicitlyAnimatedWidget {
   final Widget child;
 
   @override
-  AnimatedWidgetBaseState<AnimatedGenericTheme> createState() => _AnimatedGenericThemeState();
+  AnimatedWidgetBaseState<AnimatedGenericTheme> createState() =>
+      _AnimatedGenericThemeState();
 }
 
-class _AnimatedGenericThemeState extends AnimatedWidgetBaseState<AnimatedGenericTheme> {
+class _AnimatedGenericThemeState
+    extends AnimatedWidgetBaseState<AnimatedGenericTheme> {
   GenericThemeDataTween? _data;
   @override
   Widget build(BuildContext context) {
@@ -53,8 +55,18 @@ class _AnimatedGenericThemeState extends AnimatedWidgetBaseState<AnimatedGeneric
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _data = visitor(_data, widget.data, (dynamic value) => GenericThemeDataTween(begin: value))! as GenericThemeDataTween;
+    _data = visitor(_data, widget.data,
+            (dynamic value) => GenericThemeDataTween(begin: value))!
+        as GenericThemeDataTween;
   }
+}
+
+enum RoundedSize {
+  none,
+  small,
+  medium,
+  large,
+  full,
 }
 
 /// The [ThemeData] used by [GenericTheme].
@@ -64,25 +76,30 @@ class GenericThemeData {
     required this.backgroundColor,
     required this.foregroundColor,
     required Color highestSurfaceColor,
+    required this.roundedSize,
   }) : _highestSurfaceColor = highestSurfaceColor;
 
   factory GenericThemeData.light() => const GenericThemeData(
-        primaryColor: Color.fromARGB(255, 55, 194, 236),
+        primaryColor: Color.fromARGB(255, 35, 145, 255),
         backgroundColor: Colors.white,
         foregroundColor: Color.fromARGB(255, 20, 20, 20),
-        highestSurfaceColor: Color.fromARGB(255, 171, 234, 255),
+        highestSurfaceColor: Color.fromARGB(255, 145, 196, 212),
+        roundedSize: RoundedSize.medium,
       );
 
   factory GenericThemeData.dark() => const GenericThemeData(
-        primaryColor: Color.fromARGB(255, 55, 194, 236),
+        primaryColor: Color.fromARGB(255, 0, 128, 255),
         backgroundColor: Color.fromARGB(255, 20, 20, 20),
         foregroundColor: Color.fromARGB(255, 255, 255, 255),
         highestSurfaceColor: Color.fromARGB(255, 45, 45, 45),
+        roundedSize: RoundedSize.medium,
       );
 
   final Color primaryColor;
   final Color backgroundColor;
   final Color foregroundColor;
+  final RoundedSize roundedSize;
+
   final Color _highestSurfaceColor;
 
   GenericColorSwatch get surfaceColor => GenericColorSwatch(
@@ -98,14 +115,17 @@ class GenericThemeData {
         },
       );
 
-  static GenericThemeData lerp(GenericThemeData a, GenericThemeData b, double t) {
+  static GenericThemeData lerp(
+      GenericThemeData a, GenericThemeData b, double t) {
     if (identical(a, b)) return a;
 
     return GenericThemeData(
       primaryColor: Color.lerp(a.primaryColor, b.primaryColor, t)!,
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
       foregroundColor: Color.lerp(a.foregroundColor, b.foregroundColor, t)!,
-      highestSurfaceColor: Color.lerp(a._highestSurfaceColor, b._highestSurfaceColor, t)!,
+      roundedSize: b.roundedSize,
+      highestSurfaceColor:
+          Color.lerp(a._highestSurfaceColor, b._highestSurfaceColor, t)!,
     );
   }
 }
@@ -139,4 +159,10 @@ class GenericColorSwatch extends ColorSwatch<int> {
   Color get high => this[1]!;
   Color get higher => this[2]!;
   Color get highest => this[3]!;
+}
+
+extension GenericThemeExtension on BuildContext {
+  GenericThemeData get theme {
+    return GenericTheme.of(this);
+  }
 }

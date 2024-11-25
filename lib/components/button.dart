@@ -5,7 +5,6 @@ import 'package:widget_app/utils.dart';
 
 enum AxType {
   primary,
-  secondary,
   outline,
   ghost,
   glass,
@@ -17,7 +16,6 @@ class Button extends StatefulWidget {
     this.children = const [],
     this.builder,
     required this.onPressed,
-    this.interactable = true,
     required this.backgroundColor,
     required this.borderColor,
     required this.foregroundColor,
@@ -27,6 +25,66 @@ class Button extends StatefulWidget {
     this.focusNode,
     this.unfocusOnTapOutside = true,
   }) : type = null;
+
+  const Button.primary({
+    super.key,
+    this.children = const [],
+    this.builder,
+    required this.onPressed,
+    this.gap = 5.0,
+    this.tooltip,
+    this.focusable = true,
+    this.focusNode,
+    this.unfocusOnTapOutside = true,
+  })  : type = AxType.primary,
+        foregroundColor = null,
+        backgroundColor = null,
+        borderColor = null;
+
+  const Button.outline({
+    super.key,
+    this.children = const [],
+    this.builder,
+    required this.onPressed,
+    this.gap = 5.0,
+    this.tooltip,
+    this.focusable = true,
+    this.focusNode,
+    this.unfocusOnTapOutside = true,
+  })  : type = AxType.outline,
+        foregroundColor = null,
+        backgroundColor = null,
+        borderColor = null;
+
+  const Button.ghost({
+    super.key,
+    this.children = const [],
+    this.builder,
+    required this.onPressed,
+    this.gap = 5.0,
+    this.tooltip,
+    this.focusable = true,
+    this.focusNode,
+    this.unfocusOnTapOutside = true,
+  })  : type = AxType.ghost,
+        foregroundColor = null,
+        backgroundColor = null,
+        borderColor = null;
+
+  const Button.glass({
+    super.key,
+    this.children = const [],
+    this.builder,
+    required this.onPressed,
+    this.gap = 5.0,
+    this.tooltip,
+    this.focusable = true,
+    this.focusNode,
+    this.unfocusOnTapOutside = true,
+  })  : type = AxType.glass,
+        foregroundColor = null,
+        backgroundColor = null,
+        borderColor = null;
 
   final List<Widget> children;
   final Widget Function(bool hovered, bool pressed, bool focused)? builder;
@@ -38,7 +96,6 @@ class Button extends StatefulWidget {
   final WidgetStateColor? backgroundColor;
   final WidgetStateColor? borderColor;
   final WidgetStateColor? foregroundColor;
-  final bool interactable;
   final double gap;
   final bool focusable;
   final bool unfocusOnTapOutside;
@@ -95,8 +152,8 @@ class _ButtonState extends State<Button> {
     final theme = GenericTheme.of(context);
 
     final isDarkMode = context.isDarkMode;
-    final pressedValue = switch (isDarkMode) { true => 0.25, false => 0.1 };
-    final hoveredValue = pressedValue * 0.5;
+    const pressedValue = 0.2;
+    const hoveredValue = pressedValue * 0.5;
 
     //TODO: add light mode
     final bgColor = widget.backgroundColor?.resolve(state) ??
@@ -105,37 +162,33 @@ class _ButtonState extends State<Button> {
               var colorHSV = HSVColor.fromColor(theme.primaryColor);
 
               if (state.contains(WidgetState.pressed)) {
-                return colorHSV.withValue(colorHSV.value - pressedValue).toColor();
+                return colorHSV
+                    .withValue(colorHSV.value - pressedValue)
+                    .toColor();
               }
+
               if (state.contains(WidgetState.hovered)) {
-                return colorHSV.withValue(colorHSV.value - hoveredValue).toColor();
+                return colorHSV
+                    .withValue(colorHSV.value - hoveredValue)
+                    .toColor();
               }
 
               return colorHSV.toColor();
             }).resolve(state),
-          AxType.secondary => WidgetStateColor.resolveWith((state) {
-              var colorHSV = HSVColor.fromColor(theme.primaryColor);
-
+          AxType.outline ||
+          AxType.ghost =>
+            WidgetStateColor.resolveWith((state) {
               if (state.contains(WidgetState.pressed)) {
-                return colorHSV.withValue(colorHSV.value - pressedValue).toColor();
+                return GenericTheme.of(context)
+                    .foregroundColor
+                    .withOpacity(0.05);
               }
               if (state.contains(WidgetState.hovered)) {
-                return colorHSV.withValue(colorHSV.value - hoveredValue).toColor();
+                return GenericTheme.of(context)
+                    .foregroundColor
+                    .withOpacity(0.1);
               }
-
-              return colorHSV.toColor();
-            }).resolve(state),
-          AxType.outline || AxType.ghost => WidgetStateColor.resolveWith((state) {
-              var color = theme.foregroundColor;
-
-              if (state.contains(WidgetState.pressed)) {
-                return color.withOpacity(0.15);
-              }
-              if (state.contains(WidgetState.hovered)) {
-                return color.withOpacity(0.07);
-              }
-
-              return color.withOpacity(0.0);
+              return GenericTheme.of(context).foregroundColor.withOpacity(0.0);
             }).resolve(state),
           AxType.glass => WidgetStateColor.resolveWith((state) {
               var color = theme.primaryColor;
@@ -154,15 +207,32 @@ class _ButtonState extends State<Button> {
 
     final borderColor = widget.borderColor?.resolve(state) ??
         switch (widget.type) {
-          AxType.outline => theme.foregroundColor,
-          AxType.glass => theme.primaryColor,
+          AxType.outline => WidgetStateColor.resolveWith((state) {
+              if (state.contains(WidgetState.pressed)) {
+                return GenericTheme.of(context)
+                    .foregroundColor
+                    .withOpacity(0.05);
+              }
+              if (state.contains(WidgetState.hovered)) {
+                return GenericTheme.of(context)
+                    .foregroundColor
+                    .withOpacity(0.0);
+              }
+              return GenericTheme.of(context).foregroundColor.withOpacity(0.15);
+            }).resolve(state),
+          AxType.glass => theme.primaryColor.withOpacity(0.5),
           _ => Colors.transparent,
         };
 
     final fgColor = widget.foregroundColor?.resolve(state) ??
         switch (widget.type) {
-          AxType.primary => theme.foregroundColor,
-          AxType.secondary => theme.foregroundColor,
+          AxType.primary => WidgetStateColor.resolveWith((state) {
+              if (isDarkMode) {
+                return theme.foregroundColor;
+              }
+
+              return theme.backgroundColor;
+            }).resolve(state),
           AxType.glass => theme.primaryColor,
           _ => theme.foregroundColor,
         };
@@ -175,7 +245,8 @@ class _ButtonState extends State<Button> {
       focusNode: _focusNode,
       onFocusChange: (value) => setState(() => focused = value),
       onShowHoverHighlight: (value) => setState(() => hovered = value),
-      mouseCursor: enabled ? SystemMouseCursors.basic : SystemMouseCursors.forbidden,
+      mouseCursor:
+          enabled ? SystemMouseCursors.basic : SystemMouseCursors.forbidden,
       child: GestureDetector(
         behavior: HitTestBehavior.deferToChild,
         onTapDown: (details) => setState(() => pressed = true),
@@ -191,7 +262,7 @@ class _ButtonState extends State<Button> {
         onTap: widget.onPressed == null
             ? null
             : () {
-                if (widget.interactable) widget.onPressed!.call();
+                widget.onPressed!.call();
               },
         child: Opacity(
           opacity: enabled ? 1.0 : 0.65,
@@ -201,23 +272,27 @@ class _ButtonState extends State<Button> {
             decoration: BoxDecoration(
               color: bgColor,
               borderRadius: BorderRadius.circular(4.0),
-              border: borderColor.alpha == 0.0
-                  ? null
-                  : Border.all(
-                      strokeAlign: BorderSide.strokeAlignInside,
-                      width: 1.0,
-                      color: borderColor,
-                    ),
+              border: Border.all(
+                strokeAlign: BorderSide.strokeAlignInside,
+                width: 1.0,
+                color: borderColor,
+              ),
             ),
             child: Padding(
               padding: EdgeInsets.symmetric(
                 /* horizontal: widget.squared ? 7.5 : 12.0,
                 vertical: widget.squared ? 7.5 : 6.0, */
-                horizontal: widget.children.length == 1 && widget.children.first is! Text ? squarePadding : horizontalPadding,
-                vertical: widget.children.length == 1 && widget.children.first is! Text ? squarePadding : verticalPadding,
+                horizontal: widget.children.length == 1 &&
+                        widget.children.first is! Text
+                    ? squarePadding
+                    : horizontalPadding,
+                vertical: widget.children.length == 1 &&
+                        widget.children.first is! Text
+                    ? squarePadding
+                    : verticalPadding,
               ),
               child: IconTheme(
-                data: IconThemeData(color: fgColor),
+                data: IconThemeData(color: fgColor, size: 16),
                 child: DefaultTextStyle(
                   style: TextStyle(
                     color: fgColor,
@@ -228,8 +303,11 @@ class _ButtonState extends State<Button> {
                           ? Row(
                               mainAxisSize: MainAxisSize.min,
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate((widget.children.length * 2) - 1,
-                                  (index) => index.isEven ? widget.children[index ~/ 2] : SizedBox(width: widget.gap)),
+                              children: List.generate(
+                                  (widget.children.length * 2) - 1,
+                                  (index) => index.isEven
+                                      ? widget.children[index ~/ 2]
+                                      : SizedBox(width: widget.gap)),
                             )
                           : const SizedBox.shrink()),
                 ),
