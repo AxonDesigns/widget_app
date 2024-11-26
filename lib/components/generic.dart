@@ -1,5 +1,5 @@
 export 'package:flutter/widgets.dart' hide showGeneralDialog;
-export 'generic_app.dart';
+export 'app.dart';
 export 'generic_page.dart';
 export 'generic_page_route.dart';
 export 'text_input.dart';

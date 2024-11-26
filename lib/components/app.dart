@@ -1,8 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:widget_app/components/generic.dart';
 
-class GenericApp extends StatefulWidget {
-  const GenericApp({
+class App extends StatefulWidget {
+  const App({
     super.key,
     this.navigatorKey,
     this.home,
@@ -12,7 +11,8 @@ class GenericApp extends StatefulWidget {
     this.onGenerateInitialRoutes,
     this.onUnknownRoute,
     this.onNavigationNotification,
-    List<NavigatorObserver> this.navigatorObservers = const <NavigatorObserver>[],
+    List<NavigatorObserver> this.navigatorObservers =
+        const <NavigatorObserver>[],
     this.builder,
     this.title = '',
     this.onGenerateTitle,
@@ -39,7 +39,7 @@ class GenericApp extends StatefulWidget {
         backButtonDispatcher = null,
         routerConfig = null;
 
-  const GenericApp.router({
+  const App.router({
     super.key,
     this.routeInformationProvider,
     this.routeInformationParser,
@@ -97,7 +97,8 @@ class GenericApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.inspectorSelectButtonBuilder}
   ///
   /// Builds the widget the [WidgetInspector] uses to switch between view and inspect modes.
-  final Widget Function(BuildContext context, VoidCallback onPressed)? inspectorSelectButtonBuilder;
+  final Widget Function(BuildContext context, VoidCallback onPressed)?
+      inspectorSelectButtonBuilder;
 
   /// {@macro flutter.widgets.widgetsApp.routes}
   final Map<String, WidgetBuilder>? routes;
@@ -115,7 +116,8 @@ class GenericApp extends StatefulWidget {
   final RouteFactory? onUnknownRoute;
 
   /// {@macro flutter.widgets.widgetsApp.onNavigationNotification}
-  final NotificationListenerCallback<NavigationNotification>? onNavigationNotification;
+  final NotificationListenerCallback<NavigationNotification>?
+      onNavigationNotification;
 
   /// {@macro flutter.widgets.widgetsApp.navigatorObservers}
   final List<NavigatorObserver>? navigatorObservers;
@@ -373,19 +375,23 @@ class GenericApp extends StatefulWidget {
   final ScrollBehavior? scrollBehavior;
 
   @override
-  State<GenericApp> createState() => _GenericAppState();
+  State<App> createState() => _AppState();
 }
 
-class _GenericAppState extends State<GenericApp> {
-  bool get _usesRouter => widget.routerDelegate != null || widget.routerConfig != null;
+class _AppState extends State<App> {
+  bool get _usesRouter =>
+      widget.routerDelegate != null || widget.routerConfig != null;
 
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates {
     return <LocalizationsDelegate<dynamic>>[
-      if (widget.localizationsDelegates != null) ...widget.localizationsDelegates!,
+      if (widget.localizationsDelegates != null)
+        ...widget.localizationsDelegates!,
     ];
   }
 
-  TextStyle get _textStyle => widget.textStyle ?? const TextStyle(color: Color.fromARGB(255, 255, 255, 255));
+  TextStyle get _textStyle =>
+      widget.textStyle ??
+      const TextStyle(color: Color.fromARGB(255, 255, 255, 255));
   Color get _color => widget.color ?? const Color.fromARGB(255, 51, 131, 250);
 
   Widget _buildWidgetsApp(BuildContext context) {
@@ -399,7 +405,8 @@ class _GenericAppState extends State<GenericApp> {
         backButtonDispatcher: widget.backButtonDispatcher,
         onNavigationNotification: widget.onNavigationNotification,
         title: widget.title,
-        builder: widget.builder ?? (context, child) => child ?? const SizedBox(),
+        builder:
+            widget.builder ?? (context, child) => child ?? const SizedBox(),
         onGenerateTitle: widget.onGenerateTitle,
         textStyle: widget.textStyle ?? _textStyle,
         color: _color,
@@ -423,7 +430,8 @@ class _GenericAppState extends State<GenericApp> {
       title: widget.title,
       routes: widget.routes!,
       initialRoute: widget.initialRoute,
-      pageRouteBuilder: <T>(settings, builder) => MaterialPageRoute(settings: settings, builder: builder),
+      pageRouteBuilder: <T>(settings, builder) =>
+          GenericPageRoute(settings: settings, builder: builder),
       onGenerateTitle: widget.onGenerateTitle,
       onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
       onGenerateRoute: widget.onGenerateRoute,

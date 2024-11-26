@@ -1,8 +1,19 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' as material
-    show Material, TextField, DefaultMaterialLocalizations, InputDecoration, InputBorder, Theme, ThemeData, TextSelectionThemeData;
+    show
+        Material,
+        TextField,
+        DefaultMaterialLocalizations,
+        InputDecoration,
+        InputBorder,
+        Theme,
+        ThemeData,
+        TextSelectionThemeData;
 import 'package:flutter/services.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:widget_app/components/button.dart';
 import 'package:widget_app/components/generic.dart';
+import 'package:widget_app/utils.dart';
 
 class TextInput extends StatefulWidget {
   const TextInput({
@@ -68,10 +79,14 @@ class TextInput extends StatefulWidget {
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
     this.restorationId,
-  })  : enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled);
+  })  : enableInteractiveSelection =
+            enableInteractiveSelection ?? (!readOnly || !obscureText),
+        keyboardType = keyboardType ??
+            (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
+        smartDashesType = smartDashesType ??
+            (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+        smartQuotesType = smartQuotesType ??
+            (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled);
 
   final TextMagnifierConfiguration? magnifierConfiguration;
 
@@ -480,7 +495,10 @@ class TextInput extends StatefulWidget {
   ///
   /// If buildCounter returns null, then no counter and no Semantics widget will
   /// be created at all.
-  final Widget? Function(BuildContext context, {required int currentLength, required int? maxLength, required bool isFocused})? buildCounter;
+  final Widget? Function(BuildContext context,
+      {required int currentLength,
+      required int? maxLength,
+      required bool isFocused})? buildCounter;
 
   /// {@macro flutter.widgets.editableText.restorationId}
   final String? restorationId;
@@ -489,7 +507,8 @@ class TextInput extends StatefulWidget {
   State<TextInput> createState() => _TextInputState();
 }
 
-class _TextInputState extends State<TextInput> with AutomaticKeepAliveClientMixin {
+class _TextInputState extends State<TextInput>
+    with AutomaticKeepAliveClientMixin {
   // Since making a text input is a bit of a pain, I'm just going to use the material one for now.
 
   @override
@@ -498,94 +517,136 @@ class _TextInputState extends State<TextInput> with AutomaticKeepAliveClientMixi
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final app = context.findAncestorWidgetOfExactType<GenericApp>();
+
     return Container(
-      color: GenericTheme.of(context).surfaceColor.highest,
-      child: Localizations.override(
-        context: context,
-        locale: app?.locale ?? const Locale('en'),
-        delegates: const [material.DefaultMaterialLocalizations.delegate],
-        child: material.Material(
-          color: Colors.transparent,
-          child: material.Theme(
-            data: material.ThemeData(
-              textSelectionTheme: material.TextSelectionThemeData(
-                cursorColor: Colors.white,
-                selectionColor: Colors.white.withOpacity(0.5),
-                selectionHandleColor: Colors.white.withOpacity(0.5),
+      decoration: BoxDecoration(
+        color: GenericTheme.of(context).surfaceColor.highest,
+        borderRadius: BorderRadius.circular(
+          switch (context.theme.roundedSize) {
+            RoundedSize.none => 0.0,
+            RoundedSize.small => 4.0,
+            RoundedSize.medium => 8.0,
+            RoundedSize.large => 16.0,
+            RoundedSize.full => 100.0,
+          },
+        ),
+      ),
+      child: Stack(
+        children: [
+          _buildMaterialTextField(context),
+          Positioned.fill(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: TapRegion(
+                groupId: TextInput,
+                child: Button.ghost(
+                  // So that the input field doesn't lose focus
+                  focusable: false,
+                  onPressed: () {
+                    print("Button pressed");
+                  },
+                  children: [
+                    Icon(
+                      LucideIcons.eye,
+                    ),
+                  ],
+                ),
               ),
             ),
-            child: material.TextField(
-              style: app?.textStyle ??
-                  TextStyle(
-                    fontSize: 12,
-                    color: GenericTheme.maybeOf(context)?.foregroundColor ?? Colors.white,
-                  ),
-              decoration: const material.InputDecoration(
-                filled: false,
-                border: material.InputBorder.none,
-                contentPadding: EdgeInsets.zero,
-                isDense: true,
-              ),
-              controller: widget.controller,
-              focusNode: widget.focusNode,
-              undoController: widget.undoController,
-              keyboardType: widget.keyboardType,
-              textInputAction: widget.textInputAction,
-              textCapitalization: widget.textCapitalization,
-              autocorrect: widget.autocorrect,
-              autofillHints: widget.autofillHints,
-              autofocus: widget.autofocus,
-              canRequestFocus: widget.canRequestFocus,
-              clipBehavior: widget.clipBehavior,
-              enableInteractiveSelection: widget.enableInteractiveSelection,
-              enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-              enableSuggestions: widget.enableSuggestions,
-              maxLength: widget.maxLength,
-              maxLines: widget.maxLines,
-              minLines: widget.minLines,
-              obscureText: widget.obscureText,
-              obscuringCharacter: widget.obscuringCharacter,
-              readOnly: widget.readOnly,
-              showCursor: widget.showCursor,
-              smartDashesType: widget.smartDashesType,
-              smartQuotesType: widget.smartQuotesType,
-              strutStyle: widget.strutStyle,
-              textAlign: widget.textAlign,
-              textAlignVertical: widget.textAlignVertical,
-              textDirection: widget.textDirection,
-              scrollPadding: widget.scrollPadding,
-              dragStartBehavior: widget.dragStartBehavior,
-              selectionControls: widget.selectionControls,
-              onTap: widget.onTap,
-              onTapAlwaysCalled: widget.onTapAlwaysCalled,
-              onTapOutside: widget.onTapOutside,
-              mouseCursor: widget.mouseCursor,
-              contextMenuBuilder: widget.contextMenuBuilder,
-              contentInsertionConfiguration: widget.contentInsertionConfiguration,
-              cursorColor: widget.cursorColor,
-              cursorHeight: widget.cursorHeight,
-              cursorRadius: widget.cursorRadius,
-              cursorOpacityAnimates: widget.cursorOpacityAnimates,
-              cursorWidth: widget.cursorWidth,
-              keyboardAppearance: widget.keyboardAppearance,
-              maxLengthEnforcement: widget.maxLengthEnforcement,
-              onAppPrivateCommand: widget.onAppPrivateCommand,
-              onEditingComplete: widget.onEditingComplete,
-              cursorErrorColor: widget.cursorErrorColor,
-              scrollController: widget.scrollController,
-              scrollPhysics: widget.scrollPhysics,
-              enabled: widget.enabled,
-              expands: widget.expands,
-              inputFormatters: widget.inputFormatters,
-              ignorePointers: widget.ignorePointers,
-              magnifierConfiguration: widget.magnifierConfiguration,
-              onChanged: widget.onChanged,
-              onSubmitted: widget.onSubmitted,
-              scribbleEnabled: widget.scribbleEnabled,
-              spellCheckConfiguration: widget.spellCheckConfiguration,
-              buildCounter: widget.buildCounter,
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMaterialTextField(BuildContext context) {
+    final app = context.findAncestorWidgetOfExactType<App>();
+    return Localizations.override(
+      context: context,
+      locale: app?.locale ?? const Locale('en'),
+      delegates: const [material.DefaultMaterialLocalizations.delegate],
+      child: material.Material(
+        color: Colors.transparent,
+        child: material.Theme(
+          data: material.ThemeData(
+            textSelectionTheme: material.TextSelectionThemeData(
+              cursorColor: Colors.white,
+              selectionColor: Colors.white.withOpacity(0.5),
+              selectionHandleColor: Colors.white.withOpacity(0.5),
             ),
+          ),
+          child: material.TextField(
+            groupId: TextInput,
+            style: app?.textStyle ??
+                TextStyle(
+                  fontSize: 12,
+                  color: GenericTheme.maybeOf(context)?.foregroundColor ??
+                      Colors.white,
+                ),
+            decoration: material.InputDecoration(
+              filled: false,
+              border: material.InputBorder.none,
+              contentPadding: EdgeInsets.all(isDesktop ? 12.0 : 16.0),
+              isDense: true,
+            ),
+            controller: widget.controller,
+            focusNode: widget.focusNode,
+            undoController: widget.undoController,
+            keyboardType: widget.keyboardType,
+            textInputAction: widget.textInputAction,
+            textCapitalization: widget.textCapitalization,
+            autocorrect: widget.autocorrect,
+            autofillHints: widget.autofillHints,
+            autofocus: widget.autofocus,
+            canRequestFocus: widget.canRequestFocus,
+            clipBehavior: widget.clipBehavior,
+            enableInteractiveSelection: widget.enableInteractiveSelection,
+            enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+            enableSuggestions: widget.enableSuggestions,
+            maxLength: widget.maxLength,
+            maxLines: widget.maxLines,
+            minLines: widget.minLines,
+            obscureText: widget.obscureText,
+            obscuringCharacter: widget.obscuringCharacter,
+            readOnly: widget.readOnly,
+            showCursor: widget.showCursor,
+            smartDashesType: widget.smartDashesType,
+            smartQuotesType: widget.smartQuotesType,
+            strutStyle: widget.strutStyle,
+            textAlign: widget.textAlign,
+            textAlignVertical: widget.textAlignVertical,
+            textDirection: widget.textDirection,
+            scrollPadding: widget.scrollPadding,
+            dragStartBehavior: widget.dragStartBehavior,
+            selectionControls: widget.selectionControls,
+            onTap: widget.onTap,
+            onTapAlwaysCalled: widget.onTapAlwaysCalled,
+            onTapOutside: widget.onTapOutside,
+            mouseCursor: widget.mouseCursor,
+            contextMenuBuilder: widget.contextMenuBuilder,
+            contentInsertionConfiguration: widget.contentInsertionConfiguration,
+            cursorColor: widget.cursorColor,
+            cursorHeight: widget.cursorHeight,
+            cursorRadius: widget.cursorRadius,
+            cursorOpacityAnimates: widget.cursorOpacityAnimates,
+            cursorWidth: widget.cursorWidth,
+            keyboardAppearance: widget.keyboardAppearance,
+            maxLengthEnforcement: widget.maxLengthEnforcement,
+            onAppPrivateCommand: widget.onAppPrivateCommand,
+            onEditingComplete: widget.onEditingComplete,
+            cursorErrorColor: widget.cursorErrorColor,
+            scrollController: widget.scrollController,
+            scrollPhysics: widget.scrollPhysics,
+            enabled: widget.enabled,
+            expands: widget.expands,
+            inputFormatters: widget.inputFormatters,
+            ignorePointers: widget.ignorePointers,
+            magnifierConfiguration: widget.magnifierConfiguration,
+            onChanged: widget.onChanged,
+            onSubmitted: widget.onSubmitted,
+            scribbleEnabled: widget.scribbleEnabled,
+            spellCheckConfiguration: widget.spellCheckConfiguration,
+            buildCounter: widget.buildCounter,
           ),
         ),
       ),

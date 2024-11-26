@@ -8,14 +8,15 @@ enum AxType {
   outline,
   ghost,
   glass,
+  destructive,
 }
 
 class Button extends StatefulWidget {
   const Button.custom({
     super.key,
-    this.children = const [],
     this.builder,
     required this.onPressed,
+    required this.children,
     required this.backgroundColor,
     required this.borderColor,
     required this.foregroundColor,
@@ -28,9 +29,9 @@ class Button extends StatefulWidget {
 
   const Button.primary({
     super.key,
-    this.children = const [],
     this.builder,
     required this.onPressed,
+    required this.children,
     this.gap = 5.0,
     this.tooltip,
     this.focusable = true,
@@ -43,7 +44,7 @@ class Button extends StatefulWidget {
 
   const Button.outline({
     super.key,
-    this.children = const [],
+    required this.children,
     this.builder,
     required this.onPressed,
     this.gap = 5.0,
@@ -58,7 +59,7 @@ class Button extends StatefulWidget {
 
   const Button.ghost({
     super.key,
-    this.children = const [],
+    required this.children,
     this.builder,
     required this.onPressed,
     this.gap = 5.0,
@@ -73,7 +74,7 @@ class Button extends StatefulWidget {
 
   const Button.glass({
     super.key,
-    this.children = const [],
+    required this.children,
     this.builder,
     required this.onPressed,
     this.gap = 5.0,
@@ -86,12 +87,25 @@ class Button extends StatefulWidget {
         backgroundColor = null,
         borderColor = null;
 
+  const Button.destructive({
+    super.key,
+    required this.children,
+    this.builder,
+    required this.onPressed,
+    this.gap = 5.0,
+    this.tooltip,
+    this.focusable = true,
+    this.focusNode,
+    this.unfocusOnTapOutside = true,
+  })  : type = AxType.destructive,
+        foregroundColor = null,
+        backgroundColor = null,
+        borderColor = null;
+
   final List<Widget> children;
   final Widget Function(bool hovered, bool pressed, bool focused)? builder;
   final AxType? type;
   final String? tooltip;
-  //final bool useOutline;
-  //final bool animateOpacity;
   final VoidCallback? onPressed;
   final WidgetStateColor? backgroundColor;
   final WidgetStateColor? borderColor;
@@ -202,6 +216,27 @@ class _ButtonState extends State<Button> {
 
               return color.withOpacity(0.1);
             }).resolve(state),
+          AxType.destructive => WidgetStateColor.resolveWith((state) {
+              var colorHSV = HSVColor.fromColor(
+                isDarkMode
+                    ? (const Color.fromARGB(255, 165, 36, 36))
+                    : (const Color.fromARGB(255, 223, 56, 56)),
+              );
+
+              if (state.contains(WidgetState.pressed)) {
+                return colorHSV
+                    .withValue(colorHSV.value - pressedValue)
+                    .toColor();
+              }
+
+              if (state.contains(WidgetState.hovered)) {
+                return colorHSV
+                    .withValue(colorHSV.value - hoveredValue)
+                    .toColor();
+              }
+
+              return colorHSV.toColor();
+            }).resolve(state),
           _ => Colors.transparent,
         };
 
@@ -227,13 +262,11 @@ class _ButtonState extends State<Button> {
     final fgColor = widget.foregroundColor?.resolve(state) ??
         switch (widget.type) {
           AxType.primary => WidgetStateColor.resolveWith((state) {
-              if (isDarkMode) {
-                return theme.foregroundColor;
-              }
-
-              return theme.backgroundColor;
+              return Colors.white;
             }).resolve(state),
           AxType.glass => theme.primaryColor,
+          AxType.destructive =>
+            isDarkMode ? context.theme.foregroundColor : theme.backgroundColor,
           _ => theme.foregroundColor,
         };
 
@@ -271,7 +304,15 @@ class _ButtonState extends State<Button> {
             curve: Curves.fastEaseInToSlowEaseOut,
             decoration: BoxDecoration(
               color: bgColor,
-              borderRadius: BorderRadius.circular(4.0),
+              borderRadius: BorderRadius.circular(
+                switch (context.theme.roundedSize) {
+                  RoundedSize.none => 0.0,
+                  RoundedSize.small => 4.0,
+                  RoundedSize.medium => 8.0,
+                  RoundedSize.large => 16.0,
+                  RoundedSize.full => 5000.0,
+                },
+              ),
               border: Border.all(
                 strokeAlign: BorderSide.strokeAlignInside,
                 width: 1.0,
@@ -292,11 +333,12 @@ class _ButtonState extends State<Button> {
                     : verticalPadding,
               ),
               child: IconTheme(
-                data: IconThemeData(color: fgColor, size: 16),
+                data: IconTheme.of(context).copyWith(
+                  color: fgColor,
+                ),
                 child: DefaultTextStyle(
-                  style: TextStyle(
+                  style: context.theme.baseTextStyle.copyWith(
                     color: fgColor,
-                    fontWeight: FontWeight.w400,
                   ),
                   child: widget.builder?.call(hovered, pressed, false) ??
                       (widget.children.isNotEmpty

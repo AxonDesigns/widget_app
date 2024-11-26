@@ -1,8 +1,10 @@
 import 'package:go_router/go_router.dart';
+import 'package:widget_app/components/animated_spinner.dart';
 import 'package:widget_app/components/button.dart';
 import 'package:widget_app/components/dark_mode_state.dart';
 import 'package:widget_app/components/generic.dart';
 import 'package:widget_app/components/tooltip.dart';
+import 'package:widget_app/utils.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -11,13 +13,11 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with AutomaticKeepAliveClientMixin {
+class _HomePageState extends State<HomePage> {
   final _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     return Container(
       color: GenericTheme.of(context).backgroundColor,
       child: Center(
@@ -41,26 +41,42 @@ class _HomePageState extends State<HomePage>
                   onPressed: () async {
                     await context.push('/about');
                   },
-                  children: [Text("Go to About Page")],
+                  children: const [
+                    AnimatedSpinner(size: 20),
+                    Text("Go to About Page"),
+                  ],
                 ),
+              ),
+              Button.glass(
+                onPressed: () async {
+                  final result = await context.showConfirmDialog(
+                    title: "Are you absolutely sure?",
+                    content: "This will delete all your data from our servers, "
+                        "and you will not be able to recover it.",
+                    type: ConfirmDialogType.destructive,
+                  );
+
+                  print(result);
+                },
+                children: const [Text("Open Confirm Dialog")],
               ),
               Button.outline(
                 onPressed: () async {
                   context.setThemeMode(ThemeMode.light);
                 },
-                children: [Text("Change to Light Mode")],
+                children: const [Text("Change to Light Mode")],
               ),
               Button.outline(
                 onPressed: () async {
                   context.setThemeMode(ThemeMode.dark);
                 },
-                children: [Text("Change to Dark Mode")],
+                children: const [Text("Change to Dark Mode")],
               ),
               Button.outline(
                 onPressed: () async {
                   context.setThemeMode(ThemeMode.system);
                 },
-                children: [Text("Change to System Mode")],
+                children: const [Text("Change to System Mode")],
               ),
             ],
           ),
@@ -68,7 +84,4 @@ class _HomePageState extends State<HomePage>
       ),
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }

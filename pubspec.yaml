@@ -12,6 +12,7 @@ dependencies:
     sdk: flutter
   flutter_lucide: ^1.5.0
   go_router: ^14.2.7
+  rive: ^0.13.18
   shared_preferences: ^2.3.3
   window_manager: ^0.4.2
 
@@ -21,4 +22,19 @@ dev_dependencies:
   flutter_lints: ^4.0.0
 
 flutter:
-  uses-material-design: true
+  uses-material-design: false
+  assets:
+    - assets/rive/
+  fonts:
+    - family: GeneralSans
+      fonts:
+        - asset: assets/fonts/GeneralSans-Variable.ttf
+          weight: 700
+        - asset: assets/fonts/GeneralSans-VariableItalic.ttf
+          style: italic
+    - family: Supreme
+      fonts:
+        - asset: assets/fonts/Supreme-Variable.ttf
+          weight: 700
+        - asset: assets/fonts/Supreme-VariableItalic.ttf
+          style: italic

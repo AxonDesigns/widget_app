@@ -12,7 +12,7 @@ class AboutPage extends StatelessWidget {
       color: GenericTheme.of(context).backgroundColor,
       child: Center(
         child: SizedBox(
-          width: 100,
+          width: 200,
           child: GappedColumn(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,

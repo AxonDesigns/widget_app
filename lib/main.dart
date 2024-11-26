@@ -23,7 +23,7 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GenericApp.router(
+    return App.router(
       debugShowCheckedModeBanner: false,
       builder: (context, child) {
         return ThemeModeStateProvider(
@@ -38,10 +38,16 @@ class MainApp extends StatelessWidget {
               child: Builder(
                 builder: (context) {
                   return DefaultTextStyle(
-                    style: TextStyle(
+                    style: context.theme.baseTextStyle.copyWith(
                       color: context.theme.foregroundColor,
                     ),
-                    child: child!,
+                    child: IconTheme(
+                      data: IconThemeData(
+                        color: context.theme.foregroundColor,
+                        size: context.theme.iconSize,
+                      ),
+                      child: child!,
+                    ),
                   );
                 },
               ),

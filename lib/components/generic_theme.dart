@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:widget_app/components/generic.dart';
+import 'package:widget_app/utils.dart';
 
 /// A theme that uses the [GenericThemeData] as its [ThemeData].
 class GenericTheme extends InheritedWidget {
@@ -62,11 +65,15 @@ class _AnimatedGenericThemeState
 }
 
 enum RoundedSize {
-  none,
-  small,
-  medium,
-  large,
-  full,
+  none(0.0),
+  small(4.0),
+  medium(8.0),
+  large(16.0),
+  full(250.0);
+
+  const RoundedSize(this.size);
+
+  final double size;
 }
 
 /// The [ThemeData] used by [GenericTheme].
@@ -77,30 +84,47 @@ class GenericThemeData {
     required this.foregroundColor,
     required Color highestSurfaceColor,
     required this.roundedSize,
+    required this.baseTextStyle,
   }) : _highestSurfaceColor = highestSurfaceColor;
 
-  factory GenericThemeData.light() => const GenericThemeData(
-        primaryColor: Color.fromARGB(255, 35, 145, 255),
-        backgroundColor: Colors.white,
-        foregroundColor: Color.fromARGB(255, 20, 20, 20),
-        highestSurfaceColor: Color.fromARGB(255, 145, 196, 212),
-        roundedSize: RoundedSize.medium,
-      );
+  factory GenericThemeData.light() => GenericThemeData(
+      primaryColor: const Color.fromARGB(255, 35, 145, 255),
+      backgroundColor: Colors.white,
+      foregroundColor: const Color.fromARGB(255, 20, 20, 20),
+      highestSurfaceColor: const Color.fromARGB(255, 223, 223, 223),
+      roundedSize: RoundedSize.medium,
+      baseTextStyle: TextStyle(
+        fontFamily: 'Supreme',
+        fontSize: isDesktop ? 14.0 : 16.0,
+        fontVariations: const [
+          FontVariation.weight(400),
+        ],
+      ));
 
-  factory GenericThemeData.dark() => const GenericThemeData(
-        primaryColor: Color.fromARGB(255, 0, 128, 255),
-        backgroundColor: Color.fromARGB(255, 20, 20, 20),
-        foregroundColor: Color.fromARGB(255, 255, 255, 255),
-        highestSurfaceColor: Color.fromARGB(255, 45, 45, 45),
-        roundedSize: RoundedSize.medium,
-      );
+  factory GenericThemeData.dark() => GenericThemeData(
+      primaryColor: const Color.fromARGB(255, 0, 128, 255),
+      backgroundColor: const Color.fromARGB(255, 20, 20, 20),
+      foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+      highestSurfaceColor: const Color.fromARGB(255, 45, 45, 45),
+      roundedSize: RoundedSize.medium,
+      baseTextStyle: TextStyle(
+        fontFamily: 'Supreme',
+        fontSize: isDesktop ? 14.0 : 16.0,
+        letterSpacing: 0.0,
+        fontVariations: const [
+          FontVariation.weight(400),
+        ],
+      ));
 
   final Color primaryColor;
   final Color backgroundColor;
   final Color foregroundColor;
   final RoundedSize roundedSize;
+  final TextStyle baseTextStyle;
 
   final Color _highestSurfaceColor;
+
+  double get iconSize => isDesktop ? 16.0 : 20.0;
 
   GenericColorSwatch get surfaceColor => GenericColorSwatch(
         Color.lerp(backgroundColor, _highestSurfaceColor, 0.4285714287)!.value,
@@ -123,6 +147,7 @@ class GenericThemeData {
       primaryColor: Color.lerp(a.primaryColor, b.primaryColor, t)!,
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
       foregroundColor: Color.lerp(a.foregroundColor, b.foregroundColor, t)!,
+      baseTextStyle: b.baseTextStyle,
       roundedSize: b.roundedSize,
       highestSurfaceColor:
           Color.lerp(a._highestSurfaceColor, b._highestSurfaceColor, t)!,

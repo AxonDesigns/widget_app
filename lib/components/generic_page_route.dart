@@ -52,14 +52,18 @@ class GenericPageRoute<T> extends PageRoute<T> {
   }
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation, Widget child) {
     final curvedAnimation = CurvedAnimation(parent: animation, curve: curve);
-    final curvedSecondaryAnimation = CurvedAnimation(parent: secondaryAnimation, curve: curve);
-    return transitionBuilder?.call(context, animation, secondaryAnimation, curve, child) ??
+    final curvedSecondaryAnimation =
+        CurvedAnimation(parent: secondaryAnimation, curve: curve);
+    return transitionBuilder?.call(
+            context, animation, secondaryAnimation, curve, child) ??
         FadeTransition(
           opacity: Tween(begin: 1.0, end: 0.0).animate(curvedAnimation),
           child: FadeTransition(
-            opacity: Tween(begin: 0.0, end: 1.0).animate(curvedSecondaryAnimation),
+            opacity:
+                Tween(begin: 0.0, end: 1.0).animate(curvedSecondaryAnimation),
             child: child,
           ),
         );
