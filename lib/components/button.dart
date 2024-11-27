@@ -193,16 +193,12 @@ class _ButtonState extends State<Button> {
           AxType.ghost =>
             WidgetStateColor.resolveWith((state) {
               if (state.contains(WidgetState.pressed)) {
-                return GenericTheme.of(context)
-                    .foregroundColor
-                    .withOpacity(0.05);
+                return context.theme.foregroundColor.withOpacity(0.05);
               }
               if (state.contains(WidgetState.hovered)) {
-                return GenericTheme.of(context)
-                    .foregroundColor
-                    .withOpacity(0.1);
+                return context.theme.foregroundColor.withOpacity(0.1);
               }
-              return GenericTheme.of(context).foregroundColor.withOpacity(0.0);
+              return context.theme.foregroundColor.withOpacity(0.0);
             }).resolve(state),
           AxType.glass => WidgetStateColor.resolveWith((state) {
               var color = theme.primaryColor;

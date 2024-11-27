@@ -10,8 +10,6 @@ import 'package:flutter/material.dart' as material
         ThemeData,
         TextSelectionThemeData;
 import 'package:flutter/services.dart';
-import 'package:flutter_lucide/flutter_lucide.dart';
-import 'package:widget_app/components/button.dart';
 import 'package:widget_app/components/generic.dart';
 import 'package:widget_app/utils.dart';
 
@@ -22,6 +20,8 @@ class TextInput extends StatefulWidget {
     this.focusNode,
     this.undoController,
     TextInputType? keyboardType,
+    this.prefix,
+    this.suffix,
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
     this.style,
@@ -79,6 +79,7 @@ class TextInput extends StatefulWidget {
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
     this.restorationId,
+    this.backgroundColor,
   })  : enableInteractiveSelection =
             enableInteractiveSelection ?? (!readOnly || !obscureText),
         keyboardType = keyboardType ??
@@ -502,6 +503,16 @@ class TextInput extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.restorationId}
   final String? restorationId;
+  final WidgetStateColor? backgroundColor;
+
+  /// Make sure that the widget is not focusable, so it doesn't
+  /// steal focus from the text input.<br>
+  /// e.g. password visibility toggle
+  final Widget? suffix;
+
+  /// Make sure that the widget is not focusable, so it doesn't
+  /// steal focus from the text input.
+  final Widget? prefix;
 
   @override
   State<TextInput> createState() => _TextInputState();
@@ -510,17 +521,80 @@ class TextInput extends StatefulWidget {
 class _TextInputState extends State<TextInput>
     with AutomaticKeepAliveClientMixin {
   // Since making a text input is a bit of a pain, I'm just going to use the material one for now.
+  var hovered = false;
+  var pressed = false;
+  var focused = false;
+  bool get enabled => true;
+  FocusNode? _focusNode;
 
   @override
   bool get wantKeepAlive => true;
 
   @override
+  void initState() {
+    super.initState();
+    _focusNode = widget.focusNode ?? FocusNode();
+    _focusNode!.addListener(_handleFocusChange);
+  }
+
+  @override
+  void dispose() {
+    _focusNode?.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant TextInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.focusNode != null && oldWidget.focusNode == null) {
+      _focusNode?.dispose();
+      _focusNode = widget.focusNode!;
+      _focusNode!.addListener(_handleFocusChange);
+    }
+
+    if (widget.focusNode == null && oldWidget.focusNode != null) {
+      _focusNode?.dispose();
+      _focusNode = FocusNode();
+      _focusNode!.addListener(_handleFocusChange);
+    }
+  }
+
+  void _handleFocusChange() {
+    setState(() {
+      focused = _focusNode?.hasFocus ?? false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context);
+    final state = {
+      if (hovered) WidgetState.hovered,
+      if (pressed) WidgetState.pressed,
+      if (focused) WidgetState.focused,
+    };
 
-    return Container(
+    final bgColor = widget.backgroundColor?.resolve(state) ??
+        WidgetStateColor.resolveWith((state) {
+          if (state.contains(WidgetState.focused)) {
+            return context.theme.surfaceColor.highest;
+          }
+
+          if (state.contains(WidgetState.hovered)) {
+            return context.theme.surfaceColor.higher;
+          }
+
+          return context.theme.surfaceColor.high;
+        }).resolve(state);
+
+    return AnimatedContainer(
+      duration: Duration(milliseconds: pressed ? 50 : 200),
+      curve: Curves.fastEaseInToSlowEaseOut,
       decoration: BoxDecoration(
-        color: GenericTheme.of(context).surfaceColor.highest,
+        color: bgColor,
+        border: Border.all(
+            color: context.theme.surfaceColor.highest,
+            strokeAlign: BorderSide.strokeAlignInside),
         borderRadius: BorderRadius.circular(
           switch (context.theme.roundedSize) {
             RoundedSize.none => 0.0,
@@ -531,30 +605,10 @@ class _TextInputState extends State<TextInput>
           },
         ),
       ),
-      child: Stack(
-        children: [
-          _buildMaterialTextField(context),
-          Positioned.fill(
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: TapRegion(
-                groupId: TextInput,
-                child: Button.ghost(
-                  // So that the input field doesn't lose focus
-                  focusable: false,
-                  onPressed: () {
-                    print("Button pressed");
-                  },
-                  children: [
-                    Icon(
-                      LucideIcons.eye,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          )
-        ],
+      child: MouseRegion(
+        onEnter: (event) => setState(() => hovered = true),
+        onExit: (event) => setState(() => hovered = false),
+        child: _buildMaterialTextField(context),
       ),
     );
   }
@@ -570,83 +624,115 @@ class _TextInputState extends State<TextInput>
         child: material.Theme(
           data: material.ThemeData(
             textSelectionTheme: material.TextSelectionThemeData(
-              cursorColor: Colors.white,
-              selectionColor: Colors.white.withOpacity(0.5),
-              selectionHandleColor: Colors.white.withOpacity(0.5),
+              cursorColor: context.theme.primaryColor,
+              selectionColor: context.theme.primaryColor.withOpacity(0.5),
+              selectionHandleColor: context.theme.primaryColor,
+            ),
+            iconTheme: IconThemeData(
+              color: context.theme.foregroundColor,
+              size: context.theme.iconSize,
             ),
           ),
-          child: material.TextField(
-            groupId: TextInput,
-            style: app?.textStyle ??
-                TextStyle(
-                  fontSize: 12,
-                  color: GenericTheme.maybeOf(context)?.foregroundColor ??
-                      Colors.white,
+          child: Row(
+            children: [
+              if (widget.prefix != null)
+                TapRegion(
+                  groupId: TextInput,
+                  child: widget.prefix!,
                 ),
-            decoration: material.InputDecoration(
-              filled: false,
-              border: material.InputBorder.none,
-              contentPadding: EdgeInsets.all(isDesktop ? 12.0 : 16.0),
-              isDense: true,
-            ),
-            controller: widget.controller,
-            focusNode: widget.focusNode,
-            undoController: widget.undoController,
-            keyboardType: widget.keyboardType,
-            textInputAction: widget.textInputAction,
-            textCapitalization: widget.textCapitalization,
-            autocorrect: widget.autocorrect,
-            autofillHints: widget.autofillHints,
-            autofocus: widget.autofocus,
-            canRequestFocus: widget.canRequestFocus,
-            clipBehavior: widget.clipBehavior,
-            enableInteractiveSelection: widget.enableInteractiveSelection,
-            enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-            enableSuggestions: widget.enableSuggestions,
-            maxLength: widget.maxLength,
-            maxLines: widget.maxLines,
-            minLines: widget.minLines,
-            obscureText: widget.obscureText,
-            obscuringCharacter: widget.obscuringCharacter,
-            readOnly: widget.readOnly,
-            showCursor: widget.showCursor,
-            smartDashesType: widget.smartDashesType,
-            smartQuotesType: widget.smartQuotesType,
-            strutStyle: widget.strutStyle,
-            textAlign: widget.textAlign,
-            textAlignVertical: widget.textAlignVertical,
-            textDirection: widget.textDirection,
-            scrollPadding: widget.scrollPadding,
-            dragStartBehavior: widget.dragStartBehavior,
-            selectionControls: widget.selectionControls,
-            onTap: widget.onTap,
-            onTapAlwaysCalled: widget.onTapAlwaysCalled,
-            onTapOutside: widget.onTapOutside,
-            mouseCursor: widget.mouseCursor,
-            contextMenuBuilder: widget.contextMenuBuilder,
-            contentInsertionConfiguration: widget.contentInsertionConfiguration,
-            cursorColor: widget.cursorColor,
-            cursorHeight: widget.cursorHeight,
-            cursorRadius: widget.cursorRadius,
-            cursorOpacityAnimates: widget.cursorOpacityAnimates,
-            cursorWidth: widget.cursorWidth,
-            keyboardAppearance: widget.keyboardAppearance,
-            maxLengthEnforcement: widget.maxLengthEnforcement,
-            onAppPrivateCommand: widget.onAppPrivateCommand,
-            onEditingComplete: widget.onEditingComplete,
-            cursorErrorColor: widget.cursorErrorColor,
-            scrollController: widget.scrollController,
-            scrollPhysics: widget.scrollPhysics,
-            enabled: widget.enabled,
-            expands: widget.expands,
-            inputFormatters: widget.inputFormatters,
-            ignorePointers: widget.ignorePointers,
-            magnifierConfiguration: widget.magnifierConfiguration,
-            onChanged: widget.onChanged,
-            onSubmitted: widget.onSubmitted,
-            scribbleEnabled: widget.scribbleEnabled,
-            spellCheckConfiguration: widget.spellCheckConfiguration,
-            buildCounter: widget.buildCounter,
+              Expanded(
+                child: material.TextField(
+                  groupId: TextInput,
+                  style: GenericTheme.maybeOf(context)?.baseTextStyle.copyWith(
+                        color: context.theme.foregroundColor,
+                      ),
+                  decoration: material.InputDecoration(
+                    filled: false,
+                    border: material.InputBorder.none,
+                    contentPadding: EdgeInsets.only(
+                      bottom: isDesktop ? 12.0 : 16.0,
+                      top: isDesktop ? 12.0 : 16.0,
+                      left: widget.prefix == null
+                          ? isDesktop
+                              ? 12.0
+                              : 16.0
+                          : 0.0,
+                      right: widget.suffix == null
+                          ? isDesktop
+                              ? 12.0
+                              : 16.0
+                          : 0.0,
+                    ),
+                    isDense: true,
+                  ),
+                  controller: widget.controller,
+                  focusNode: _focusNode,
+                  undoController: widget.undoController,
+                  keyboardType: widget.keyboardType,
+                  textInputAction: widget.textInputAction,
+                  textCapitalization: widget.textCapitalization,
+                  autocorrect: widget.autocorrect,
+                  autofillHints: widget.autofillHints,
+                  autofocus: widget.autofocus,
+                  canRequestFocus: widget.canRequestFocus,
+                  clipBehavior: widget.clipBehavior,
+                  enableInteractiveSelection: widget.enableInteractiveSelection,
+                  enableIMEPersonalizedLearning:
+                      widget.enableIMEPersonalizedLearning,
+                  enableSuggestions: widget.enableSuggestions,
+                  maxLength: widget.maxLength,
+                  maxLines: widget.maxLines,
+                  minLines: widget.minLines,
+                  obscureText: widget.obscureText,
+                  obscuringCharacter: widget.obscuringCharacter,
+                  readOnly: widget.readOnly,
+                  showCursor: widget.showCursor,
+                  smartDashesType: widget.smartDashesType,
+                  smartQuotesType: widget.smartQuotesType,
+                  strutStyle: widget.strutStyle,
+                  textAlign: widget.textAlign,
+                  textAlignVertical: widget.textAlignVertical,
+                  textDirection: widget.textDirection,
+                  scrollPadding: widget.scrollPadding,
+                  dragStartBehavior: widget.dragStartBehavior,
+                  selectionControls: widget.selectionControls,
+                  onTap: widget.onTap,
+                  onTapAlwaysCalled: widget.onTapAlwaysCalled,
+                  onTapOutside: widget.onTapOutside,
+                  mouseCursor: widget.mouseCursor,
+                  contextMenuBuilder: widget.contextMenuBuilder,
+                  contentInsertionConfiguration:
+                      widget.contentInsertionConfiguration,
+                  cursorColor: widget.cursorColor,
+                  cursorHeight: widget.cursorHeight,
+                  cursorRadius: widget.cursorRadius,
+                  cursorOpacityAnimates: widget.cursorOpacityAnimates,
+                  cursorWidth: widget.cursorWidth,
+                  keyboardAppearance: widget.keyboardAppearance,
+                  maxLengthEnforcement: widget.maxLengthEnforcement,
+                  onAppPrivateCommand: widget.onAppPrivateCommand,
+                  onEditingComplete: widget.onEditingComplete,
+                  cursorErrorColor: widget.cursorErrorColor,
+                  scrollController: widget.scrollController,
+                  scrollPhysics: widget.scrollPhysics,
+                  enabled: widget.enabled,
+                  expands: widget.expands,
+                  inputFormatters: widget.inputFormatters,
+                  ignorePointers: widget.ignorePointers,
+                  magnifierConfiguration: widget.magnifierConfiguration,
+                  onChanged: widget.onChanged,
+                  onSubmitted: widget.onSubmitted,
+                  scribbleEnabled: widget.scribbleEnabled,
+                  spellCheckConfiguration: widget.spellCheckConfiguration,
+                  buildCounter: widget.buildCounter,
+                ),
+              ),
+              if (widget.suffix != null)
+                TapRegion(
+                  groupId: TextInput,
+                  child: widget.suffix!,
+                ),
+            ],
           ),
         ),
       ),

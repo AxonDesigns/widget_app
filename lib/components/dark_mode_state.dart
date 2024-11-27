@@ -3,8 +3,8 @@ import 'dart:ui';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ThemeModeStateProvider extends StatefulWidget {
-  const ThemeModeStateProvider({
+class InheritedThemeModeProvider extends StatefulWidget {
+  const InheritedThemeModeProvider({
     super.key,
     required this.child,
     this.initial,
@@ -16,10 +16,11 @@ class ThemeModeStateProvider extends StatefulWidget {
   final String storageKey;
 
   @override
-  State<ThemeModeStateProvider> createState() => ThemeModeStateProviderState();
+  State<InheritedThemeModeProvider> createState() =>
+      InheritedThemeModeProviderState();
 }
 
-class ThemeModeStateProviderState extends State<ThemeModeStateProvider>
+class InheritedThemeModeProviderState extends State<InheritedThemeModeProvider>
     with WidgetsBindingObserver {
   var _isDarkMode = false;
 
@@ -61,8 +62,8 @@ class ThemeModeStateProviderState extends State<ThemeModeStateProvider>
 
   @override
   Widget build(BuildContext context) {
-    return ThemeModeState(
-      data: ThemeModeStateData(
+    return InheritedThemeMode(
+      data: ThemeModeData(
         themeMode: _themeMode ?? ThemeMode.system,
         isDarkMode: _isDarkMode,
         setThemeMode: (mode) {
@@ -81,31 +82,35 @@ class ThemeModeStateProviderState extends State<ThemeModeStateProvider>
 }
 
 /// A theme that uses the [GenericThemeData] as its [ThemeData].
-class ThemeModeState extends InheritedWidget {
-  const ThemeModeState({
+class InheritedThemeMode extends InheritedWidget {
+  const InheritedThemeMode({
     super.key,
     required super.child,
     required this.data,
   });
 
-  final ThemeModeStateData data;
+  final ThemeModeData data;
 
   @override
-  bool updateShouldNotify(covariant ThemeModeState oldWidget) {
+  bool updateShouldNotify(covariant InheritedThemeMode oldWidget) {
     return oldWidget.data != data;
   }
 
-  static ThemeModeStateData of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<ThemeModeState>()!.data;
+  static ThemeModeData of(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<InheritedThemeMode>()!
+        .data;
   }
 
-  static ThemeModeStateData? maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<ThemeModeState>()?.data;
+  static ThemeModeData? maybeOf(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<InheritedThemeMode>()
+        ?.data;
   }
 }
 
-class ThemeModeStateData {
-  ThemeModeStateData({
+class ThemeModeData {
+  ThemeModeData({
     required this.themeMode,
     required this.isDarkMode,
     required this.setThemeMode,
@@ -124,14 +129,14 @@ enum ThemeMode {
 
 extension ThemeModeStateExtension on BuildContext {
   ThemeMode get themeMode {
-    return ThemeModeState.maybeOf(this)?.themeMode ?? ThemeMode.system;
+    return InheritedThemeMode.maybeOf(this)?.themeMode ?? ThemeMode.system;
   }
 
   bool get isDarkMode {
-    return ThemeModeState.maybeOf(this)?.isDarkMode ?? false;
+    return InheritedThemeMode.maybeOf(this)?.isDarkMode ?? false;
   }
 
   void setThemeMode(ThemeMode mode) {
-    ThemeModeState.maybeOf(this)?.setThemeMode(mode);
+    InheritedThemeMode.maybeOf(this)?.setThemeMode(mode);
   }
 }

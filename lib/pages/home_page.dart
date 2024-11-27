@@ -1,3 +1,4 @@
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 import 'package:widget_app/components/animated_spinner.dart';
 import 'package:widget_app/components/button.dart';
@@ -34,6 +35,18 @@ class _HomePageState extends State<HomePage> {
             children: [
               TextInput(
                 controller: _controller,
+                obscureText: false,
+                prefix: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Icon(LucideIcons.search),
+                ),
+                suffix: Button.ghost(
+                  focusable: false,
+                  onPressed: () async {
+                    print("Button pressed");
+                  },
+                  children: const [Icon(LucideIcons.eye)],
+                ),
               ),
               Tooltip(
                 message: "Example tooltip",

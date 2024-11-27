@@ -26,7 +26,7 @@ class MainApp extends StatelessWidget {
     return App.router(
       debugShowCheckedModeBanner: false,
       builder: (context, child) {
-        return ThemeModeStateProvider(
+        return InheritedThemeModeProvider(
           initial: initialThemeMode,
           storageKey: 'theme_mode',
           // The builder is needed, because we need a new context that has access to the theme mode state.
