@@ -1,4 +1,4 @@
-import 'package:widget_app/components/generic.dart';
+import 'package:widget_app/generic.dart';
 
 class GenericPageRoute<T> extends PageRoute<T> {
   GenericPageRoute({

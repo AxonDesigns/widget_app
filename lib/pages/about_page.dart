@@ -1,7 +1,7 @@
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 import 'package:widget_app/components/button.dart';
-import 'package:widget_app/components/generic.dart';
+import 'package:widget_app/generic.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:widget_app/components/button.dart';
 import 'package:widget_app/components/dark_mode_state.dart';
 
-import 'components/generic.dart';
+import 'generic.dart';
 
 bool get isDesktop =>
     Platform.isWindows ||
@@ -59,7 +59,7 @@ extension ContextExtensions on BuildContext {
                     decoration: BoxDecoration(
                       color: context.theme.surfaceColor,
                       borderRadius:
-                          BorderRadius.circular(context.theme.roundedSize.size),
+                          BorderRadius.circular(context.theme.radiusSize),
                       border: Border.all(
                         color: context.theme.foregroundColor.withOpacity(0.075),
                       ),

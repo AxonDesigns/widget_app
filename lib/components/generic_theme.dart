@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:widget_app/components/generic.dart';
+import 'package:widget_app/generic.dart';
 import 'package:widget_app/utils.dart';
 
 /// A theme that uses the [GenericThemeData] as its [ThemeData].
@@ -64,16 +64,26 @@ class _AnimatedGenericThemeState
   }
 }
 
-enum RoundedSize {
-  none(0.0),
-  small(4.0),
-  medium(8.0),
-  large(16.0),
-  full(250.0);
+extension type const RadiusSize._(double value) {
+  /// 0.0
+  static double get none => 0.0;
 
-  const RoundedSize(this.size);
+  /// 4.0
+  static double get small => 4.0;
 
-  final double size;
+  /// 8.0
+  static double get medium => 8.0;
+
+  /// 16.0
+  static double get large => 16.0;
+
+  /// 100%
+  static double get full => 5000.0;
+
+  /// custom
+  static custom(double value) {
+    return value;
+  }
 }
 
 /// The [ThemeData] used by [GenericTheme].
@@ -83,7 +93,7 @@ class GenericThemeData {
     required this.backgroundColor,
     required this.foregroundColor,
     required Color highestSurfaceColor,
-    required this.roundedSize,
+    required this.radiusSize,
     required this.baseTextStyle,
   }) : _highestSurfaceColor = highestSurfaceColor;
 
@@ -92,7 +102,7 @@ class GenericThemeData {
       backgroundColor: Colors.white,
       foregroundColor: const Color.fromARGB(255, 20, 20, 20),
       highestSurfaceColor: const Color.fromARGB(255, 223, 223, 223),
-      roundedSize: RoundedSize.medium,
+      radiusSize: RadiusSize.small,
       baseTextStyle: TextStyle(
         fontFamily: 'Supreme',
         fontSize: isDesktop ? 14.0 : 16.0,
@@ -106,7 +116,7 @@ class GenericThemeData {
       backgroundColor: const Color.fromARGB(255, 20, 20, 20),
       foregroundColor: const Color.fromARGB(255, 255, 255, 255),
       highestSurfaceColor: const Color.fromARGB(255, 45, 45, 45),
-      roundedSize: RoundedSize.medium,
+      radiusSize: RadiusSize.small,
       baseTextStyle: TextStyle(
         fontFamily: 'Supreme',
         fontSize: isDesktop ? 14.0 : 16.0,
@@ -119,7 +129,7 @@ class GenericThemeData {
   final Color primaryColor;
   final Color backgroundColor;
   final Color foregroundColor;
-  final RoundedSize roundedSize;
+  final double radiusSize;
   final TextStyle baseTextStyle;
 
   final Color _highestSurfaceColor;
@@ -148,7 +158,7 @@ class GenericThemeData {
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
       foregroundColor: Color.lerp(a.foregroundColor, b.foregroundColor, t)!,
       baseTextStyle: b.baseTextStyle,
-      roundedSize: b.roundedSize,
+      radiusSize: lerpDouble(a.radiusSize, b.radiusSize, t)!,
       highestSurfaceColor:
           Color.lerp(a._highestSurfaceColor, b._highestSurfaceColor, t)!,
     );

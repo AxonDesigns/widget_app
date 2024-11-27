@@ -1,4 +1,4 @@
-import 'package:widget_app/components/generic.dart';
+import 'package:widget_app/generic.dart';
 
 extension GenericDialogExt on BuildContext {
   /// Shows a dialog above the current contents of the app.
@@ -12,7 +12,8 @@ extension GenericDialogExt on BuildContext {
     RouteSettings? routeSettings,
     Offset? anchorPoint,
   }) {
-    return Navigator.of(this, rootNavigator: useRootNavigator).push<T>(RawDialogRoute<T>(
+    return Navigator.of(this, rootNavigator: useRootNavigator)
+        .push<T>(RawDialogRoute<T>(
       barrierDismissible: dismissible,
       barrierLabel: barrierLabel,
       barrierColor: const Color.fromARGB(0, 0, 0, 0),

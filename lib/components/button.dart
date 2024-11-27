@@ -1,6 +1,5 @@
-import 'package:flutter/widgets.dart';
 import 'package:widget_app/components/dark_mode_state.dart';
-import 'package:widget_app/components/generic.dart';
+import 'package:widget_app/generic.dart';
 import 'package:widget_app/utils.dart';
 
 enum AxType {
@@ -169,7 +168,6 @@ class _ButtonState extends State<Button> {
     const pressedValue = 0.2;
     const hoveredValue = pressedValue * 0.5;
 
-    //TODO: add light mode
     final bgColor = widget.backgroundColor?.resolve(state) ??
         switch (widget.type) {
           AxType.primary => WidgetStateColor.resolveWith((state) {
@@ -301,13 +299,7 @@ class _ButtonState extends State<Button> {
             decoration: BoxDecoration(
               color: bgColor,
               borderRadius: BorderRadius.circular(
-                switch (context.theme.roundedSize) {
-                  RoundedSize.none => 0.0,
-                  RoundedSize.small => 4.0,
-                  RoundedSize.medium => 8.0,
-                  RoundedSize.large => 16.0,
-                  RoundedSize.full => 5000.0,
-                },
+                context.theme.radiusSize,
               ),
               border: Border.all(
                 strokeAlign: BorderSide.strokeAlignInside,

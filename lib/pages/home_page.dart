@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:widget_app/components/animated_spinner.dart';
 import 'package:widget_app/components/button.dart';
 import 'package:widget_app/components/dark_mode_state.dart';
-import 'package:widget_app/components/generic.dart';
+import 'package:widget_app/generic.dart';
 import 'package:widget_app/components/tooltip.dart';
 import 'package:widget_app/utils.dart';
 

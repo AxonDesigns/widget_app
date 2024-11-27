@@ -1,16 +1,16 @@
 export 'package:flutter/widgets.dart' hide showGeneralDialog;
-export 'app.dart';
-export 'generic_page.dart';
-export 'generic_page_route.dart';
-export 'text_input.dart';
-export 'colors.dart';
-export 'generic_dialog.dart';
-export 'barrier.dart';
-export 'gapped_flex.dart';
-export 'generic_theme.dart';
+export 'components/app.dart';
+export 'components/generic_page.dart';
+export 'components/generic_page_route.dart';
+export 'components/text_input.dart';
+export 'components/colors.dart';
+export 'components/generic_dialog.dart';
+export 'components/barrier.dart';
+export 'components/gapped_flex.dart';
+export 'components/generic_theme.dart';
 
 import 'dart:io';
-import 'package:widget_app/components/generic.dart';
+import 'package:widget_app/generic.dart';
 
 /// Used to categorize the platform types instead of using the [Platform] class for a more generic approach.
 enum PlatformType {

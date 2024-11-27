@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:widget_app/components/dark_mode_state.dart';
 import 'package:widget_app/router.dart';
-import 'components/generic.dart';
+import 'generic.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

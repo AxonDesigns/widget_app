@@ -10,7 +10,7 @@ import 'package:flutter/material.dart' as material
         ThemeData,
         TextSelectionThemeData;
 import 'package:flutter/services.dart';
-import 'package:widget_app/components/generic.dart';
+import 'package:widget_app/generic.dart';
 import 'package:widget_app/utils.dart';
 
 class TextInput extends StatefulWidget {
@@ -596,13 +596,7 @@ class _TextInputState extends State<TextInput>
             color: context.theme.surfaceColor.highest,
             strokeAlign: BorderSide.strokeAlignInside),
         borderRadius: BorderRadius.circular(
-          switch (context.theme.roundedSize) {
-            RoundedSize.none => 0.0,
-            RoundedSize.small => 4.0,
-            RoundedSize.medium => 8.0,
-            RoundedSize.large => 16.0,
-            RoundedSize.full => 100.0,
-          },
+          context.theme.radiusSize,
         ),
       ),
       child: MouseRegion(
@@ -650,8 +644,8 @@ class _TextInputState extends State<TextInput>
                     filled: false,
                     border: material.InputBorder.none,
                     contentPadding: EdgeInsets.only(
-                      bottom: isDesktop ? 12.0 : 16.0,
-                      top: isDesktop ? 12.0 : 16.0,
+                      bottom: isDesktop ? 10.0 : 16.0,
+                      top: isDesktop ? 10.0 : 16.0,
                       left: widget.prefix == null
                           ? isDesktop
                               ? 12.0

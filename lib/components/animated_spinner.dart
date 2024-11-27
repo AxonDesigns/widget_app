@@ -1,6 +1,6 @@
 import 'package:rive/rive.dart';
 
-import 'generic.dart';
+import '../generic.dart';
 
 class AnimatedSpinner extends StatelessWidget {
   const AnimatedSpinner({

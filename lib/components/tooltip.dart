@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'generic.dart';
+import '../generic.dart';
 
 /// Displays a tooltip when hovering over the child widget.
 class Tooltip extends StatefulWidget {
