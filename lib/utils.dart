@@ -10,6 +10,7 @@ bool get isDesktop =>
     Platform.isLinux ||
     Platform.isMacOS ||
     Platform.isFuchsia;
+
 bool get isMobile => Platform.isAndroid || Platform.isIOS;
 
 enum ConfirmDialogType {

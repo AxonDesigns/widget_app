@@ -577,15 +577,25 @@ class _TextInputState extends State<TextInput>
     final bgColor = widget.backgroundColor?.resolve(state) ??
         WidgetStateColor.resolveWith((state) {
           if (state.contains(WidgetState.focused)) {
-            return context.theme.surfaceColor.highest;
+            return context.theme.foregroundColor.withOpacity(0.1);
           }
 
           if (state.contains(WidgetState.hovered)) {
-            return context.theme.surfaceColor.higher;
+            return context.theme.foregroundColor.withOpacity(0.05);
           }
 
-          return context.theme.surfaceColor.high;
+          return context.theme.foregroundColor.withOpacity(0.01);
         }).resolve(state);
+
+    final borderColor = WidgetStateColor.resolveWith((state) {
+      if (state.contains(WidgetState.focused)) {
+        return context.theme.foregroundColor.withOpacity(0.0);
+      }
+      if (state.contains(WidgetState.hovered)) {
+        return context.theme.foregroundColor.withOpacity(0.1);
+      }
+      return context.theme.foregroundColor.withOpacity(0.1);
+    }).resolve(state);
 
     return AnimatedContainer(
       duration: Duration(milliseconds: pressed ? 50 : 200),
@@ -593,8 +603,9 @@ class _TextInputState extends State<TextInput>
       decoration: BoxDecoration(
         color: bgColor,
         border: Border.all(
-            color: context.theme.surfaceColor.highest,
-            strokeAlign: BorderSide.strokeAlignInside),
+          color: borderColor,
+          strokeAlign: BorderSide.strokeAlignInside,
+        ),
         borderRadius: BorderRadius.circular(
           context.theme.radiusSize,
         ),
@@ -628,11 +639,18 @@ class _TextInputState extends State<TextInput>
             ),
           ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               if (widget.prefix != null)
                 TapRegion(
                   groupId: TextInput,
-                  child: widget.prefix!,
+                  child: IconTheme(
+                    data: IconThemeData(
+                      size: context.theme.iconSize,
+                      color: context.theme.foregroundColor.withOpacity(0.5),
+                    ),
+                    child: widget.prefix!,
+                  ),
                 ),
               Expanded(
                 child: material.TextField(
@@ -644,17 +662,17 @@ class _TextInputState extends State<TextInput>
                     filled: false,
                     border: material.InputBorder.none,
                     contentPadding: EdgeInsets.only(
-                      bottom: isDesktop ? 10.0 : 16.0,
-                      top: isDesktop ? 10.0 : 16.0,
+                      bottom: isDesktop ? 10.0 : 12.0,
+                      top: isDesktop ? 10.0 : 12.0,
                       left: widget.prefix == null
                           ? isDesktop
-                              ? 12.0
-                              : 16.0
+                              ? 10.0
+                              : 12.0
                           : 0.0,
                       right: widget.suffix == null
                           ? isDesktop
-                              ? 12.0
-                              : 16.0
+                              ? 10.0
+                              : 12.0
                           : 0.0,
                     ),
                     isDense: true,
@@ -724,7 +742,13 @@ class _TextInputState extends State<TextInput>
               if (widget.suffix != null)
                 TapRegion(
                   groupId: TextInput,
-                  child: widget.suffix!,
+                  child: IconTheme(
+                    data: IconThemeData(
+                      size: context.theme.iconSize,
+                      color: context.theme.foregroundColor.withOpacity(0.5),
+                    ),
+                    child: widget.suffix!,
+                  ),
                 ),
             ],
           ),

@@ -1,8 +1,10 @@
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
+import 'package:widget_app/components/Card.dart';
 import 'package:widget_app/components/animated_spinner.dart';
 import 'package:widget_app/components/button.dart';
 import 'package:widget_app/components/dark_mode_state.dart';
+import 'package:widget_app/components/file_input.dart';
 import 'package:widget_app/generic.dart';
 import 'package:widget_app/components/tooltip.dart';
 import 'package:widget_app/utils.dart';
@@ -16,36 +18,65 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _controller = TextEditingController();
+  bool _obscureText = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() {
+      if (!context.mounted) return;
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: GenericTheme.of(context).backgroundColor,
       child: Center(
-        child: Container(
+        child: Card(
           width: 400.0,
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: GenericTheme.of(context).surfaceColor,
-            borderRadius: BorderRadius.circular(4.0),
-          ),
+          elevation: 16.0,
           child: GappedColumn(
             mainAxisSize: MainAxisSize.min,
             gap: 14.0,
             children: [
-              TextInput(
-                controller: _controller,
-                obscureText: false,
-                prefix: const Padding(
-                  padding: EdgeInsets.all(8.0),
+              const TextInput(),
+              const TextInput(
+                prefix: Padding(
+                  padding: EdgeInsets.all(10.0),
                   child: Icon(LucideIcons.search),
                 ),
-                suffix: Button.ghost(
-                  focusable: false,
-                  onPressed: () async {
-                    print("Button pressed");
-                  },
-                  children: const [Icon(LucideIcons.eye)],
+              ),
+              TextInput(
+                controller: _controller,
+                obscureText: _obscureText,
+                prefix: const Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: Icon(LucideIcons.search),
+                ),
+                suffix: Padding(
+                  padding: const EdgeInsets.only(right: 2),
+                  child: Button.ghost(
+                    focusable: false,
+                    disabled: _controller.text.isEmpty,
+                    onPressed: () async {
+                      setState(() {
+                        _obscureText = !_obscureText;
+                      });
+                    },
+                    children: [
+                      Icon(
+                        _obscureText ? LucideIcons.eye : LucideIcons.eye_off,
+                      )
+                    ],
+                  ),
                 ),
               ),
               Tooltip(
@@ -59,6 +90,16 @@ class _HomePageState extends State<HomePage> {
                     Text("Go to About Page"),
                   ],
                 ),
+              ),
+              Button.primary(
+                disabled: true,
+                onPressed: () async {
+                  await context.push('/about');
+                },
+                children: const [
+                  AnimatedSpinner(size: 20),
+                  Text("Go to About Page"),
+                ],
               ),
               Button.glass(
                 onPressed: () async {
@@ -91,6 +132,7 @@ class _HomePageState extends State<HomePage> {
                 },
                 children: const [Text("Change to System Mode")],
               ),
+              FileInput(),
             ],
           ),
         ),

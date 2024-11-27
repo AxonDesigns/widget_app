@@ -22,6 +22,7 @@ class Button extends StatefulWidget {
     this.gap = 5.0,
     this.tooltip,
     this.focusable = true,
+    this.disabled = false,
     this.focusNode,
     this.unfocusOnTapOutside = true,
   }) : type = null;
@@ -34,6 +35,7 @@ class Button extends StatefulWidget {
     this.gap = 5.0,
     this.tooltip,
     this.focusable = true,
+    this.disabled = false,
     this.focusNode,
     this.unfocusOnTapOutside = true,
   })  : type = AxType.primary,
@@ -49,6 +51,7 @@ class Button extends StatefulWidget {
     this.gap = 5.0,
     this.tooltip,
     this.focusable = true,
+    this.disabled = false,
     this.focusNode,
     this.unfocusOnTapOutside = true,
   })  : type = AxType.outline,
@@ -64,6 +67,7 @@ class Button extends StatefulWidget {
     this.gap = 5.0,
     this.tooltip,
     this.focusable = true,
+    this.disabled = false,
     this.focusNode,
     this.unfocusOnTapOutside = true,
   })  : type = AxType.ghost,
@@ -79,6 +83,7 @@ class Button extends StatefulWidget {
     this.gap = 5.0,
     this.tooltip,
     this.focusable = true,
+    this.disabled = false,
     this.focusNode,
     this.unfocusOnTapOutside = true,
   })  : type = AxType.glass,
@@ -94,6 +99,7 @@ class Button extends StatefulWidget {
     this.gap = 5.0,
     this.tooltip,
     this.focusable = true,
+    this.disabled = false,
     this.focusNode,
     this.unfocusOnTapOutside = true,
   })  : type = AxType.destructive,
@@ -111,6 +117,7 @@ class Button extends StatefulWidget {
   final WidgetStateColor? foregroundColor;
   final double gap;
   final bool focusable;
+  final bool disabled;
   final bool unfocusOnTapOutside;
   final FocusNode? focusNode;
 
@@ -122,7 +129,7 @@ class _ButtonState extends State<Button> {
   var hovered = false;
   var pressed = false;
   var focused = false;
-  bool get enabled => widget.onPressed != null;
+  bool get enabled => widget.onPressed != null && !widget.disabled;
   late var _focusNode = widget.focusNode ?? FocusNode();
 
   @override
@@ -173,6 +180,10 @@ class _ButtonState extends State<Button> {
           AxType.primary => WidgetStateColor.resolveWith((state) {
               var colorHSV = HSVColor.fromColor(theme.primaryColor);
 
+              if (!enabled) {
+                return colorHSV.toColor();
+              }
+
               if (state.contains(WidgetState.pressed)) {
                 return colorHSV
                     .withValue(colorHSV.value - pressedValue)
@@ -190,6 +201,10 @@ class _ButtonState extends State<Button> {
           AxType.outline ||
           AxType.ghost =>
             WidgetStateColor.resolveWith((state) {
+              if (!enabled) {
+                return context.theme.foregroundColor.withOpacity(0.0);
+              }
+
               if (state.contains(WidgetState.pressed)) {
                 return context.theme.foregroundColor.withOpacity(0.05);
               }
@@ -200,6 +215,10 @@ class _ButtonState extends State<Button> {
             }).resolve(state),
           AxType.glass => WidgetStateColor.resolveWith((state) {
               var color = theme.primaryColor;
+
+              if (!enabled) {
+                return color.withOpacity(0.1);
+              }
 
               if (state.contains(WidgetState.pressed)) {
                 return color.withOpacity(0.25);
@@ -216,6 +235,10 @@ class _ButtonState extends State<Button> {
                     ? (const Color.fromARGB(255, 165, 36, 36))
                     : (const Color.fromARGB(255, 223, 56, 56)),
               );
+
+              if (!enabled) {
+                return colorHSV.toColor();
+              }
 
               if (state.contains(WidgetState.pressed)) {
                 return colorHSV
@@ -237,17 +260,7 @@ class _ButtonState extends State<Button> {
     final borderColor = widget.borderColor?.resolve(state) ??
         switch (widget.type) {
           AxType.outline => WidgetStateColor.resolveWith((state) {
-              if (state.contains(WidgetState.pressed)) {
-                return GenericTheme.of(context)
-                    .foregroundColor
-                    .withOpacity(0.05);
-              }
-              if (state.contains(WidgetState.hovered)) {
-                return GenericTheme.of(context)
-                    .foregroundColor
-                    .withOpacity(0.0);
-              }
-              return GenericTheme.of(context).foregroundColor.withOpacity(0.15);
+              return context.theme.surfaceColor.highest;
             }).resolve(state),
           AxType.glass => theme.primaryColor.withOpacity(0.5),
           _ => Colors.transparent,
@@ -272,8 +285,7 @@ class _ButtonState extends State<Button> {
       focusNode: _focusNode,
       onFocusChange: (value) => setState(() => focused = value),
       onShowHoverHighlight: (value) => setState(() => hovered = value),
-      mouseCursor:
-          enabled ? SystemMouseCursors.basic : SystemMouseCursors.forbidden,
+      mouseCursor: SystemMouseCursors.basic,
       child: GestureDetector(
         behavior: HitTestBehavior.deferToChild,
         onTapDown: (details) => setState(() => pressed = true),
@@ -286,7 +298,7 @@ class _ButtonState extends State<Button> {
           setState(() => pressed = false);
         },
         onTapCancel: () => setState(() => pressed = false),
-        onTap: widget.onPressed == null
+        onTap: !enabled
             ? null
             : () {
                 widget.onPressed!.call();
