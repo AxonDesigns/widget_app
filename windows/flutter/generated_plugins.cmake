@@ -5,8 +5,10 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
   desktop_multi_window
+  irondash_engine_context
   rive_common
   screen_retriever
+  super_native_extensions
   window_manager
 )
 

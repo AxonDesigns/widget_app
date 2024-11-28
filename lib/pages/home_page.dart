@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 import 'package:widget_app/components/Card.dart';
@@ -86,7 +87,7 @@ class _HomePageState extends State<HomePage> {
                     await context.push('/about');
                   },
                   children: const [
-                    AnimatedSpinner(size: 20),
+                    AnimatedSpinner(size: 16),
                     Text("Go to About Page"),
                   ],
                 ),
@@ -97,7 +98,7 @@ class _HomePageState extends State<HomePage> {
                   await context.push('/about');
                 },
                 children: const [
-                  AnimatedSpinner(size: 20),
+                  AnimatedSpinner(size: 16),
                   Text("Go to About Page"),
                 ],
               ),
@@ -132,7 +133,11 @@ class _HomePageState extends State<HomePage> {
                 },
                 children: const [Text("Change to System Mode")],
               ),
-              FileInput(),
+              FileInput(
+                onDropped: (paths) {
+                  print(paths);
+                },
+              ),
             ],
           ),
         ),

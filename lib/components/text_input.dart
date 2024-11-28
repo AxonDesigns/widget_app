@@ -8,6 +8,7 @@ import 'package:flutter/material.dart' as material
         InputBorder,
         Theme,
         ThemeData,
+        AdaptiveTextSelectionToolbar,
         TextSelectionThemeData;
 import 'package:flutter/services.dart';
 import 'package:widget_app/generic.dart';
@@ -623,7 +624,9 @@ class _TextInputState extends State<TextInput>
     return Localizations.override(
       context: context,
       locale: app?.locale ?? const Locale('en'),
-      delegates: const [material.DefaultMaterialLocalizations.delegate],
+      delegates: const [
+        material.DefaultMaterialLocalizations.delegate,
+      ],
       child: material.Material(
         color: Colors.transparent,
         child: material.Theme(
@@ -712,7 +715,23 @@ class _TextInputState extends State<TextInput>
                   onTapAlwaysCalled: widget.onTapAlwaysCalled,
                   onTapOutside: widget.onTapOutside,
                   mouseCursor: widget.mouseCursor,
-                  contextMenuBuilder: widget.contextMenuBuilder,
+                  contextMenuBuilder: widget.contextMenuBuilder ??
+                      (context, editableTextState) {
+                        return Localizations.override(
+                          context: context,
+                          locale: app?.locale ?? const Locale('en'),
+                          delegates: const [
+                            material.DefaultMaterialLocalizations.delegate,
+                          ],
+                          child: TapRegion(
+                            groupId: TextInput,
+                            child: material.AdaptiveTextSelectionToolbar
+                                .editableText(
+                              editableTextState: editableTextState,
+                            ),
+                          ),
+                        );
+                      },
                   contentInsertionConfiguration:
                       widget.contentInsertionConfiguration,
                   cursorColor: widget.cursorColor,

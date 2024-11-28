@@ -105,7 +105,8 @@ class GenericThemeData {
       radiusSize: RadiusSize.small,
       baseTextStyle: TextStyle(
         fontFamily: 'Supreme',
-        fontSize: isDesktop ? 14.0 : 16.0,
+        fontSize: isDesktop ? 13.0 : 16.0,
+        color: Colors.black,
         fontVariations: const [
           FontVariation.weight(400),
         ],
@@ -119,8 +120,8 @@ class GenericThemeData {
       radiusSize: RadiusSize.small,
       baseTextStyle: TextStyle(
         fontFamily: 'Supreme',
-        fontSize: isDesktop ? 14.0 : 16.0,
-        letterSpacing: 0.0,
+        fontSize: isDesktop ? 13.0 : 16.0,
+        color: Colors.white,
         fontVariations: const [
           FontVariation.weight(400),
         ],
@@ -134,7 +135,7 @@ class GenericThemeData {
 
   final Color _highestSurfaceColor;
 
-  double get iconSize => isDesktop ? 16.0 : 20.0;
+  double get iconSize => isDesktop ? 13.0 : 20.0;
 
   GenericColorSwatch get surfaceColor => GenericColorSwatch(
         Color.lerp(backgroundColor, _highestSurfaceColor, 0.4285714287)!.value,

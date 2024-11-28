@@ -16,6 +16,8 @@ dependencies:
   go_router: ^14.2.7
   rive: ^0.13.18
   shared_preferences: ^2.3.3
+  super_drag_and_drop: ^0.8.24
+  visibility_detector: ^0.4.0+2
   window_manager: ^0.4.2
 
 dev_dependencies:
