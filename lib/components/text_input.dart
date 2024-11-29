@@ -81,14 +81,10 @@ class TextInput extends StatefulWidget {
     this.magnifierConfiguration,
     this.restorationId,
     this.backgroundColor,
-  })  : enableInteractiveSelection =
-            enableInteractiveSelection ?? (!readOnly || !obscureText),
-        keyboardType = keyboardType ??
-            (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-        smartDashesType = smartDashesType ??
-            (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-        smartQuotesType = smartQuotesType ??
-            (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled);
+  })  : enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
+        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
+        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled);
 
   final TextMagnifierConfiguration? magnifierConfiguration;
 
@@ -497,10 +493,7 @@ class TextInput extends StatefulWidget {
   ///
   /// If buildCounter returns null, then no counter and no Semantics widget will
   /// be created at all.
-  final Widget? Function(BuildContext context,
-      {required int currentLength,
-      required int? maxLength,
-      required bool isFocused})? buildCounter;
+  final Widget? Function(BuildContext context, {required int currentLength, required int? maxLength, required bool isFocused})? buildCounter;
 
   /// {@macro flutter.widgets.editableText.restorationId}
   final String? restorationId;
@@ -519,8 +512,7 @@ class TextInput extends StatefulWidget {
   State<TextInput> createState() => _TextInputState();
 }
 
-class _TextInputState extends State<TextInput>
-    with AutomaticKeepAliveClientMixin {
+class _TextInputState extends State<TextInput> with AutomaticKeepAliveClientMixin {
   // Since making a text input is a bit of a pain, I'm just going to use the material one for now.
   var hovered = false;
   var pressed = false;
@@ -599,7 +591,7 @@ class _TextInputState extends State<TextInput>
     }).resolve(state);
 
     return AnimatedContainer(
-      duration: Duration(milliseconds: pressed ? 50 : 200),
+      duration: Duration(milliseconds: pressed || hovered ? 50 : 200),
       curve: Curves.fastEaseInToSlowEaseOut,
       decoration: BoxDecoration(
         color: bgColor,
@@ -692,8 +684,7 @@ class _TextInputState extends State<TextInput>
                   canRequestFocus: widget.canRequestFocus,
                   clipBehavior: widget.clipBehavior,
                   enableInteractiveSelection: widget.enableInteractiveSelection,
-                  enableIMEPersonalizedLearning:
-                      widget.enableIMEPersonalizedLearning,
+                  enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
                   enableSuggestions: widget.enableSuggestions,
                   maxLength: widget.maxLength,
                   maxLines: widget.maxLines,
@@ -725,15 +716,13 @@ class _TextInputState extends State<TextInput>
                           ],
                           child: TapRegion(
                             groupId: TextInput,
-                            child: material.AdaptiveTextSelectionToolbar
-                                .editableText(
+                            child: material.AdaptiveTextSelectionToolbar.editableText(
                               editableTextState: editableTextState,
                             ),
                           ),
                         );
                       },
-                  contentInsertionConfiguration:
-                      widget.contentInsertionConfiguration,
+                  contentInsertionConfiguration: widget.contentInsertionConfiguration,
                   cursorColor: widget.cursorColor,
                   cursorHeight: widget.cursorHeight,
                   cursorRadius: widget.cursorRadius,

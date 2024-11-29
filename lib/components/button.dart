@@ -185,22 +185,16 @@ class _ButtonState extends State<Button> {
               }
 
               if (state.contains(WidgetState.pressed)) {
-                return colorHSV
-                    .withValue(colorHSV.value - pressedValue)
-                    .toColor();
+                return colorHSV.withValue(colorHSV.value - pressedValue).toColor();
               }
 
               if (state.contains(WidgetState.hovered)) {
-                return colorHSV
-                    .withValue(colorHSV.value - hoveredValue)
-                    .toColor();
+                return colorHSV.withValue(colorHSV.value - hoveredValue).toColor();
               }
 
               return colorHSV.toColor();
             }).resolve(state),
-          AxType.outline ||
-          AxType.ghost =>
-            WidgetStateColor.resolveWith((state) {
+          AxType.outline || AxType.ghost => WidgetStateColor.resolveWith((state) {
               if (!enabled) {
                 return context.theme.foregroundColor.withOpacity(0.0);
               }
@@ -231,9 +225,7 @@ class _ButtonState extends State<Button> {
             }).resolve(state),
           AxType.destructive => WidgetStateColor.resolveWith((state) {
               var colorHSV = HSVColor.fromColor(
-                isDarkMode
-                    ? (const Color.fromARGB(255, 165, 36, 36))
-                    : (const Color.fromARGB(255, 223, 56, 56)),
+                isDarkMode ? (const Color.fromARGB(255, 165, 36, 36)) : (const Color.fromARGB(255, 223, 56, 56)),
               );
 
               if (!enabled) {
@@ -241,15 +233,11 @@ class _ButtonState extends State<Button> {
               }
 
               if (state.contains(WidgetState.pressed)) {
-                return colorHSV
-                    .withValue(colorHSV.value - pressedValue)
-                    .toColor();
+                return colorHSV.withValue(colorHSV.value - pressedValue).toColor();
               }
 
               if (state.contains(WidgetState.hovered)) {
-                return colorHSV
-                    .withValue(colorHSV.value - hoveredValue)
-                    .toColor();
+                return colorHSV.withValue(colorHSV.value - hoveredValue).toColor();
               }
 
               return colorHSV.toColor();
@@ -272,8 +260,7 @@ class _ButtonState extends State<Button> {
               return Colors.white;
             }).resolve(state),
           AxType.glass => theme.primaryColor,
-          AxType.destructive =>
-            isDarkMode ? context.theme.foregroundColor : theme.backgroundColor,
+          AxType.destructive => isDarkMode ? context.theme.foregroundColor : theme.backgroundColor,
           _ => theme.foregroundColor,
         };
 
@@ -306,7 +293,7 @@ class _ButtonState extends State<Button> {
         child: Opacity(
           opacity: enabled ? 1.0 : 0.65,
           child: AnimatedContainer(
-            duration: Duration(milliseconds: pressed ? 50 : 200),
+            duration: Duration(milliseconds: pressed || hovered ? 50 : 200),
             curve: Curves.fastEaseInToSlowEaseOut,
             decoration: BoxDecoration(
               color: bgColor,
@@ -323,14 +310,8 @@ class _ButtonState extends State<Button> {
               padding: EdgeInsets.symmetric(
                 /* horizontal: widget.squared ? 7.5 : 12.0,
                 vertical: widget.squared ? 7.5 : 6.0, */
-                horizontal: widget.children.length == 1 &&
-                        widget.children.first is! Text
-                    ? squarePadding
-                    : horizontalPadding,
-                vertical: widget.children.length == 1 &&
-                        widget.children.first is! Text
-                    ? squarePadding
-                    : verticalPadding,
+                horizontal: widget.children.length == 1 && widget.children.first is! Text ? squarePadding : horizontalPadding,
+                vertical: widget.children.length == 1 && widget.children.first is! Text ? squarePadding : verticalPadding,
               ),
               child: IconTheme(
                 data: IconTheme.of(context).copyWith(
@@ -345,11 +326,8 @@ class _ButtonState extends State<Button> {
                           ? Row(
                               mainAxisSize: MainAxisSize.min,
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(
-                                  (widget.children.length * 2) - 1,
-                                  (index) => index.isEven
-                                      ? widget.children[index ~/ 2]
-                                      : SizedBox(width: widget.gap)),
+                              children: List.generate((widget.children.length * 2) - 1,
+                                  (index) => index.isEven ? widget.children[index ~/ 2] : SizedBox(width: widget.gap)),
                             )
                           : const SizedBox.shrink()),
                 ),
