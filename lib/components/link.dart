@@ -37,7 +37,7 @@ class _LinkState extends State<Link> {
           ),
           textHeightBehavior: const TextHeightBehavior(
             applyHeightToLastDescent: false,
-            applyHeightToFirstAscent: false,
+            applyHeightToFirstAscent: true,
           ),
         ),
       ),

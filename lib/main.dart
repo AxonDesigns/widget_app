@@ -25,37 +25,41 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return App.router(
       debugShowCheckedModeBanner: false,
-      builder: (context, child) {
-        return InheritedThemeModeProvider(
-          initial: initialThemeMode,
-          storageKey: 'theme_mode',
-          // The builder is needed, because we need a new context that has access to the theme mode state.
-          child: Builder(
-            builder: (context) {
-              return AnimatedGenericTheme(
-                data: context.isDarkMode ? GenericThemeData.dark() : GenericThemeData.light(),
-                child: Builder(
-                  builder: (context) {
-                    return DefaultTextStyle(
-                      style: context.theme.baseTextStyle.copyWith(
-                        color: context.theme.foregroundColor,
-                      ),
-                      child: IconTheme(
-                        data: IconThemeData(
-                          color: context.theme.foregroundColor,
-                          size: context.theme.iconSize,
-                        ),
-                        child: child!,
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        );
-      },
+      builder: _buildApp,
       routerConfig: router,
+    );
+  }
+
+  Widget _buildApp(BuildContext context, Widget? child) {
+    return InheritedThemeModeProvider(
+      initial: initialThemeMode,
+      storageKey: 'theme_mode',
+      // The builder is needed, because we need a new context that has access to the theme mode state.
+      child: Builder(
+        builder: (context) {
+          return AnimatedGenericTheme(
+            data: context.isDarkMode
+                ? GenericThemeData.dark()
+                : GenericThemeData.light(),
+            child: Builder(
+              builder: (context) {
+                return DefaultTextStyle(
+                  style: context.theme.baseTextStyle.copyWith(
+                    color: context.theme.foregroundColor,
+                  ),
+                  child: IconTheme(
+                    data: IconThemeData(
+                      color: context.theme.foregroundColor,
+                      size: context.theme.iconSize,
+                    ),
+                    child: child!,
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 }

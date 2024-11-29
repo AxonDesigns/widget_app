@@ -1,7 +1,5 @@
 import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
-import 'package:rive/rive.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:widget_app/components/link.dart';
 import 'package:widget_app/generic.dart';
@@ -66,7 +64,8 @@ class _FileInputState extends State<FileInput> {
           duration: const Duration(milliseconds: 200),
           curve: Curves.fastEaseInToSlowEaseOut,
           decoration: BoxDecoration(
-            color: context.theme.primaryColor.withOpacity(_dragging ? 1.0 : 0.1),
+            color:
+                context.theme.primaryColor.withOpacity(_dragging ? 1.0 : 0.1),
             borderRadius: BorderRadius.circular(context.theme.radiusSize),
           ),
           padding: const EdgeInsets.all(12),

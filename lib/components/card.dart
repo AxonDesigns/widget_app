@@ -7,18 +7,23 @@ class Card extends StatelessWidget {
     this.width,
     this.height,
     this.elevation = 4.0,
+    this.padding,
+    this.clipBehavior = Clip.none,
   });
 
   final Widget? child;
   final double? width;
   final double? height;
   final double elevation;
+  final EdgeInsetsGeometry? padding;
+  final Clip clipBehavior;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: width,
       height: height,
+      clipBehavior: clipBehavior,
       decoration: BoxDecoration(
         color: context.theme.surfaceColor,
         borderRadius: BorderRadius.circular(context.theme.radiusSize),
@@ -33,10 +38,7 @@ class Card extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 18.0,
-        vertical: 16.0,
-      ),
+      padding: padding,
       child: child ?? const SizedBox.shrink(),
     );
   }
