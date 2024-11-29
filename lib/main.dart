@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:widget_app/components/dark_mode_state.dart';
+import 'package:widget_app/components/generic_scroll_behavior.dart';
 import 'package:widget_app/router.dart';
 import 'generic.dart';
 
@@ -52,7 +53,10 @@ class MainApp extends StatelessWidget {
                       color: context.theme.foregroundColor,
                       size: context.theme.iconSize,
                     ),
-                    child: child!,
+                    child: ScrollConfiguration(
+                      behavior: const GenericScrollBehavior(),
+                      child: child!,
+                    ),
                   ),
                 );
               },
