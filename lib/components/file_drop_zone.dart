@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:widget_app/components/link.dart';
@@ -92,8 +91,7 @@ class _FileDropZoneState extends State<FileDropZone> {
           duration: Duration(milliseconds: _hovering ? 50 : 200),
           curve: Curves.fastEaseInToSlowEaseOut,
           decoration: BoxDecoration(
-            color:
-                context.theme.primaryColor.withOpacity(_hovering ? 1.0 : 0.1),
+            color: context.theme.primaryColor.withOpacity(_hovering ? 1.0 : 0.1),
             borderRadius: BorderRadius.circular(context.theme.radiusSize),
           ),
           padding: EdgeInsets.all(isDesktop ? 16 : 18),
@@ -158,8 +156,7 @@ class _FileDropZoneState extends State<FileDropZone> {
     setState(() {
       _picking = true;
     });
-    final extensions =
-        widget.allowedExtensions?.map((e) => e.replaceAll(".", "")).toList();
+    final extensions = widget.allowedExtensions?.map((e) => e.replaceAll(".", "")).toList();
     final result = await FilePicker.platform.pickFiles(
       allowMultiple: widget.allowMultiple,
       type: FileType.custom,
@@ -196,8 +193,7 @@ class _FileDropZoneState extends State<FileDropZone> {
         final path = value.toFilePath(windows: Platform.isWindows);
 
         final isNull = widget.allowedExtensions == null;
-        final isAllowed = widget.allowedExtensions != null &&
-            widget.allowedExtensions!.contains(p.extension(path));
+        final isAllowed = widget.allowedExtensions != null && widget.allowedExtensions!.contains(p.extension(path));
 
         if (isNull || isAllowed) {
           paths.add(path);
@@ -221,7 +217,6 @@ class _FileDropZoneState extends State<FileDropZone> {
     final items = event.session.items;
 
     if (items.isEmpty) return DropOperation.none;
-    if (kDebugMode) print(items);
 
     bool allowed = false;
     final completer = Completer();
@@ -235,8 +230,7 @@ class _FileDropZoneState extends State<FileDropZone> {
         final extension = p.extension(path);
 
         final isNull = widget.allowedExtensions == null;
-        final isAllowed = widget.allowedExtensions != null &&
-            widget.allowedExtensions!.contains(extension);
+        final isAllowed = widget.allowedExtensions != null && widget.allowedExtensions!.contains(extension);
 
         if (isNull || isAllowed) {
           allowed = true;

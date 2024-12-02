@@ -1,13 +1,13 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:widget_app/components/app_provider.dart';
 import 'package:widget_app/components/dark_mode_state.dart';
-import 'package:widget_app/components/generic_scroll_behavior.dart';
 import 'package:widget_app/router.dart';
 import 'generic.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final prefs = await SharedPreferences.getInstance();
-  final initialThemeMode = ThemeMode.values[prefs.getInt('theme_mode') ?? 0];
+  final preferences = await SharedPreferences.getInstance();
+  final initialThemeMode = ThemeMode.values[preferences.getInt('theme_mode') ?? 0];
 
   runApp(MainApp(
     initialThemeMode: initialThemeMode,
@@ -26,44 +26,11 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return App.router(
       debugShowCheckedModeBanner: false,
-      builder: _buildApp,
-      routerConfig: router,
-    );
-  }
-
-  Widget _buildApp(BuildContext context, Widget? child) {
-    return InheritedThemeModeProvider(
-      initial: initialThemeMode,
-      storageKey: 'theme_mode',
-      // The builder is needed, because we need a new context that has access to the theme mode state.
-      child: Builder(
-        builder: (context) {
-          return AnimatedGenericTheme(
-            data: context.isDarkMode
-                ? GenericThemeData.dark()
-                : GenericThemeData.light(),
-            child: Builder(
-              builder: (context) {
-                return DefaultTextStyle(
-                  style: context.theme.baseTextStyle.copyWith(
-                    color: context.theme.foregroundColor,
-                  ),
-                  child: IconTheme(
-                    data: IconThemeData(
-                      color: context.theme.foregroundColor,
-                      size: context.theme.iconSize,
-                    ),
-                    child: ScrollConfiguration(
-                      behavior: const GenericScrollBehavior(),
-                      child: child!,
-                    ),
-                  ),
-                );
-              },
-            ),
-          );
-        },
+      builder: (context, child) => AppProvider(
+        initialThemeMode: initialThemeMode,
+        child: child!,
       ),
+      routerConfig: router,
     );
   }
 }
