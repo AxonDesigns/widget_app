@@ -1,5 +1,6 @@
 import 'package:widget_app/generic.dart';
 
+/// Displays a card with configurable elevation, width, height, padding, and clip behavior.
 class Card extends StatelessWidget {
   const Card({
     super.key,

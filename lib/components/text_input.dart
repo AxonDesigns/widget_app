@@ -12,8 +12,9 @@ import 'package:flutter/material.dart' as material
         TextSelectionThemeData;
 import 'package:flutter/services.dart';
 import 'package:widget_app/generic.dart';
-import 'package:widget_app/utils.dart';
 
+/// Displays a text input.
+/// The text input can be configured to have a prefix, suffix, and a background color.
 class TextInput extends StatefulWidget {
   const TextInput({
     super.key,
@@ -90,6 +91,7 @@ class TextInput extends StatefulWidget {
         smartQuotesType = smartQuotesType ??
             (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled);
 
+  /// The magnifier configuration to use for the text input.
   final TextMagnifierConfiguration? magnifierConfiguration;
 
   /// Controls the text being edited.

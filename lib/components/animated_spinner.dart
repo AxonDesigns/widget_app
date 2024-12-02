@@ -1,7 +1,7 @@
 import 'package:rive/rive.dart';
+import 'package:widget_app/generic.dart';
 
-import '../generic.dart';
-
+/// Displays an animated spinner.
 class AnimatedSpinner extends StatelessWidget {
   const AnimatedSpinner({
     super.key,
@@ -9,7 +9,11 @@ class AnimatedSpinner extends StatelessWidget {
     this.color = Colors.white,
   });
 
+  /// The size of the spinner.
+  /// If null, the size of the spinner is determined by the [GenericTheme.iconSize].
   final double? size;
+
+  /// The color of the spinner.
   final Color color;
 
   @override

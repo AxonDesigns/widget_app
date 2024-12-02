@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+/// A widget that displays its children in a column with a gap between them.
 class GappedColumn extends Flex {
   GappedColumn({
     super.key,
@@ -30,6 +31,7 @@ class GappedColumn extends Flex {
   final double gap;
 }
 
+/// A widget that displays its children in a row with a gap between them.
 class GappedRow extends Flex {
   GappedRow({
     super.key,

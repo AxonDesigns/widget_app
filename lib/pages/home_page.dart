@@ -1,13 +1,6 @@
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
-import 'package:widget_app/components/Card.dart';
-import 'package:widget_app/components/animated_spinner.dart';
-import 'package:widget_app/components/button.dart';
-import 'package:widget_app/components/dark_mode_state.dart';
-import 'package:widget_app/components/file_drop_zone.dart';
 import 'package:widget_app/generic.dart';
-import 'package:widget_app/components/tooltip.dart';
-import 'package:widget_app/utils.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

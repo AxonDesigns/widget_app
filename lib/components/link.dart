@@ -1,7 +1,6 @@
-import 'dart:ui';
-
 import 'package:widget_app/generic.dart';
 
+/// A widget that displays a clickable text.
 class Link extends StatefulWidget {
   const Link({
     super.key,
@@ -9,7 +8,10 @@ class Link extends StatefulWidget {
     this.onTap,
   });
 
+  /// The text to display.
   final String text;
+
+  /// The callback to be called when the link is tapped.
   final VoidCallback? onTap;
 
   @override

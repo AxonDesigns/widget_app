@@ -1,9 +1,8 @@
 import 'dart:ui';
-import 'package:flutter/widgets.dart';
-import 'package:widget_app/components/preferences_provider.dart';
+import 'package:widget_app/generic.dart';
 
-class InheritedThemeModeProvider extends StatefulWidget {
-  const InheritedThemeModeProvider({
+class ThemeModeProvider extends StatefulWidget {
+  const ThemeModeProvider({
     super.key,
     required this.child,
     this.initial,
@@ -15,11 +14,10 @@ class InheritedThemeModeProvider extends StatefulWidget {
   final String storageKey;
 
   @override
-  State<InheritedThemeModeProvider> createState() =>
-      InheritedThemeModeProviderState();
+  State<ThemeModeProvider> createState() => ThemeModeProviderState();
 }
 
-class InheritedThemeModeProviderState extends State<InheritedThemeModeProvider>
+class ThemeModeProviderState extends State<ThemeModeProvider>
     with WidgetsBindingObserver {
   var _isDarkMode = false;
 
@@ -119,24 +117,4 @@ class ThemeModeData {
   final ThemeMode themeMode;
   final bool isDarkMode;
   final Function(ThemeMode mode) setThemeMode;
-}
-
-enum ThemeMode {
-  system,
-  light,
-  dark,
-}
-
-extension ThemeModeStateExtension on BuildContext {
-  ThemeMode get themeMode {
-    return InheritedThemeMode.maybeOf(this)?.themeMode ?? ThemeMode.system;
-  }
-
-  bool get isDarkMode {
-    return InheritedThemeMode.maybeOf(this)?.isDarkMode ?? false;
-  }
-
-  void setThemeMode(ThemeMode mode) {
-    InheritedThemeMode.maybeOf(this)?.setThemeMode(mode);
-  }
 }

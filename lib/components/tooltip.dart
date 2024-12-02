@@ -12,9 +12,16 @@ class Tooltip extends StatefulWidget {
     this.opacityDelay = const Duration(milliseconds: 75),
   });
 
+  /// The child widget to display the tooltip for.
   final Widget child;
+
+  /// The message to display in the tooltip.
   final String message;
+
+  /// How long to wait before showing the tooltip.
   final Duration startDelay;
+
+  /// How long it will take for the tooltip to fade out.
   final Duration opacityDelay;
 
   @override

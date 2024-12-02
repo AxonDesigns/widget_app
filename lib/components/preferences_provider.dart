@@ -1,31 +1,33 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:widget_app/generic.dart';
 
+/// A provides access to the [SharedPreferences] instance<br>
+/// and notifies listeners when the value of a key changed.
 class PreferencesNotifier extends ChangeNotifier {
+  /// Creates a new instance of [PreferencesNotifier].
   PreferencesNotifier(this._preferences);
 
   final SharedPreferencesWithCache _preferences;
 
-  bool? getBool(String key) {
-    return _preferences.getBool(key);
-  }
+  /// Returns [bool] for a given [key], or null if the key is not found.
+  bool? getBool(String key) => _preferences.getBool(key);
 
-  int? getInt(String key) {
-    return _preferences.getInt(key);
-  }
+  /// Returns [int] for a given [key], or null if the key is not found.
+  int? getInt(String key) => _preferences.getInt(key);
 
-  double? getDouble(String key) {
-    return _preferences.getDouble(key);
-  }
+  /// Returns [double] for a given [key], or null if the key is not found.
+  double? getDouble(String key) => _preferences.getDouble(key);
 
-  String? getString(String key) {
-    return _preferences.getString(key);
-  }
+  /// Returns [String] for a given [key], or null if the key is not found.
+  String? getString(String key) => _preferences.getString(key);
 
-  List<String>? getStringList(String key) {
-    return _preferences.getStringList(key);
-  }
+  /// Returns [List] of [String] for a given [key], or null if the key is not found.
+  List<String>? getStringList(String key) => _preferences.getStringList(key);
 
+  /// Sets value for a given [key] and notifies its listeners.
+  /// If the value is a [bool], [int], [double], [String], or [List] of [String],
+  ///
+  /// If the value is not one of the supported types, an [ArgumentError] is thrown.
   Future<void> set<T extends Object>(String key, T value) async {
     if (value is bool) {
       await _preferences.setBool(key, value);
@@ -49,6 +51,7 @@ class PreferencesNotifier extends ChangeNotifier {
   }
 }
 
+/// Provides an instance of [PreferencesNotifier] and listens to its changes.
 class PreferencesProvider extends InheritedNotifier<PreferencesNotifier> {
   const PreferencesProvider({
     super.key,
@@ -56,6 +59,8 @@ class PreferencesProvider extends InheritedNotifier<PreferencesNotifier> {
     required super.child,
   });
 
+  /// Returns the [PreferencesNotifier] instance of the ancestor [PreferencesProvider].
+  /// If there is no ancestor, an error is thrown.
   static PreferencesNotifier of(BuildContext context) {
     final provider =
         context.dependOnInheritedWidgetOfExactType<PreferencesProvider>();
@@ -65,12 +70,19 @@ class PreferencesProvider extends InheritedNotifier<PreferencesNotifier> {
     return provider!.notifier!;
   }
 
+  /// Returns an instance of [PreferencesNotifier] if exists, otherwise null.
   static PreferencesNotifier? maybeOf(BuildContext context) {
     final provider =
         context.dependOnInheritedWidgetOfExactType<PreferencesProvider>();
     return provider?.notifier;
   }
 
+  /// Sets a value for the given [key] in the [SharedPreferences] instance.
+  ///
+  /// If the value is a [bool], [int], [double], [String], or [List<String>],
+  /// the value is set in the [SharedPreferences] instance.
+  ///
+  /// If the value is not one of the supported types, an [ArgumentError] is thrown.
   static Future<void> set<T extends Object>(
     BuildContext context,
     String key,

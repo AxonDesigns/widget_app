@@ -1,7 +1,5 @@
 import 'dart:ui';
-
 import 'package:widget_app/generic.dart';
-import 'package:widget_app/utils.dart';
 
 /// A theme that uses the [GenericThemeData] as its [ThemeData].
 class GenericTheme extends InheritedWidget {
@@ -95,6 +93,7 @@ class GenericThemeData {
     required Color highestSurfaceColor,
     required this.radiusSize,
     required this.baseTextStyle,
+    required this.themeMode,
   }) : _highestSurfaceColor = highestSurfaceColor;
 
   factory GenericThemeData.light() => GenericThemeData(
@@ -103,6 +102,7 @@ class GenericThemeData {
       foregroundColor: const Color.fromARGB(255, 20, 20, 20),
       highestSurfaceColor: const Color.fromARGB(255, 223, 223, 223),
       radiusSize: RadiusSize.small,
+      themeMode: ThemeMode.light,
       baseTextStyle: TextStyle(
         fontFamily: 'Supreme',
         fontSize: isDesktop ? 13.0 : 16.0,
@@ -118,6 +118,7 @@ class GenericThemeData {
       foregroundColor: const Color.fromARGB(255, 255, 255, 255),
       highestSurfaceColor: const Color.fromARGB(255, 45, 45, 45),
       radiusSize: RadiusSize.small,
+      themeMode: ThemeMode.dark,
       baseTextStyle: TextStyle(
         fontFamily: 'Supreme',
         fontSize: isDesktop ? 13.0 : 16.0,
@@ -132,6 +133,7 @@ class GenericThemeData {
   final Color foregroundColor;
   final double radiusSize;
   final TextStyle baseTextStyle;
+  final ThemeMode themeMode;
 
   final Color _highestSurfaceColor;
 
@@ -160,6 +162,7 @@ class GenericThemeData {
       foregroundColor: Color.lerp(a.foregroundColor, b.foregroundColor, t)!,
       baseTextStyle: b.baseTextStyle,
       radiusSize: lerpDouble(a.radiusSize, b.radiusSize, t)!,
+      themeMode: b.themeMode,
       highestSurfaceColor:
           Color.lerp(a._highestSurfaceColor, b._highestSurfaceColor, t)!,
     );

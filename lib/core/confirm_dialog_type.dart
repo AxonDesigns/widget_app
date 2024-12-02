@@ -1,0 +1,4 @@
+enum ConfirmDialogType {
+  info,
+  destructive,
+}

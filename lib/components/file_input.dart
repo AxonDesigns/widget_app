@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+/// Displays a file input, allowing the user to select one or more files.
 class FileInput extends StatefulWidget {
   const FileInput({
     super.key,

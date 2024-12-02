@@ -1,8 +1,7 @@
-import 'package:widget_app/components/dark_mode_state.dart';
 import 'package:widget_app/generic.dart';
-import 'package:widget_app/utils.dart';
 
-enum AxType {
+/// Variant for a given button.
+enum ButtonVariant {
   primary,
   outline,
   ghost,
@@ -10,7 +9,10 @@ enum AxType {
   destructive,
 }
 
+/// A widget that displays a button.
+/// The button can be configured to have a background color, border color, foreground color, etc.
 class Button extends StatefulWidget {
+  /// Custom button constructor.
   const Button.custom({
     super.key,
     this.builder,
@@ -25,8 +27,9 @@ class Button extends StatefulWidget {
     this.disabled = false,
     this.focusNode,
     this.unfocusOnTapOutside = true,
-  }) : type = null;
+  }) : variant = null;
 
+  /// Primary button constructor.
   const Button.primary({
     super.key,
     this.builder,
@@ -38,11 +41,12 @@ class Button extends StatefulWidget {
     this.disabled = false,
     this.focusNode,
     this.unfocusOnTapOutside = true,
-  })  : type = AxType.primary,
+  })  : variant = ButtonVariant.primary,
         foregroundColor = null,
         backgroundColor = null,
         borderColor = null;
 
+  /// Outline button constructor.
   const Button.outline({
     super.key,
     required this.children,
@@ -54,11 +58,12 @@ class Button extends StatefulWidget {
     this.disabled = false,
     this.focusNode,
     this.unfocusOnTapOutside = true,
-  })  : type = AxType.outline,
+  })  : variant = ButtonVariant.outline,
         foregroundColor = null,
         backgroundColor = null,
         borderColor = null;
 
+  /// Ghost button constructor.
   const Button.ghost({
     super.key,
     required this.children,
@@ -70,11 +75,12 @@ class Button extends StatefulWidget {
     this.disabled = false,
     this.focusNode,
     this.unfocusOnTapOutside = true,
-  })  : type = AxType.ghost,
+  })  : variant = ButtonVariant.ghost,
         foregroundColor = null,
         backgroundColor = null,
         borderColor = null;
 
+  /// Glass button constructor.
   const Button.glass({
     super.key,
     required this.children,
@@ -86,11 +92,12 @@ class Button extends StatefulWidget {
     this.disabled = false,
     this.focusNode,
     this.unfocusOnTapOutside = true,
-  })  : type = AxType.glass,
+  })  : variant = ButtonVariant.glass,
         foregroundColor = null,
         backgroundColor = null,
         borderColor = null;
 
+  /// Destructive button constructor.
   const Button.destructive({
     super.key,
     required this.children,
@@ -102,23 +109,50 @@ class Button extends StatefulWidget {
     this.disabled = false,
     this.focusNode,
     this.unfocusOnTapOutside = true,
-  })  : type = AxType.destructive,
+  })  : variant = ButtonVariant.destructive,
         foregroundColor = null,
         backgroundColor = null,
         borderColor = null;
 
+  /// The children of the button.
+  /// The children are displayed in a row.
   final List<Widget> children;
+
+  /// Allows to react to the button state, such as hovered, pressed, and focused.
+  /// If defined, it will be used instead of [children].
   final Widget Function(bool hovered, bool pressed, bool focused)? builder;
-  final AxType? type;
+
+  /// The variant of the button.
+  final ButtonVariant? variant;
+
+  /// The tooltip to display when hovering over the button.
   final String? tooltip;
+
+  /// The callback to be called when the button is tapped.
   final VoidCallback? onPressed;
+
+  /// The background color of the button.
   final WidgetStateColor? backgroundColor;
+
+  /// The border color of the button.
   final WidgetStateColor? borderColor;
+
+  /// The foreground color of the button.
   final WidgetStateColor? foregroundColor;
+
+  /// The gap between the children of the button.
   final double gap;
+
+  /// Whether the button is focusable.
   final bool focusable;
+
+  /// Whether the button is disabled.
   final bool disabled;
+
+  /// Whether the button should unfocus when tapped outside.
   final bool unfocusOnTapOutside;
+
+  /// The focus node of the button, if null, the button will create its own focus node.
   final FocusNode? focusNode;
 
   @override
@@ -176,8 +210,8 @@ class _ButtonState extends State<Button> {
     const hoveredValue = pressedValue * 0.5;
 
     final bgColor = widget.backgroundColor?.resolve(state) ??
-        switch (widget.type) {
-          AxType.primary => WidgetStateColor.resolveWith((state) {
+        switch (widget.variant) {
+          ButtonVariant.primary => WidgetStateColor.resolveWith((state) {
               var colorHSV = HSVColor.fromColor(theme.primaryColor);
 
               if (!enabled) {
@@ -185,16 +219,22 @@ class _ButtonState extends State<Button> {
               }
 
               if (state.contains(WidgetState.pressed)) {
-                return colorHSV.withValue(colorHSV.value - pressedValue).toColor();
+                return colorHSV
+                    .withValue(colorHSV.value - pressedValue)
+                    .toColor();
               }
 
               if (state.contains(WidgetState.hovered)) {
-                return colorHSV.withValue(colorHSV.value - hoveredValue).toColor();
+                return colorHSV
+                    .withValue(colorHSV.value - hoveredValue)
+                    .toColor();
               }
 
               return colorHSV.toColor();
             }).resolve(state),
-          AxType.outline || AxType.ghost => WidgetStateColor.resolveWith((state) {
+          ButtonVariant.outline ||
+          ButtonVariant.ghost =>
+            WidgetStateColor.resolveWith((state) {
               if (!enabled) {
                 return context.theme.foregroundColor.withOpacity(0.0);
               }
@@ -207,7 +247,7 @@ class _ButtonState extends State<Button> {
               }
               return context.theme.foregroundColor.withOpacity(0.0);
             }).resolve(state),
-          AxType.glass => WidgetStateColor.resolveWith((state) {
+          ButtonVariant.glass => WidgetStateColor.resolveWith((state) {
               var color = theme.primaryColor;
 
               if (!enabled) {
@@ -223,9 +263,11 @@ class _ButtonState extends State<Button> {
 
               return color.withOpacity(0.1);
             }).resolve(state),
-          AxType.destructive => WidgetStateColor.resolveWith((state) {
+          ButtonVariant.destructive => WidgetStateColor.resolveWith((state) {
               var colorHSV = HSVColor.fromColor(
-                isDarkMode ? (const Color.fromARGB(255, 165, 36, 36)) : (const Color.fromARGB(255, 223, 56, 56)),
+                isDarkMode
+                    ? (const Color.fromARGB(255, 165, 36, 36))
+                    : (const Color.fromARGB(255, 223, 56, 56)),
               );
 
               if (!enabled) {
@@ -233,11 +275,15 @@ class _ButtonState extends State<Button> {
               }
 
               if (state.contains(WidgetState.pressed)) {
-                return colorHSV.withValue(colorHSV.value - pressedValue).toColor();
+                return colorHSV
+                    .withValue(colorHSV.value - pressedValue)
+                    .toColor();
               }
 
               if (state.contains(WidgetState.hovered)) {
-                return colorHSV.withValue(colorHSV.value - hoveredValue).toColor();
+                return colorHSV
+                    .withValue(colorHSV.value - hoveredValue)
+                    .toColor();
               }
 
               return colorHSV.toColor();
@@ -246,21 +292,22 @@ class _ButtonState extends State<Button> {
         };
 
     final borderColor = widget.borderColor?.resolve(state) ??
-        switch (widget.type) {
-          AxType.outline => WidgetStateColor.resolveWith((state) {
+        switch (widget.variant) {
+          ButtonVariant.outline => WidgetStateColor.resolveWith((state) {
               return context.theme.surfaceColor.highest;
             }).resolve(state),
-          AxType.glass => theme.primaryColor.withOpacity(0.5),
+          ButtonVariant.glass => theme.primaryColor.withOpacity(0.5),
           _ => Colors.transparent,
         };
 
     final fgColor = widget.foregroundColor?.resolve(state) ??
-        switch (widget.type) {
-          AxType.primary => WidgetStateColor.resolveWith((state) {
+        switch (widget.variant) {
+          ButtonVariant.primary => WidgetStateColor.resolveWith((state) {
               return Colors.white;
             }).resolve(state),
-          AxType.glass => theme.primaryColor,
-          AxType.destructive => isDarkMode ? context.theme.foregroundColor : theme.backgroundColor,
+          ButtonVariant.glass => theme.primaryColor,
+          ButtonVariant.destructive =>
+            isDarkMode ? context.theme.foregroundColor : theme.backgroundColor,
           _ => theme.foregroundColor,
         };
 
@@ -310,8 +357,14 @@ class _ButtonState extends State<Button> {
               padding: EdgeInsets.symmetric(
                 /* horizontal: widget.squared ? 7.5 : 12.0,
                 vertical: widget.squared ? 7.5 : 6.0, */
-                horizontal: widget.children.length == 1 && widget.children.first is! Text ? squarePadding : horizontalPadding,
-                vertical: widget.children.length == 1 && widget.children.first is! Text ? squarePadding : verticalPadding,
+                horizontal: widget.children.length == 1 &&
+                        widget.children.first is! Text
+                    ? squarePadding
+                    : horizontalPadding,
+                vertical: widget.children.length == 1 &&
+                        widget.children.first is! Text
+                    ? squarePadding
+                    : verticalPadding,
               ),
               child: IconTheme(
                 data: IconTheme.of(context).copyWith(
@@ -326,8 +379,11 @@ class _ButtonState extends State<Button> {
                           ? Row(
                               mainAxisSize: MainAxisSize.min,
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate((widget.children.length * 2) - 1,
-                                  (index) => index.isEven ? widget.children[index ~/ 2] : SizedBox(width: widget.gap)),
+                              children: List.generate(
+                                  (widget.children.length * 2) - 1,
+                                  (index) => index.isEven
+                                      ? widget.children[index ~/ 2]
+                                      : SizedBox(width: widget.gap)),
                             )
                           : const SizedBox.shrink()),
                 ),

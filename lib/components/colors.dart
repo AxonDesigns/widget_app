@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+/// List of commonly used colors.
 abstract class Colors {
   static const Color transparent = Color(0x00000000);
 
