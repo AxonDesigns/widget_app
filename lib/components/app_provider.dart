@@ -1,27 +1,30 @@
 import 'package:widget_app/components/dark_mode_state.dart';
 import 'package:widget_app/components/generic_scroll_behavior.dart';
+import 'package:widget_app/components/preferences_provider.dart';
 import 'package:widget_app/generic.dart';
 
 class AppProvider extends StatelessWidget {
   const AppProvider({
     super.key,
     required this.child,
-    required this.initialThemeMode,
   });
 
   final Widget child;
-  final ThemeMode initialThemeMode;
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = PreferencesProvider.of(context).getInt('theme_mode') ?? 0;
+
     return InheritedThemeModeProvider(
-      initial: initialThemeMode,
+      initial: ThemeMode.values[themeMode],
       storageKey: 'theme_mode',
       // The builder is needed, because we need a new context that has access to the theme mode state.
       child: Builder(
         builder: (context) {
           return AnimatedGenericTheme(
-            data: context.isDarkMode ? GenericThemeData.dark() : GenericThemeData.light(),
+            data: context.isDarkMode
+                ? GenericThemeData.dark()
+                : GenericThemeData.light(),
             child: Builder(
               builder: (context) {
                 return DefaultTextStyle(

@@ -1,7 +1,6 @@
 import 'dart:ui';
-
 import 'package:flutter/widgets.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:widget_app/components/preferences_provider.dart';
 
 class InheritedThemeModeProvider extends StatefulWidget {
   const InheritedThemeModeProvider({
@@ -71,8 +70,9 @@ class InheritedThemeModeProviderState extends State<InheritedThemeModeProvider>
             _themeMode = mode;
             _updateIsDarkMode();
           });
-          SharedPreferences.getInstance().then(
-            (value) => value.setInt(widget.storageKey, _themeMode?.index ?? 0),
+          PreferencesProvider.maybeOf(context)?.set(
+            widget.storageKey,
+            mode.index,
           );
         },
       ),
