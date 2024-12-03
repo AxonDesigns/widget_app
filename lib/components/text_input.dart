@@ -595,13 +595,15 @@ class _TextInputState extends State<TextInput>
         return context.theme.foregroundColor.withOpacity(0.0);
       }
       if (state.contains(WidgetState.hovered)) {
-        return context.theme.foregroundColor.withOpacity(0.1);
+        return context.theme.foregroundColor
+            .withOpacity(context.isDarkMode ? 0.1 : 0.2);
       }
-      return context.theme.foregroundColor.withOpacity(0.1);
+      return context.theme.foregroundColor
+          .withOpacity(context.isDarkMode ? 0.1 : 0.2);
     }).resolve(state);
 
     return AnimatedContainer(
-      duration: Duration(milliseconds: pressed || hovered ? 50 : 200),
+      duration: Duration(milliseconds: pressed || hovered ? 0 : 200),
       curve: Curves.fastEaseInToSlowEaseOut,
       decoration: BoxDecoration(
         color: bgColor,

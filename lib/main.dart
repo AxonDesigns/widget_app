@@ -1,6 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:widget_app/components/app_provider.dart';
-import 'package:widget_app/components/preferences_provider.dart';
 import 'package:widget_app/router.dart';
 import 'generic.dart';
 
@@ -11,7 +10,7 @@ Future<void> main() async {
   );
 
   runApp(PreferencesProvider(
-    notifier: PreferencesNotifier(preferences),
+    preferences: preferences,
     child: const MainApp(),
   ));
 }

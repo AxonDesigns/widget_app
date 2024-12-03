@@ -8,7 +8,7 @@ class GenericPage<T> extends Page<T> {
     this.maintainState = true,
     this.fullscreenDialog = true,
     this.allowSnapshotting = true,
-    this.duration = const Duration(milliseconds: 150),
+    this.duration,
     this.curve = Curves.fastEaseInToSlowEaseOut,
   });
 
@@ -25,7 +25,7 @@ class GenericPage<T> extends Page<T> {
       Curve curve,
       Widget child)? transitionBuilder;
 
-  final Duration duration;
+  final Duration? duration;
 
   final Curve curve;
 

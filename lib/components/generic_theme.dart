@@ -97,15 +97,14 @@ class GenericThemeData {
   }) : _highestSurfaceColor = highestSurfaceColor;
 
   factory GenericThemeData.light() => GenericThemeData(
-      primaryColor: const Color.fromARGB(255, 35, 145, 255),
+      primaryColor: const Color.fromARGB(255, 0, 106, 212),
       backgroundColor: Colors.white,
       foregroundColor: const Color.fromARGB(255, 20, 20, 20),
       highestSurfaceColor: const Color.fromARGB(255, 223, 223, 223),
       radiusSize: RadiusSize.small,
       themeMode: ThemeMode.light,
       baseTextStyle: TextStyle(
-        fontFamily: 'Supreme',
-        fontSize: isDesktop ? 13.0 : 16.0,
+        fontSize: isDesktop ? 12.0 : 16.0,
         color: Colors.black,
         fontVariations: const [
           FontVariation.weight(400),
@@ -120,8 +119,7 @@ class GenericThemeData {
       radiusSize: RadiusSize.small,
       themeMode: ThemeMode.dark,
       baseTextStyle: TextStyle(
-        fontFamily: 'Supreme',
-        fontSize: isDesktop ? 13.0 : 16.0,
+        fontSize: isDesktop ? 12.0 : 16.0,
         color: Colors.white,
         fontVariations: const [
           FontVariation.weight(400),

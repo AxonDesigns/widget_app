@@ -43,3 +43,9 @@ flutter:
           weight: 700
         - asset: assets/fonts/Supreme-VariableItalic.ttf
           style: italic
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Variable.ttf
+          weight: 700
+        - asset: assets/fonts/Inter-VariableItalic.ttf
+          style: italic

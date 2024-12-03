@@ -35,7 +35,10 @@ class AppProvider extends StatelessWidget {
                     ),
                     child: ScrollConfiguration(
                       behavior: const GenericScrollBehavior(),
-                      child: child,
+                      child: Container(
+                        color: context.theme.backgroundColor,
+                        child: child,
+                      ),
                     ),
                   ),
                 );

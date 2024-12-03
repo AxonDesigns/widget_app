@@ -9,8 +9,6 @@ var router = GoRouter(
       path: '/',
       pageBuilder: (context, state) => GenericPage(
         key: state.pageKey,
-        duration: const Duration(milliseconds: 500),
-        transitionBuilder: _transition,
         builder: (context) => const HomePage(),
       ),
     ),
@@ -18,8 +16,6 @@ var router = GoRouter(
       path: '/about',
       pageBuilder: (context, state) => GenericPage(
         key: state.pageKey,
-        duration: const Duration(milliseconds: 500),
-        transitionBuilder: _transition,
         builder: (context) => const AboutPage(),
       ),
     ),

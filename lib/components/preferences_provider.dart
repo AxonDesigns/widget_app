@@ -5,7 +5,9 @@ import 'package:widget_app/generic.dart';
 /// and notifies listeners when the value of a key changed.
 class PreferencesNotifier extends ChangeNotifier {
   /// Creates a new instance of [PreferencesNotifier].
-  PreferencesNotifier(this._preferences);
+  PreferencesNotifier({
+    required SharedPreferencesWithCache preferences,
+  }) : _preferences = preferences;
 
   final SharedPreferencesWithCache _preferences;
 
@@ -53,11 +55,11 @@ class PreferencesNotifier extends ChangeNotifier {
 
 /// Provides an instance of [PreferencesNotifier] and listens to its changes.
 class PreferencesProvider extends InheritedNotifier<PreferencesNotifier> {
-  const PreferencesProvider({
+  PreferencesProvider({
     super.key,
-    required super.notifier,
+    required SharedPreferencesWithCache preferences,
     required super.child,
-  });
+  }) : super(notifier: PreferencesNotifier(preferences: preferences));
 
   /// Returns the [PreferencesNotifier] instance of the ancestor [PreferencesProvider].
   /// If there is no ancestor, an error is thrown.

@@ -2,12 +2,22 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../generic.dart';
 
+enum TooltipPosition {
+  follow,
+  left,
+  right,
+  top,
+  bottom,
+}
+
 /// Displays a tooltip when hovering over the child widget.
 class Tooltip extends StatefulWidget {
   const Tooltip({
     super.key,
     required this.child,
     required this.message,
+    this.mobilePosition = TooltipPosition.top,
+    this.desktopPosition = TooltipPosition.follow,
     this.startDelay = const Duration(milliseconds: 500),
     this.opacityDelay = const Duration(milliseconds: 75),
   });
@@ -23,6 +33,14 @@ class Tooltip extends StatefulWidget {
 
   /// How long it will take for the tooltip to fade out.
   final Duration opacityDelay;
+
+  /// Where the tooltip will be located around the target on mobile devices.
+  /// if the tooltip doesn't fit in the defined position,
+  /// it will try to display in the opposite one.
+  final TooltipPosition mobilePosition;
+
+  /// Where the tooltip will be located around the target on desktop.
+  final TooltipPosition desktopPosition;
 
   @override
   State<Tooltip> createState() => _TooltipState();

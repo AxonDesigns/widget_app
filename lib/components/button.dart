@@ -240,10 +240,12 @@ class _ButtonState extends State<Button> {
               }
 
               if (state.contains(WidgetState.pressed)) {
-                return context.theme.foregroundColor.withOpacity(0.05);
+                return context.theme.foregroundColor
+                    .withOpacity(context.isDarkMode ? 0.05 : 0.15);
               }
               if (state.contains(WidgetState.hovered)) {
-                return context.theme.foregroundColor.withOpacity(0.1);
+                return context.theme.foregroundColor
+                    .withOpacity(context.isDarkMode ? 0.1 : 0.2);
               }
               return context.theme.foregroundColor.withOpacity(0.0);
             }).resolve(state),
@@ -294,7 +296,11 @@ class _ButtonState extends State<Button> {
     final borderColor = widget.borderColor?.resolve(state) ??
         switch (widget.variant) {
           ButtonVariant.outline => WidgetStateColor.resolveWith((state) {
-              return context.theme.surfaceColor.highest;
+              if (state.contains(WidgetState.hovered)) {
+                return context.theme.foregroundColor.withOpacity(0.0);
+              }
+              return context.theme.foregroundColor
+                  .withOpacity(context.isDarkMode ? 0.1 : 0.2);
             }).resolve(state),
           ButtonVariant.glass => theme.primaryColor.withOpacity(0.5),
           _ => Colors.transparent,
@@ -340,7 +346,7 @@ class _ButtonState extends State<Button> {
         child: Opacity(
           opacity: enabled ? 1.0 : 0.65,
           child: AnimatedContainer(
-            duration: Duration(milliseconds: pressed || hovered ? 50 : 200),
+            duration: Duration(milliseconds: pressed || hovered ? 0 : 200),
             curve: Curves.fastEaseInToSlowEaseOut,
             decoration: BoxDecoration(
               color: bgColor,

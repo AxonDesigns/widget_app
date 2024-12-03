@@ -63,12 +63,9 @@ class ConfirmDialog extends StatelessWidget {
                     Text(
                       title,
                       style: const TextStyle(
-                        fontSize: 18.0,
-                        fontFamily: "GeneralSans",
-                        fontVariations: [
-                          FontVariation.weight(600),
-                        ],
-                      ),
+                          fontSize: 18.0,
+                          fontFamily: "Segoe UI",
+                          fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 8.0),
                     Text(
