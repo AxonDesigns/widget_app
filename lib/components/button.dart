@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:widget_app/generic.dart';
 
 /// Variant for a given button.
@@ -27,6 +28,8 @@ class Button extends StatefulWidget {
     this.disabled = false,
     this.focusNode,
     this.unfocusOnTapOutside = true,
+    this.borderRadius,
+    this.padding,
   }) : variant = null;
 
   /// Primary button constructor.
@@ -41,6 +44,8 @@ class Button extends StatefulWidget {
     this.disabled = false,
     this.focusNode,
     this.unfocusOnTapOutside = true,
+    this.borderRadius,
+    this.padding,
   })  : variant = ButtonVariant.primary,
         foregroundColor = null,
         backgroundColor = null,
@@ -58,6 +63,8 @@ class Button extends StatefulWidget {
     this.disabled = false,
     this.focusNode,
     this.unfocusOnTapOutside = true,
+    this.borderRadius,
+    this.padding,
   })  : variant = ButtonVariant.outline,
         foregroundColor = null,
         backgroundColor = null,
@@ -75,6 +82,8 @@ class Button extends StatefulWidget {
     this.disabled = false,
     this.focusNode,
     this.unfocusOnTapOutside = true,
+    this.borderRadius,
+    this.padding,
   })  : variant = ButtonVariant.ghost,
         foregroundColor = null,
         backgroundColor = null,
@@ -92,6 +101,8 @@ class Button extends StatefulWidget {
     this.disabled = false,
     this.focusNode,
     this.unfocusOnTapOutside = true,
+    this.borderRadius,
+    this.padding,
   })  : variant = ButtonVariant.glass,
         foregroundColor = null,
         backgroundColor = null,
@@ -109,6 +120,8 @@ class Button extends StatefulWidget {
     this.disabled = false,
     this.focusNode,
     this.unfocusOnTapOutside = true,
+    this.borderRadius,
+    this.padding,
   })  : variant = ButtonVariant.destructive,
         foregroundColor = null,
         backgroundColor = null,
@@ -155,6 +168,12 @@ class Button extends StatefulWidget {
   /// The focus node of the button, if null, the button will create its own focus node.
   final FocusNode? focusNode;
 
+  /// The border radius of the button.
+  /// If null, the button will use the default border radius.
+  final double? borderRadius;
+
+  final EdgeInsetsGeometry? padding;
+
   @override
   State<Button> createState() => _ButtonState();
 }
@@ -163,8 +182,22 @@ class _ButtonState extends State<Button> {
   var hovered = false;
   var pressed = false;
   var focused = false;
+  var _wasClicked = false;
   bool get enabled => widget.onPressed != null && !widget.disabled;
-  late var _focusNode = widget.focusNode ?? FocusNode();
+  late FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = widget.focusNode ?? FocusNode();
+    _setUpFocusNode(_focusNode);
+  }
+
+  @override
+  void dispose() {
+    _disposeFocusNode(_focusNode);
+    super.dispose();
+  }
 
   @override
   void didUpdateWidget(covariant Button oldWidget) {
@@ -173,6 +206,51 @@ class _ButtonState extends State<Button> {
       _focusNode.dispose();
       _focusNode = widget.focusNode!;
     }
+    if (widget.focusNode == null && oldWidget.focusNode != null) {
+      oldWidget.focusNode!.dispose();
+      _focusNode = FocusNode();
+    }
+
+    if (widget.focusable != oldWidget.focusable) {
+      _focusNode.canRequestFocus = widget.focusable;
+      _focusNode.skipTraversal = !widget.focusable;
+    }
+  }
+
+  void _onFocusChange() {
+    if (!_wasClicked && _focusNode.hasFocus) {
+      setState(() {
+        focused = true;
+      });
+    }
+
+    if (!_focusNode.hasFocus) {
+      setState(() {
+        focused = false;
+      });
+    }
+
+    _wasClicked = false;
+  }
+
+  void _setUpFocusNode(FocusNode node) {
+    node.addListener(_onFocusChange);
+
+    _focusNode.canRequestFocus = widget.focusable;
+    _focusNode.skipTraversal = !widget.focusable;
+    node.onKeyEvent = (node, event) {
+      if (event is KeyDownEvent &&
+          event.logicalKey == LogicalKeyboardKey.escape) {
+        node.unfocus();
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored;
+    };
+  }
+
+  void _disposeFocusNode(FocusNode node) {
+    node.removeListener(_onFocusChange);
+    node.dispose();
   }
 
   @override
@@ -238,7 +316,6 @@ class _ButtonState extends State<Button> {
               if (!enabled) {
                 return context.theme.foregroundColor.withOpacity(0.0);
               }
-
               if (state.contains(WidgetState.pressed)) {
                 return context.theme.foregroundColor
                     .withOpacity(context.isDarkMode ? 0.05 : 0.15);
@@ -295,14 +372,38 @@ class _ButtonState extends State<Button> {
 
     final borderColor = widget.borderColor?.resolve(state) ??
         switch (widget.variant) {
+          ButtonVariant.primary ||
+          ButtonVariant.destructive =>
+            WidgetStateColor.resolveWith((state) {
+              if (state.contains(WidgetState.focused)) {
+                return Colors.white;
+              }
+              return context.theme.foregroundColor
+                  .withOpacity(context.isDarkMode ? 0.1 : 0.2);
+            }).resolve(state),
+          ButtonVariant.ghost => WidgetStateColor.resolveWith((state) {
+              if (state.contains(WidgetState.focused)) {
+                return context.theme.foregroundColor;
+              }
+              return context.theme.foregroundColor.withOpacity(0.0);
+            }).resolve(state),
           ButtonVariant.outline => WidgetStateColor.resolveWith((state) {
+              if (state.contains(WidgetState.focused)) {
+                return context.theme.foregroundColor.withOpacity(0.75);
+              }
+
               if (state.contains(WidgetState.hovered)) {
                 return context.theme.foregroundColor.withOpacity(0.0);
               }
               return context.theme.foregroundColor
                   .withOpacity(context.isDarkMode ? 0.1 : 0.2);
             }).resolve(state),
-          ButtonVariant.glass => theme.primaryColor.withOpacity(0.5),
+          ButtonVariant.glass => WidgetStateColor.resolveWith((state) {
+              if (state.contains(WidgetState.focused)) {
+                return theme.primaryColor.withOpacity(1.0);
+              }
+              return theme.primaryColor.withOpacity(0.5);
+            }).resolve(state),
           _ => Colors.transparent,
         };
 
@@ -323,9 +424,24 @@ class _ButtonState extends State<Button> {
 
     return FocusableActionDetector(
       focusNode: _focusNode,
-      onFocusChange: (value) => setState(() => focused = value),
+      enabled: enabled,
+      descendantsAreFocusable: false,
+      descendantsAreTraversable: false,
       onShowHoverHighlight: (value) => setState(() => hovered = value),
       mouseCursor: SystemMouseCursors.basic,
+      shortcuts: {
+        LogicalKeySet(LogicalKeyboardKey.enter): const ButtonActivateIntent(),
+      },
+      actions: {
+        ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(
+          onInvoke: (intent) {
+            if (widget.onPressed != null) {
+              widget.onPressed!.call();
+            }
+            return null;
+          },
+        ),
+      },
       child: GestureDetector(
         behavior: HitTestBehavior.deferToChild,
         onTapDown: (details) => setState(() => pressed = true),
@@ -341,6 +457,7 @@ class _ButtonState extends State<Button> {
         onTap: !enabled
             ? null
             : () {
+                _wasClicked = true;
                 widget.onPressed!.call();
               },
         child: Opacity(
@@ -351,7 +468,7 @@ class _ButtonState extends State<Button> {
             decoration: BoxDecoration(
               color: bgColor,
               borderRadius: BorderRadius.circular(
-                context.theme.radiusSize,
+                widget.borderRadius ?? context.theme.radiusSize,
               ),
               border: Border.all(
                 strokeAlign: BorderSide.strokeAlignInside,
@@ -363,14 +480,18 @@ class _ButtonState extends State<Button> {
               padding: EdgeInsets.symmetric(
                 /* horizontal: widget.squared ? 7.5 : 12.0,
                 vertical: widget.squared ? 7.5 : 6.0, */
-                horizontal: widget.children.length == 1 &&
-                        widget.children.first is! Text
-                    ? squarePadding
-                    : horizontalPadding,
-                vertical: widget.children.length == 1 &&
-                        widget.children.first is! Text
-                    ? squarePadding
-                    : verticalPadding,
+                horizontal: widget.padding != null
+                    ? widget.padding!.horizontal
+                    : widget.children.length == 1 &&
+                            widget.children.first is! Text
+                        ? squarePadding
+                        : horizontalPadding,
+                vertical: widget.padding != null
+                    ? widget.padding!.vertical
+                    : widget.children.length == 1 &&
+                            widget.children.first is! Text
+                        ? squarePadding
+                        : verticalPadding,
               ),
               child: IconTheme(
                 data: IconTheme.of(context).copyWith(

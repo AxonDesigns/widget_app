@@ -1,27 +1,35 @@
+import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:widget_app/components/app_provider.dart';
+import 'package:widget_app/components/window_title_bar.dart';
 import 'package:widget_app/router.dart';
-import 'package:window_manager_plus/window_manager_plus.dart';
+import 'package:window_manager/window_manager.dart';
 import 'generic.dart';
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await WindowManagerPlus.ensureInitialized(args.isEmpty ? 0 : int.tryParse(args[0]) ?? 0);
+  GoRouter.optionURLReflectsImperativeAPIs = true;
 
-  // Now you can use the plugin, such as WindowManagerPlus.current
-  WindowOptions windowOptions = const WindowOptions(
-    size: Size(800, 600),
-    center: true,
-    backgroundColor: Colors.transparent,
-    titleBarStyle: TitleBarStyle.hidden,
-    title: "Widget App",
-  );
+  if (isDesktop && !kIsWeb) {
+    await windowManager.ensureInitialized();
 
-  WindowManagerPlus.current.waitUntilReadyToShow(windowOptions, () async {
-    await WindowManagerPlus.current.show();
-    await WindowManagerPlus.current.focus();
-  });
+    const windowOptions = WindowOptions(
+      size: Size(1067, 600),
+      center: true,
+      backgroundColor: Colors.transparent,
+      titleBarStyle: TitleBarStyle.hidden,
+      title: "Widget App",
+      windowButtonVisibility: false,
+      minimumSize: Size(240, 240),
+    );
+
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
 
   final preferences = await SharedPreferencesWithCache.create(
     cacheOptions: const SharedPreferencesWithCacheOptions(allowList: null),
@@ -47,6 +55,7 @@ class MainApp extends StatelessWidget {
           builder: (context) {
             return Column(
               children: [
+                if (isDesktop && !kIsWeb) const WindowTitleBar(),
                 Expanded(child: child!),
               ],
             );

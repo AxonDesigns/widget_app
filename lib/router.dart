@@ -4,9 +4,11 @@ import 'package:widget_app/pages/about_page.dart';
 import 'package:widget_app/pages/home_page.dart';
 
 var router = GoRouter(
+  initialLocation: "/",
   routes: [
     GoRoute(
       path: '/',
+      name: "home",
       pageBuilder: (context, state) => GenericPage(
         key: state.pageKey,
         builder: (context) => const HomePage(),
@@ -14,6 +16,7 @@ var router = GoRouter(
     ),
     GoRoute(
       path: '/about',
+      name: "about",
       pageBuilder: (context, state) => GenericPage(
         key: state.pageKey,
         builder: (context) => const AboutPage(),

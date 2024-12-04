@@ -528,7 +528,7 @@ class _TextInputState extends State<TextInput>
   var pressed = false;
   var focused = false;
   bool get enabled => true;
-  FocusNode? _focusNode;
+  late FocusNode _focusNode;
 
   @override
   bool get wantKeepAlive => true;
@@ -537,12 +537,13 @@ class _TextInputState extends State<TextInput>
   void initState() {
     super.initState();
     _focusNode = widget.focusNode ?? FocusNode();
-    _focusNode!.addListener(_handleFocusChange);
+    _focusNode.addListener(_handleFocusChange);
   }
 
   @override
   void dispose() {
-    _focusNode?.dispose();
+    _focusNode.removeListener(_handleFocusChange);
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -550,78 +551,65 @@ class _TextInputState extends State<TextInput>
   void didUpdateWidget(covariant TextInput oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.focusNode != null && oldWidget.focusNode == null) {
-      _focusNode?.dispose();
+      _disposeFocusNode(_focusNode);
       _focusNode = widget.focusNode!;
-      _focusNode!.addListener(_handleFocusChange);
+      _setUpFocusNode(_focusNode);
     }
 
     if (widget.focusNode == null && oldWidget.focusNode != null) {
-      _focusNode?.dispose();
+      _disposeFocusNode(oldWidget.focusNode!);
       _focusNode = FocusNode();
-      _focusNode!.addListener(_handleFocusChange);
+      _setUpFocusNode(_focusNode);
     }
   }
 
   void _handleFocusChange() {
     setState(() {
-      focused = _focusNode?.hasFocus ?? false;
+      focused = _focusNode.hasFocus;
     });
+    _focusNode.onKeyEvent = (node, event) {
+      if (event is KeyDownEvent &&
+          event.logicalKey == LogicalKeyboardKey.escape) {
+        node.unfocus();
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored;
+    };
+  }
+
+  void _setUpFocusNode(FocusNode node) {
+    node.addListener(_handleFocusChange);
+    node.onKeyEvent = (node, event) {
+      if (event is KeyDownEvent &&
+          event.logicalKey == LogicalKeyboardKey.escape) {
+        node.unfocus();
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored;
+    };
+  }
+
+  void _disposeFocusNode(FocusNode node) {
+    node.removeListener(_handleFocusChange);
+    node.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final state = {
-      if (hovered) WidgetState.hovered,
-      if (pressed) WidgetState.pressed,
-      if (focused) WidgetState.focused,
-    };
 
-    final bgColor = widget.backgroundColor?.resolve(state) ??
-        WidgetStateColor.resolveWith((state) {
-          if (state.contains(WidgetState.focused)) {
-            return context.theme.foregroundColor.withOpacity(0.1);
-          }
-
-          if (state.contains(WidgetState.hovered)) {
-            return context.theme.foregroundColor.withOpacity(0.05);
-          }
-
-          return context.theme.foregroundColor.withOpacity(0.01);
-        }).resolve(state);
-
-    final borderColor = WidgetStateColor.resolveWith((state) {
-      if (state.contains(WidgetState.focused)) {
-        return context.theme.foregroundColor.withOpacity(0.0);
-      }
-      if (state.contains(WidgetState.hovered)) {
-        return context.theme.foregroundColor
-            .withOpacity(context.isDarkMode ? 0.1 : 0.2);
-      }
-      return context.theme.foregroundColor
-          .withOpacity(context.isDarkMode ? 0.1 : 0.2);
-    }).resolve(state);
-
-    return AnimatedContainer(
-      duration: Duration(milliseconds: pressed || hovered ? 0 : 200),
-      curve: Curves.fastEaseInToSlowEaseOut,
-      decoration: BoxDecoration(
-        color: bgColor,
-        border: Border.all(
-          color: borderColor,
-          strokeAlign: BorderSide.strokeAlignInside,
-        ),
-        borderRadius: BorderRadius.circular(
-          context.theme.radiusSize,
-        ),
-      ),
+    return InputContainer(
+      hovered: hovered,
+      pressed: pressed,
+      focused: focused,
+      padding: EdgeInsets.zero,
       child: MouseRegion(
         onEnter: (event) => setState(() => hovered = true),
         onExit: (event) => setState(() => hovered = false),
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTapDown: (_) {
-            if (_focusNode?.hasFocus ?? true) return;
+            if (_focusNode.hasFocus) return;
             FocusScope.of(context).requestFocus(_focusNode);
           },
           child: _buildMaterialTextField(context),
@@ -676,8 +664,8 @@ class _TextInputState extends State<TextInput>
                     filled: false,
                     border: material.InputBorder.none,
                     contentPadding: EdgeInsets.only(
-                      bottom: isDesktop ? 10.0 : 12.0,
-                      top: isDesktop ? 10.0 : 12.0,
+                      bottom: isDesktop ? 12.0 : 13.0,
+                      top: isDesktop ? 12.0 : 13.0,
                       left: widget.prefix == null
                           ? isDesktop
                               ? 10.0

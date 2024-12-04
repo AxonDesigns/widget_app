@@ -369,7 +369,7 @@ packages:
     source: hosted
     version: "0.4.13"
   screen_retriever:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: screen_retriever
       sha256: "570dbc8e4f70bac451e0efc9c9bb19fa2d6799a11e6ef04f946d7886d2e23d0c"
@@ -605,14 +605,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.5"
-  window_manager_plus:
+  window_manager:
     dependency: "direct main"
     description:
-      name: window_manager_plus
-      sha256: c3a7e030fb7f61a0e04db8c49b24c43affaaf5fbff5da375d5bb822a7e01b9f0
+      name: window_manager
+      sha256: "732896e1416297c63c9e3fb95aea72d0355f61390263982a47fd519169dc5059"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.5"
+    version: "0.4.3"
   xdg_directories:
     dependency: transitive
     description:

@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:screen_retriever/screen_retriever.dart';
+import 'package:window_manager/window_manager.dart';
 import '../generic.dart';
 
 enum TooltipPosition {
@@ -49,43 +51,48 @@ class Tooltip extends StatefulWidget {
 class _TooltipState extends State<Tooltip> {
   bool _showing = false;
   OverlayEntry? _overlayEntry;
-  Offset _enterPosition = Offset.zero;
   Timer? _startDelayTimer;
   Timer? _hideTimer;
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onHover: (event) {
-        if (_showing) return;
-        _enterPosition = event.position;
-      },
-      onEnter: (event) {
-        if (_startDelayTimer != null && _startDelayTimer!.isActive) {
-          _startDelayTimer!.cancel();
-        }
-
-        _startDelayTimer = Timer(widget.startDelay, () {
-          _showTooltip(context, widget.message);
-        });
-      },
-      onExit: (event) {
-        if (_startDelayTimer != null && _startDelayTimer!.isActive) {
-          _startDelayTimer!.cancel();
-        }
-
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (event) {
         _hideTooltip();
       },
-      opaque: false,
-      child: widget.child,
+      child: MouseRegion(
+        onEnter: (event) {
+          if (_startDelayTimer != null && _startDelayTimer!.isActive) {
+            _startDelayTimer!.cancel();
+          }
+
+          _startDelayTimer = Timer(widget.startDelay, () {
+            _showTooltip(context, widget.message);
+          });
+        },
+        onExit: (event) {
+          if (_startDelayTimer != null && _startDelayTimer!.isActive) {
+            _startDelayTimer!.cancel();
+          }
+
+          _hideTooltip();
+        },
+        opaque: false,
+        child: widget.child,
+      ),
     );
   }
 
   void _showTooltip(BuildContext context, String message) {
     if (kIsWeb) return;
-    if (_overlayEntry == null) {
-      _createOverlayEntry(_enterPosition);
+
+    if (_overlayEntry != null) {
+      _overlayEntry!.remove();
+      _overlayEntry = null;
     }
+
+    _createOverlayEntry();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_overlayEntry == null) return;
@@ -109,13 +116,17 @@ class _TooltipState extends State<Tooltip> {
     });
   }
 
-  void _createOverlayEntry(Offset startPosition) {
+  void _createOverlayEntry() async {
     final overlayState = Overlay.of(context);
+    final mousePos = await screenRetriever.getCursorScreenPoint();
+    final window = await windowManager.getPosition();
+    final isMaximized = await windowManager.isMaximized();
+
     _overlayEntry = OverlayEntry(
       builder: (context) => _TooltipOverlay(
         message: widget.message,
         showing: _showing,
-        startPosition: startPosition,
+        startPosition: mousePos - window.translate(8, isMaximized ? 8 : 0),
         opacityDelay: widget.opacityDelay,
       ),
     );
@@ -148,7 +159,10 @@ class _TooltipOverlayState extends State<_TooltipOverlay> {
   @override
   void initState() {
     super.initState();
-    _position = widget.startPosition;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      RenderBox box = context.findRenderObject() as RenderBox;
+      _position = box.globalToLocal(widget.startPosition);
+    });
   }
 
   @override
@@ -157,7 +171,7 @@ class _TooltipOverlayState extends State<_TooltipOverlay> {
       opaque: false,
       onHover: (event) {
         setState(() {
-          _position = event.position;
+          _position = event.localPosition;
         });
       },
       child: Stack(

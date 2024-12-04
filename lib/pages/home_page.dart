@@ -1,7 +1,6 @@
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 import 'package:widget_app/generic.dart';
-import 'package:window_manager_plus/window_manager_plus.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -55,13 +54,6 @@ class _HomePageState extends State<HomePage> {
                   mainAxisSize: MainAxisSize.min,
                   gap: 16.0,
                   children: [
-                    const TextInput(),
-                    const TextInput(
-                      prefix: Padding(
-                        padding: EdgeInsets.all(10.0),
-                        child: Icon(LucideIcons.search),
-                      ),
-                    ),
                     TextInput(
                       controller: _controller,
                       obscureText: _obscureText,
@@ -81,12 +73,27 @@ class _HomePageState extends State<HomePage> {
                           },
                           children: [
                             Icon(
-                              _obscureText ? LucideIcons.eye : LucideIcons.eye_off,
+                              _obscureText
+                                  ? LucideIcons.eye
+                                  : LucideIcons.eye_off,
                             )
                           ],
                         ),
                       ),
                     ),
+                    GappedColumn(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      gap: 4.0,
+                      children: const [
+                        Text("Text Area"),
+                        TextInput(
+                          maxLines: null,
+                          minLines: 4,
+                        ),
+                      ],
+                    ),
+                    const SelectInput(),
                     Tooltip(
                       message: "Example tooltip",
                       child: Button.primary(
@@ -95,7 +102,17 @@ class _HomePageState extends State<HomePage> {
                         },
                         children: const [
                           AnimatedSpinner(size: 16),
-                          Text("Go to About Page"),
+                          Text("About Page"),
+                        ],
+                      ),
+                    ),
+                    Tooltip(
+                      message: "This button does nothing",
+                      child: Button.primary(
+                        onPressed: () async {},
+                        children: const [
+                          AnimatedSpinner(size: 16),
+                          Text("Do nothing"),
                         ],
                       ),
                     ),
@@ -113,7 +130,8 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () async {
                         final result = await context.showConfirmDialog(
                           title: "Are you absolutely sure?",
-                          content: "This will delete all your data from our servers, "
+                          content:
+                              "This will delete all your data from our servers, "
                               "and you will not be able to recover it.",
                           type: ConfirmDialogType.destructive,
                         );
@@ -121,28 +139,6 @@ class _HomePageState extends State<HomePage> {
                         print(result);
                       },
                       children: const [Text("Open Confirm Dialog")],
-                    ),
-                    Button.glass(
-                      onPressed: () async {
-                        final newWindow = await WindowManagerPlus.createWindow(['second_window_id']);
-                        if (newWindow != null) {
-                          var windowOptions = const WindowOptions(
-                            size: Size(800, 600),
-                            center: true,
-                            backgroundColor: Colors.transparent,
-                            titleBarStyle: TitleBarStyle.normal,
-                            title: "Widget App",
-                          );
-                          newWindow.waitUntilReadyToShow(windowOptions, () async {
-                            newWindow.setResizable(false);
-                            newWindow.setAlignment(Alignment.center);
-                            newWindow.setSkipTaskbar(true);
-                            newWindow.setSize(const Size(800, 600));
-                            print('New Created Window: $newWindow');
-                          });
-                        }
-                      },
-                      children: const [Text("Open Window")],
                     ),
                     Button.outline(
                       onPressed: () async {
