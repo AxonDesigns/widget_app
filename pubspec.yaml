@@ -7,7 +7,6 @@ environment:
   sdk: ^3.5.1
 
 dependencies:
-  desktop_multi_window: ^0.2.0
   dotted_border: ^2.1.0
   file_picker: ^8.1.4
   flutter:
@@ -18,8 +17,7 @@ dependencies:
   rive: ^0.13.18
   shared_preferences: ^2.3.3
   super_drag_and_drop: ^0.8.24
-  visibility_detector: ^0.4.0+2
-  window_manager: ^0.4.2
+  window_manager_plus: ^1.0.5
 
 dev_dependencies:
   flutter_test:

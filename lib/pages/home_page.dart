@@ -1,6 +1,7 @@
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 import 'package:widget_app/generic.dart';
+import 'package:window_manager_plus/window_manager_plus.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -80,9 +81,7 @@ class _HomePageState extends State<HomePage> {
                           },
                           children: [
                             Icon(
-                              _obscureText
-                                  ? LucideIcons.eye
-                                  : LucideIcons.eye_off,
+                              _obscureText ? LucideIcons.eye : LucideIcons.eye_off,
                             )
                           ],
                         ),
@@ -114,8 +113,7 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () async {
                         final result = await context.showConfirmDialog(
                           title: "Are you absolutely sure?",
-                          content:
-                              "This will delete all your data from our servers, "
+                          content: "This will delete all your data from our servers, "
                               "and you will not be able to recover it.",
                           type: ConfirmDialogType.destructive,
                         );
@@ -123,6 +121,28 @@ class _HomePageState extends State<HomePage> {
                         print(result);
                       },
                       children: const [Text("Open Confirm Dialog")],
+                    ),
+                    Button.glass(
+                      onPressed: () async {
+                        final newWindow = await WindowManagerPlus.createWindow(['second_window_id']);
+                        if (newWindow != null) {
+                          var windowOptions = const WindowOptions(
+                            size: Size(800, 600),
+                            center: true,
+                            backgroundColor: Colors.transparent,
+                            titleBarStyle: TitleBarStyle.normal,
+                            title: "Widget App",
+                          );
+                          newWindow.waitUntilReadyToShow(windowOptions, () async {
+                            newWindow.setResizable(false);
+                            newWindow.setAlignment(Alignment.center);
+                            newWindow.setSkipTaskbar(true);
+                            newWindow.setSize(const Size(800, 600));
+                            print('New Created Window: $newWindow');
+                          });
+                        }
+                      },
+                      children: const [Text("Open Window")],
                     ),
                     Button.outline(
                       onPressed: () async {

@@ -3,12 +3,11 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  desktop_multi_window
   irondash_engine_context
   rive_common
-  screen_retriever
+  screen_retriever_windows
   super_native_extensions
-  window_manager
+  window_manager_plus
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
