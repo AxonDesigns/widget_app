@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:widget_app/generic.dart';
 
 class GenericScrollBehavior extends ScrollBehavior {
@@ -8,6 +10,14 @@ class GenericScrollBehavior extends ScrollBehavior {
 
   final ScrollPhysics? mobilePhysics;
   final ScrollPhysics? desktopPhysics;
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.touch,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.unknown,
+      };
 
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) {

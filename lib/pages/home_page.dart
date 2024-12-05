@@ -13,6 +13,7 @@ class _HomePageState extends State<HomePage> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
   bool _obscureText = false;
+  int _selectedIndex = -1;
 
   @override
   void initState() {
@@ -57,6 +58,7 @@ class _HomePageState extends State<HomePage> {
                     TextInput(
                       controller: _controller,
                       obscureText: _obscureText,
+                      keyboardType: TextInputType.text,
                       prefix: const Padding(
                         padding: EdgeInsets.all(10.0),
                         child: Icon(LucideIcons.search),
@@ -90,10 +92,42 @@ class _HomePageState extends State<HomePage> {
                         TextInput(
                           maxLines: null,
                           minLines: 4,
+                          keyboardType: TextInputType.multiline,
                         ),
                       ],
                     ),
-                    const SelectInput(),
+                    SelectInput(
+                      expanded: true,
+                      selectedIndex: _selectedIndex,
+                      onItemSelected: (index) {
+                        setState(() {
+                          _selectedIndex = index;
+                        });
+                        print(index);
+                      },
+                      items: const [
+                        SelectItem(
+                          icon: Icon(LucideIcons.user),
+                          text: "Hi!",
+                        ),
+                        SelectItem(
+                          icon: Icon(LucideIcons.bird),
+                          text: "This Widget",
+                        ),
+                        SelectItem(
+                          icon: Icon(LucideIcons.building),
+                          text: "Resizes",
+                        ),
+                        SelectItem(
+                          icon: Icon(LucideIcons.airplay),
+                          text: "Depending on",
+                        ),
+                        SelectItem(
+                          icon: Icon(LucideIcons.list),
+                          text: "it's contents!",
+                        ),
+                      ],
+                    ),
                     Tooltip(
                       message: "Example tooltip",
                       child: Button.primary(

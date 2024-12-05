@@ -79,10 +79,10 @@ class InputContainer extends StatelessWidget {
       child: Padding(
         padding: padding ??
             EdgeInsets.only(
-              bottom: isDesktop ? 10.0 : 12.0,
-              top: isDesktop ? 10.0 : 12.0,
-              left: isDesktop ? 10.0 : 12.0,
-              right: isDesktop ? 10.0 : 12.0,
+              bottom: isDesktop ? 10.0 : 14.0,
+              top: isDesktop ? 10.0 : 14.0,
+              left: isDesktop ? 10.0 : 13.0,
+              right: isDesktop ? 10.0 : 13.0,
             ),
         child: child,
       ),

@@ -659,6 +659,7 @@ class _TextInputState extends State<TextInput>
                   groupId: TextInput,
                   style: GenericTheme.maybeOf(context)?.baseTextStyle.copyWith(
                         color: context.theme.foregroundColor,
+                        decorationColor: context.theme.foregroundColor,
                       ),
                   decoration: material.InputDecoration(
                     filled: false,

@@ -1,3 +1,4 @@
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/services.dart';
 import 'package:widget_app/generic.dart';
 
@@ -30,6 +31,7 @@ class Button extends StatefulWidget {
     this.unfocusOnTapOutside = true,
     this.borderRadius,
     this.padding,
+    this.alignment,
   }) : variant = null;
 
   /// Primary button constructor.
@@ -46,6 +48,7 @@ class Button extends StatefulWidget {
     this.unfocusOnTapOutside = true,
     this.borderRadius,
     this.padding,
+    this.alignment,
   })  : variant = ButtonVariant.primary,
         foregroundColor = null,
         backgroundColor = null,
@@ -65,6 +68,7 @@ class Button extends StatefulWidget {
     this.unfocusOnTapOutside = true,
     this.borderRadius,
     this.padding,
+    this.alignment,
   })  : variant = ButtonVariant.outline,
         foregroundColor = null,
         backgroundColor = null,
@@ -84,6 +88,7 @@ class Button extends StatefulWidget {
     this.unfocusOnTapOutside = true,
     this.borderRadius,
     this.padding,
+    this.alignment,
   })  : variant = ButtonVariant.ghost,
         foregroundColor = null,
         backgroundColor = null,
@@ -103,6 +108,7 @@ class Button extends StatefulWidget {
     this.unfocusOnTapOutside = true,
     this.borderRadius,
     this.padding,
+    this.alignment,
   })  : variant = ButtonVariant.glass,
         foregroundColor = null,
         backgroundColor = null,
@@ -122,6 +128,7 @@ class Button extends StatefulWidget {
     this.unfocusOnTapOutside = true,
     this.borderRadius,
     this.padding,
+    this.alignment,
   })  : variant = ButtonVariant.destructive,
         foregroundColor = null,
         backgroundColor = null,
@@ -174,6 +181,8 @@ class Button extends StatefulWidget {
 
   final EdgeInsetsGeometry? padding;
 
+  final MainAxisAlignment? alignment;
+
   @override
   State<Button> createState() => _ButtonState();
 }
@@ -218,7 +227,7 @@ class _ButtonState extends State<Button> {
   }
 
   void _onFocusChange() {
-    if (!_wasClicked && _focusNode.hasFocus) {
+    if (!_wasClicked && _focusNode.hasFocus && isDesktop) {
       setState(() {
         focused = true;
       });
@@ -375,23 +384,13 @@ class _ButtonState extends State<Button> {
           ButtonVariant.primary ||
           ButtonVariant.destructive =>
             WidgetStateColor.resolveWith((state) {
-              if (state.contains(WidgetState.focused)) {
-                return Colors.white;
-              }
               return context.theme.foregroundColor
                   .withOpacity(context.isDarkMode ? 0.1 : 0.2);
             }).resolve(state),
           ButtonVariant.ghost => WidgetStateColor.resolveWith((state) {
-              if (state.contains(WidgetState.focused)) {
-                return context.theme.foregroundColor;
-              }
               return context.theme.foregroundColor.withOpacity(0.0);
             }).resolve(state),
           ButtonVariant.outline => WidgetStateColor.resolveWith((state) {
-              if (state.contains(WidgetState.focused)) {
-                return context.theme.foregroundColor.withOpacity(0.75);
-              }
-
               if (state.contains(WidgetState.hovered)) {
                 return context.theme.foregroundColor.withOpacity(0.0);
               }
@@ -399,9 +398,6 @@ class _ButtonState extends State<Button> {
                   .withOpacity(context.isDarkMode ? 0.1 : 0.2);
             }).resolve(state),
           ButtonVariant.glass => WidgetStateColor.resolveWith((state) {
-              if (state.contains(WidgetState.focused)) {
-                return theme.primaryColor.withOpacity(1.0);
-              }
               return theme.primaryColor.withOpacity(0.5);
             }).resolve(state),
           _ => Colors.transparent,
@@ -418,8 +414,8 @@ class _ButtonState extends State<Button> {
           _ => theme.foregroundColor,
         };
 
-    final squarePadding = isDesktop ? 7.5 : 10.0;
-    final horizontalPadding = isDesktop ? 12.0 : 20.0;
+    final squarePadding = isDesktop ? 8.0 : 10.0;
+    final horizontalPadding = isDesktop ? 13.0 : 20.0;
     final verticalPadding = isDesktop ? 6.0 : 12.0;
 
     return FocusableActionDetector(
@@ -459,60 +455,75 @@ class _ButtonState extends State<Button> {
             : () {
                 _wasClicked = true;
                 widget.onPressed!.call();
+                setState(() => focused = false);
               },
-        child: Opacity(
-          opacity: enabled ? 1.0 : 0.65,
-          child: AnimatedContainer(
-            duration: Duration(milliseconds: pressed || hovered ? 0 : 200),
-            curve: Curves.fastEaseInToSlowEaseOut,
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(
-                widget.borderRadius ?? context.theme.radiusSize,
-              ),
-              border: Border.all(
-                strokeAlign: BorderSide.strokeAlignInside,
-                width: 1.0,
-                color: borderColor,
-              ),
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                /* horizontal: widget.squared ? 7.5 : 12.0,
-                vertical: widget.squared ? 7.5 : 6.0, */
-                horizontal: widget.padding != null
-                    ? widget.padding!.horizontal
-                    : widget.children.length == 1 &&
-                            widget.children.first is! Text
-                        ? squarePadding
-                        : horizontalPadding,
-                vertical: widget.padding != null
-                    ? widget.padding!.vertical
-                    : widget.children.length == 1 &&
-                            widget.children.first is! Text
-                        ? squarePadding
-                        : verticalPadding,
-              ),
-              child: IconTheme(
-                data: IconTheme.of(context).copyWith(
-                  color: fgColor,
+        child: DottedBorder(
+          color: context.theme.foregroundColor.withOpacity(focused ? 0.5 : 0.0),
+          strokeWidth: 1.0,
+          padding: EdgeInsets.zero,
+          stackFit: StackFit.passthrough,
+          borderPadding: const EdgeInsets.symmetric(
+            horizontal: -2.5,
+            vertical: -2.5,
+          ),
+          radius: Radius.circular(context.theme.radiusSize + 2.5),
+          dashPattern: const [1, 0],
+          borderType: BorderType.RRect,
+          child: Opacity(
+            opacity: enabled ? 1.0 : 0.65,
+            child: AnimatedContainer(
+              duration: Duration(milliseconds: pressed || hovered ? 0 : 200),
+              curve: Curves.fastEaseInToSlowEaseOut,
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(
+                  widget.borderRadius ?? context.theme.radiusSize,
                 ),
-                child: DefaultTextStyle(
-                  style: context.theme.baseTextStyle.copyWith(
+                border: Border.all(
+                  strokeAlign: BorderSide.strokeAlignInside,
+                  width: 1.0,
+                  color: borderColor,
+                ),
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  /* horizontal: widget.squared ? 7.5 : 12.0,
+                  vertical: widget.squared ? 7.5 : 6.0, */
+                  horizontal: widget.padding != null
+                      ? widget.padding!.horizontal
+                      : widget.children.length == 1 &&
+                              widget.children.first is! Text
+                          ? squarePadding
+                          : horizontalPadding,
+                  vertical: widget.padding != null
+                      ? widget.padding!.vertical
+                      : widget.children.length == 1 &&
+                              widget.children.first is! Text
+                          ? squarePadding
+                          : verticalPadding,
+                ),
+                child: IconTheme(
+                  data: IconTheme.of(context).copyWith(
                     color: fgColor,
                   ),
-                  child: widget.builder?.call(hovered, pressed, false) ??
-                      (widget.children.isNotEmpty
-                          ? Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(
-                                  (widget.children.length * 2) - 1,
-                                  (index) => index.isEven
-                                      ? widget.children[index ~/ 2]
-                                      : SizedBox(width: widget.gap)),
-                            )
-                          : const SizedBox.shrink()),
+                  child: DefaultTextStyle(
+                    style: context.theme.baseTextStyle.copyWith(
+                      color: fgColor,
+                    ),
+                    child: widget.builder?.call(hovered, pressed, false) ??
+                        (widget.children.isNotEmpty
+                            ? Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: widget.alignment ??
+                                    MainAxisAlignment.center,
+                                children: List.generate(
+                                    (widget.children.length * 2) - 1,
+                                    (index) => index.isEven
+                                        ? widget.children[index ~/ 2]
+                                        : SizedBox(width: widget.gap)),
+                              )
+                            : const SizedBox.shrink()),
+                  ),
                 ),
               ),
             ),

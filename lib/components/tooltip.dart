@@ -84,7 +84,7 @@ class _TooltipState extends State<Tooltip> {
     );
   }
 
-  void _showTooltip(BuildContext context, String message) {
+  void _showTooltip(BuildContext context, String message) async {
     if (kIsWeb) return;
 
     if (_overlayEntry != null) {
@@ -92,7 +92,7 @@ class _TooltipState extends State<Tooltip> {
       _overlayEntry = null;
     }
 
-    _createOverlayEntry();
+    await _createOverlayEntry();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_overlayEntry == null) return;
@@ -116,7 +116,7 @@ class _TooltipState extends State<Tooltip> {
     });
   }
 
-  void _createOverlayEntry() async {
+  Future<void> _createOverlayEntry() async {
     final overlayState = Overlay.of(context);
     final mousePos = await screenRetriever.getCursorScreenPoint();
     final window = await windowManager.getPosition();

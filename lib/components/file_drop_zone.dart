@@ -86,6 +86,7 @@ class _FileDropZoneState extends State<FileDropZone> {
         strokeWidth: 1.5,
         padding: EdgeInsets.zero,
         borderPadding: const EdgeInsets.all(0.75),
+        stackFit: StackFit.passthrough,
         child: AnimatedContainer(
           duration: Duration(milliseconds: _hovering ? 0 : 200),
           curve: Curves.fastEaseInToSlowEaseOut,
