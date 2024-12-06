@@ -13,8 +13,8 @@ class _HomePageState extends State<HomePage> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
   bool _obscureText = false;
-  int _selectedIndex = -1;
-  int _selectedIndex2 = -1;
+  int _selectedIndex = 0;
+  int _selectedIndex2 = 0;
 
   @override
   void initState() {
@@ -74,7 +74,11 @@ class _HomePageState extends State<HomePage> {
                               _obscureText = !_obscureText;
                             });
                           },
-                          children: [Icon(_obscureText ? LucideIcons.eye : LucideIcons.eye_off)],
+                          children: [
+                            Icon(_obscureText
+                                ? LucideIcons.eye
+                                : LucideIcons.eye_off)
+                          ],
                         ),
                       ),
                     ),
@@ -102,7 +106,6 @@ class _HomePageState extends State<HomePage> {
                               setState(() {
                                 _selectedIndex = index;
                               });
-                              print(index);
                             },
                             items: const [
                               SelectItem(
@@ -125,6 +128,22 @@ class _HomePageState extends State<HomePage> {
                                 icon: Icon(LucideIcons.list),
                                 text: "it's contents!",
                               ),
+                              SelectItem(
+                                icon: Icon(LucideIcons.list),
+                                text: "This one",
+                              ),
+                              SelectItem(
+                                icon: Icon(LucideIcons.list),
+                                text: "Does not",
+                              ),
+                              SelectItem(
+                                icon: Icon(LucideIcons.list),
+                                text: "Because it",
+                              ),
+                              SelectItem(
+                                icon: Icon(LucideIcons.list),
+                                text: "Expands!",
+                              ),
                             ],
                           ),
                         ),
@@ -134,7 +153,6 @@ class _HomePageState extends State<HomePage> {
                             setState(() {
                               _selectedIndex2 = index;
                             });
-                            print(index);
                           },
                           items: const [
                             SelectItem(
@@ -197,7 +215,8 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () async {
                         final result = await context.showConfirmDialog(
                           title: "Are you absolutely sure?",
-                          content: "This will delete all your data from our servers, "
+                          content:
+                              "This will delete all your data from our servers, "
                               "and you will not be able to recover it.",
                           type: ConfirmDialogType.destructive,
                         );
