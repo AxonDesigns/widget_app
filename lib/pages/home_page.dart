@@ -14,6 +14,7 @@ class _HomePageState extends State<HomePage> {
   final _scrollController = ScrollController();
   bool _obscureText = false;
   int _selectedIndex = -1;
+  int _selectedIndex2 = -1;
 
   @override
   void initState() {
@@ -73,13 +74,7 @@ class _HomePageState extends State<HomePage> {
                               _obscureText = !_obscureText;
                             });
                           },
-                          children: [
-                            Icon(
-                              _obscureText
-                                  ? LucideIcons.eye
-                                  : LucideIcons.eye_off,
-                            )
-                          ],
+                          children: [Icon(_obscureText ? LucideIcons.eye : LucideIcons.eye_off)],
                         ),
                       ),
                     ),
@@ -96,35 +91,73 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ],
                     ),
-                    SelectInput(
-                      expanded: true,
-                      selectedIndex: _selectedIndex,
-                      onItemSelected: (index) {
-                        setState(() {
-                          _selectedIndex = index;
-                        });
-                        print(index);
-                      },
-                      items: const [
-                        SelectItem(
-                          icon: Icon(LucideIcons.user),
-                          text: "Hi!",
+                    GappedRow(
+                      gap: 4.0,
+                      children: [
+                        Expanded(
+                          child: SelectInput(
+                            expanded: true,
+                            selectedIndex: _selectedIndex,
+                            onItemSelected: (index) {
+                              setState(() {
+                                _selectedIndex = index;
+                              });
+                              print(index);
+                            },
+                            items: const [
+                              SelectItem(
+                                icon: Icon(LucideIcons.user),
+                                text: "Hi!",
+                              ),
+                              SelectItem(
+                                icon: Icon(LucideIcons.bird),
+                                text: "This Widget",
+                              ),
+                              SelectItem(
+                                icon: Icon(LucideIcons.building),
+                                text: "Resizes",
+                              ),
+                              SelectItem(
+                                icon: Icon(LucideIcons.airplay),
+                                text: "Depending on",
+                              ),
+                              SelectItem(
+                                icon: Icon(LucideIcons.list),
+                                text: "it's contents!",
+                              ),
+                            ],
+                          ),
                         ),
-                        SelectItem(
-                          icon: Icon(LucideIcons.bird),
-                          text: "This Widget",
-                        ),
-                        SelectItem(
-                          icon: Icon(LucideIcons.building),
-                          text: "Resizes",
-                        ),
-                        SelectItem(
-                          icon: Icon(LucideIcons.airplay),
-                          text: "Depending on",
-                        ),
-                        SelectItem(
-                          icon: Icon(LucideIcons.list),
-                          text: "it's contents!",
+                        SelectInput(
+                          selectedIndex: _selectedIndex2,
+                          onItemSelected: (index) {
+                            setState(() {
+                              _selectedIndex2 = index;
+                            });
+                            print(index);
+                          },
+                          items: const [
+                            SelectItem(
+                              icon: Icon(LucideIcons.user),
+                              text: "Hi!",
+                            ),
+                            SelectItem(
+                              icon: Icon(LucideIcons.bird),
+                              text: "This Widget",
+                            ),
+                            SelectItem(
+                              icon: Icon(LucideIcons.building),
+                              text: "Resizes",
+                            ),
+                            SelectItem(
+                              icon: Icon(LucideIcons.airplay),
+                              text: "Depending on",
+                            ),
+                            SelectItem(
+                              icon: Icon(LucideIcons.list),
+                              text: "it's contents!",
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -164,8 +197,7 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () async {
                         final result = await context.showConfirmDialog(
                           title: "Are you absolutely sure?",
-                          content:
-                              "This will delete all your data from our servers, "
+                          content: "This will delete all your data from our servers, "
                               "and you will not be able to recover it.",
                           type: ConfirmDialogType.destructive,
                         );

@@ -80,8 +80,7 @@ class _SelectInputState extends State<SelectInput> {
   void _setUpFocusNode(FocusNode node) {
     node.addListener(_handleFocusChange);
     node.onKeyEvent = (node, event) {
-      if (event is KeyDownEvent &&
-          event.logicalKey == LogicalKeyboardKey.escape) {
+      if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
         node.unfocus();
         return KeyEventResult.handled;
       }
@@ -118,6 +117,7 @@ class _SelectInputState extends State<SelectInput> {
             groupId: SelectInput,
             child: _SelectOverlay(
               items: widget.items,
+              selectedIndex: widget.selectedIndex,
               duration: _duration,
               opened: opened,
               onItemSelected: (index) {
@@ -145,7 +145,7 @@ class _SelectInputState extends State<SelectInput> {
       _timer = null;
     });
     setState(() => opened = false);
-    _overlayEntry!.markNeedsBuild();
+    _overlayEntry?.markNeedsBuild();
   }
 
   void _destroyOverlay() {
@@ -169,8 +169,8 @@ class _SelectInputState extends State<SelectInput> {
           focusNode: _focusNode,
           onFocusChange: (value) => setState(() => focused = value),
           onShowHoverHighlight: (value) => setState(() => hovered = value),
-          descendantsAreFocusable: false,
-          descendantsAreTraversable: false,
+          //descendantsAreFocusable: false,
+          //descendantsAreTraversable: false,
           child: GestureDetector(
             onTap: () {
               if (!_focusNode.hasFocus) {
@@ -236,12 +236,14 @@ class _SelectOverlay extends StatefulWidget {
   const _SelectOverlay({
     super.key,
     required this.items,
+    required this.selectedIndex,
     required this.duration,
     this.opened = false,
     this.onItemSelected,
   });
 
   final List<SelectItem> items;
+  final int selectedIndex;
   final Duration duration;
   final bool opened;
   final Function(int index)? onItemSelected;
@@ -256,8 +258,7 @@ class _SelectOverlayState extends State<_SelectOverlay> {
   bool get isScrollable {
     if (!scrollController.hasClients) return false;
 
-    return scrollController.position.minScrollExtent !=
-        scrollController.position.maxScrollExtent;
+    return scrollController.position.minScrollExtent != scrollController.position.maxScrollExtent;
   }
 
   @override
@@ -304,6 +305,7 @@ class _SelectOverlayState extends State<_SelectOverlay> {
               itemBuilder: (context, index) {
                 return _SelectItem(
                   item: widget.items[index],
+                  selected: widget.selectedIndex == index,
                   index: index,
                   onPressed: (index) {
                     widget.onItemSelected?.call(index);
@@ -324,14 +326,30 @@ class _SelectItem extends StatelessWidget {
     required this.item,
     required this.index,
     required this.onPressed,
+    required this.selected,
   });
 
   final SelectItem item;
+  final bool selected;
   final int index;
   final void Function(int index) onPressed;
 
   @override
   Widget build(BuildContext context) {
+    if (selected) {
+      return Container(
+        decoration: BoxDecoration(
+          color: context.theme.foregroundColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(context.theme.radiusSize),
+        ),
+        child: _buildButton(context),
+      );
+    }
+
+    return _buildButton(context);
+  }
+
+  Widget _buildButton(BuildContext context) {
     return Button.ghost(
       alignment: MainAxisAlignment.start,
       onPressed: () {
