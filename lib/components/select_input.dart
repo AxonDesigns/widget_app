@@ -123,7 +123,7 @@ class _SelectInputState extends State<SelectInput>
           offset: const Offset(0, 4),
           child: TapRegion(
             groupId: SelectInput,
-            child: _SelectOverlay(
+            child: SelectOverlay(
               items: widget.items,
               selectedIndex: widget.selectedIndex,
               animation: _animationController.view,
@@ -242,27 +242,27 @@ class SelectItem {
   final void Function(int index)? onPressed;
 }
 
-class _SelectOverlay extends StatefulWidget {
-  const _SelectOverlay({
+class SelectOverlay extends StatefulWidget {
+  const SelectOverlay({
     super.key,
     required this.items,
     required this.selectedIndex,
-    required this.animation,
+    this.animation,
     this.opened = false,
     this.onItemSelected,
   });
 
   final List<SelectItem> items;
   final int selectedIndex;
-  final Animation<double> animation;
+  final Animation<double>? animation;
   final bool opened;
   final Function(int index)? onItemSelected;
 
   @override
-  State<_SelectOverlay> createState() => _SelectOverlayState();
+  State<SelectOverlay> createState() => _SelectOverlayState();
 }
 
-class _SelectOverlayState extends State<_SelectOverlay> {
+class _SelectOverlayState extends State<SelectOverlay> {
   final scrollController = ScrollController();
   late final CurvedAnimation _animation;
 
@@ -277,7 +277,7 @@ class _SelectOverlayState extends State<_SelectOverlay> {
   void initState() {
     super.initState();
     _animation = CurvedAnimation(
-      parent: widget.animation,
+      parent: widget.animation ?? const AlwaysStoppedAnimation(1.0),
       curve: Curves.fastEaseInToSlowEaseOut,
     );
   }
@@ -290,7 +290,7 @@ class _SelectOverlayState extends State<_SelectOverlay> {
   }
 
   @override
-  void didUpdateWidget(covariant _SelectOverlay oldWidget) {
+  void didUpdateWidget(covariant SelectOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
   }
 

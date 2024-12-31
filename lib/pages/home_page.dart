@@ -1,5 +1,6 @@
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
+import 'package:widget_app/components/select_input_navigator.dart';
 import 'package:widget_app/generic.dart';
 
 class HomePage extends StatefulWidget {
@@ -99,7 +100,7 @@ class _HomePageState extends State<HomePage> {
                       gap: 4.0,
                       children: [
                         Expanded(
-                          child: SelectInput(
+                          child: SelectInputNavigator(
                             expanded: true,
                             selectedIndex: _selectedIndex,
                             onItemSelected: (index) {
@@ -147,7 +148,7 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
                         ),
-                        SelectInput(
+                        SelectInputNavigator(
                           selectedIndex: _selectedIndex2,
                           onItemSelected: (index) {
                             setState(() {
@@ -161,19 +162,15 @@ class _HomePageState extends State<HomePage> {
                             ),
                             SelectItem(
                               icon: Icon(LucideIcons.bird),
-                              text: "This Widget",
+                              text: "This",
                             ),
                             SelectItem(
                               icon: Icon(LucideIcons.building),
-                              text: "Resizes",
+                              text: "Widget",
                             ),
                             SelectItem(
                               icon: Icon(LucideIcons.airplay),
-                              text: "Depending on",
-                            ),
-                            SelectItem(
-                              icon: Icon(LucideIcons.list),
-                              text: "it's contents!",
+                              text: "Resizes",
                             ),
                           ],
                         ),
