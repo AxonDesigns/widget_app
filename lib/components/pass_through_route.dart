@@ -1,35 +1,8 @@
 import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:widget_app/generic.dart';
 
-class TapThroughOverlayRoute<T> extends TransitionRoute<T> {
-  final Duration _transitionDuration;
-  final WidgetBuilder builder;
-
-  TapThroughOverlayRoute({
-    required this.builder,
-    Duration transitionDuration = Duration.zero,
-    super.settings,
-  }) : _transitionDuration = transitionDuration;
-
-  @override
-  Iterable<OverlayEntry> createOverlayEntries() {
-    return [OverlayEntry(builder: builder, maintainState: true)];
-  }
-
-  @override
-  bool get opaque => false;
-
-  @override
-  Duration get transitionDuration => _transitionDuration;
-
-  @override
-  bool get popGestureEnabled => true;
-}
-
-typedef PageBuilder = Widget Function(BuildContext context,
-    Animation<double> animation, Animation<double> secondaryAnimation);
+typedef PageBuilder = Widget Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation);
 
 class PassThroughRoute<T> extends ModalRoute<T> {
   PassThroughRoute({
@@ -56,15 +29,13 @@ class PassThroughRoute<T> extends ModalRoute<T> {
   Duration get transitionDuration => _transitionDuration;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return builder(context, animation, secondaryAnimation);
   }
 
   @override
   Widget buildModalBarrier() {
-    final isDesktop =
-        !kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
+    final isDesktop = !kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
     if (kIsWeb || isDesktop) {
       return Builder(
         builder: (context) {
