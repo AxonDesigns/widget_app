@@ -1,5 +1,6 @@
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
+import 'package:widget_app/components/sheet_route.dart';
 import 'package:widget_app/generic.dart';
 
 class HomePage extends StatefulWidget {
@@ -68,7 +69,11 @@ class _HomePageState extends State<HomePage> {
                             _obscureText = !_obscureText;
                           });
                         },
-                        children: [Icon(_obscureText ? LucideIcons.eye : LucideIcons.eye_off)],
+                        children: [
+                          Icon(_obscureText
+                              ? LucideIcons.eye
+                              : LucideIcons.eye_off)
+                        ],
                       ),
                     ),
                   ),
@@ -178,12 +183,23 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   Tooltip(
-                    message: "This button does nothing",
+                    message: "This button opens a bottom sheet",
                     child: Button.primary(
-                      onPressed: () async {},
+                      onPressed: () async {
+                        final result = Navigator.of(context).push<String>(
+                          CustomSheetRoute(
+                            builder: (context) {
+                              return Container(
+                                color: context.theme.backgroundColor,
+                                child: const Text("data"),
+                              );
+                            },
+                          ),
+                        );
+                      },
                       children: const [
                         AnimatedSpinner(size: 16),
-                        Text("Do nothing"),
+                        Text("Open Bottom Sheet"),
                       ],
                     ),
                   ),
@@ -201,7 +217,8 @@ class _HomePageState extends State<HomePage> {
                     onPressed: () async {
                       final result = await context.showConfirmDialog(
                         title: "Are you absolutely sure?",
-                        content: "This will delete all your data from our servers, "
+                        content:
+                            "This will delete all your data from our servers, "
                             "and you will not be able to recover it.",
                         type: ConfirmDialogType.destructive,
                       );

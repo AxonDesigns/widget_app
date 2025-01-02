@@ -17,6 +17,7 @@ dependencies:
   rive: ^0.13.18
   screen_retriever: ^0.2.0
   shared_preferences: ^2.3.3
+  sheet: ^1.0.0
   super_drag_and_drop: ^0.8.24
   window_manager: ^0.4.3
 

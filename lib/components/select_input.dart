@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:widget_app/components/pass_through_route.dart';
@@ -27,15 +29,13 @@ class _SelectInputState extends State<SelectInput> {
   var hovered = false;
   var pressed = false;
   var focused = false;
-  var opened = false;
-
   var _popupOpened = false;
 
   bool get enabled => true;
   late FocusNode _focusNode;
   late LayerLink _layerLink;
 
-  final _duration = const Duration(milliseconds: 150);
+  final _duration = const Duration(milliseconds: 500);
 
   @override
   void initState() {
@@ -74,7 +74,8 @@ class _SelectInputState extends State<SelectInput> {
   void _setUpFocusNode(FocusNode node) {
     node.addListener(_handleFocusChange);
     node.onKeyEvent = (node, event) {
-      if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
+      if (event is KeyDownEvent &&
+          event.logicalKey == LogicalKeyboardKey.escape) {
         node.unfocus();
         return KeyEventResult.handled;
       }
@@ -94,7 +95,8 @@ class _SelectInputState extends State<SelectInput> {
 
     final renderBox = context.findRenderObject() as RenderBox;
     final size = renderBox.size;
-    Navigator.of(context).push(
+    Navigator.of(context)
+        .push(
       PassThroughRoute(
         transitionDuration: _duration,
         onPopCallback: () {
@@ -102,40 +104,49 @@ class _SelectInputState extends State<SelectInput> {
             _closeOverlay();
           }
         },
-        builder: (context, animation, secondaryAnimation) {
+        transitionBuilder: (context, animation, secondaryAnimation, child) {
           final curvedAnimation = CurvedAnimation(
             parent: animation,
             curve: Curves.fastEaseInToSlowEaseOut,
           );
+          return FadeTransition(
+            opacity: curvedAnimation,
+            child: child,
+          );
+        },
+        builder: (context, animation, __) {
           return Stack(
             children: [
-              Positioned(
-                left: 0,
-                top: 0,
-                width: size.width,
-                child: CompositedTransformFollower(
-                  link: _layerLink,
-                  followerAnchor: Alignment.topCenter,
-                  targetAnchor: Alignment.bottomCenter,
-                  offset: const Offset(0, 4),
-                  child: TapRegion(
-                    groupId: SelectInput,
-                    child: FadeTransition(
-                      opacity: curvedAnimation,
-                      child: SlideTransition(
-                        position: Tween(begin: const Offset(0, -0.1), end: Offset.zero).animate(curvedAnimation),
-                        child: _SelectOverlay(
-                          items: widget.items,
-                          selectedIndex: widget.selectedIndex,
-                          opened: opened,
-                          onItemSelected: (index) {
-                            if (_popupOpened) {
-                              _closeOverlay();
-                            }
-                            widget.onItemSelected?.call(index);
-                          },
-                        ),
-                      ),
+              AnimatedBuilder(
+                animation: animation,
+                builder: (context, child) {
+                  final curvedAnimation = CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.fastEaseInToSlowEaseOut,
+                  );
+                  return CompositedTransformFollower(
+                    link: _layerLink,
+                    followerAnchor: Alignment.topCenter,
+                    targetAnchor: Alignment.bottomCenter,
+                    offset: Offset(
+                      0,
+                      lerpDouble(
+                        -size.height,
+                        4,
+                        curvedAnimation.value,
+                      )!,
+                    ),
+                    child: child,
+                  );
+                },
+                child: TapRegion(
+                  groupId: SelectInput,
+                  child: SizedBox(
+                    width: size.width,
+                    child: _SelectOverlay(
+                      items: widget.items,
+                      width: size.width,
+                      selectedIndex: widget.selectedIndex,
                     ),
                   ),
                 ),
@@ -144,10 +155,18 @@ class _SelectInputState extends State<SelectInput> {
           );
         },
       ),
+    )
+        .then(
+      (index) {
+        _focusNode.unfocus();
+        if (index != null && widget.selectedIndex != index) {
+          widget.onItemSelected?.call(index);
+        }
+        setState(() => _popupOpened = false);
+      },
     );
-    setState(() {
-      _popupOpened = true;
-    });
+
+    setState(() => _popupOpened = true);
   }
 
   void _closeOverlay() {
@@ -163,24 +182,15 @@ class _SelectInputState extends State<SelectInput> {
   Widget build(BuildContext context) {
     return TapRegion(
       groupId: SelectInput,
-      onTapOutside: (event) {
-        if (isDesktop) {
-          if (_popupOpened) {
-            //_closeOverlay();
-          }
-          _focusNode.unfocus();
-        }
-      },
       child: CompositedTransformTarget(
         link: _layerLink,
         child: FocusableActionDetector(
           focusNode: _focusNode,
           onFocusChange: (value) => setState(() => focused = value),
           onShowHoverHighlight: (value) => setState(() => hovered = value),
-          //descendantsAreFocusable: false,
-          //descendantsAreTraversable: false,
           shortcuts: {
-            LogicalKeySet(LogicalKeyboardKey.enter): const ButtonActivateIntent(),
+            LogicalKeySet(LogicalKeyboardKey.enter):
+                const ButtonActivateIntent(),
           },
           actions: {
             ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(
@@ -206,6 +216,10 @@ class _SelectInputState extends State<SelectInput> {
               hovered: hovered,
               pressed: pressed,
               focused: focused || _popupOpened,
+              padding: EdgeInsets.symmetric(
+                horizontal: isDesktop ? 10.0 : 13.0,
+                vertical: isDesktop ? 9.0 : 12.0,
+              ),
               child: GappedRow(
                 gap: 4.0,
                 mainAxisSize: MainAxisSize.min,
@@ -255,32 +269,17 @@ class Option {
   final void Function(int index)? onPressed;
 }
 
-class _SelectOverlay extends StatefulWidget {
+class _SelectOverlay extends StatelessWidget {
   const _SelectOverlay({
     super.key,
     required this.items,
+    required this.width,
     required this.selectedIndex,
-    this.opened = false,
-    this.onItemSelected,
   });
 
   final List<Option> items;
+  final double width;
   final int selectedIndex;
-  final bool opened;
-  final Function(int index)? onItemSelected;
-
-  @override
-  State<_SelectOverlay> createState() => _SelectOverlayState();
-}
-
-class _SelectOverlayState extends State<_SelectOverlay> {
-  final scrollController = ScrollController();
-
-  bool get isScrollable {
-    if (!scrollController.hasClients) return false;
-
-    return scrollController.position.minScrollExtent != scrollController.position.maxScrollExtent;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -288,18 +287,23 @@ class _SelectOverlayState extends State<_SelectOverlay> {
       padding: const EdgeInsets.all(4.0),
       elevation: 8.0,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(
+        constraints: BoxConstraints(
           maxHeight: 250.0,
+          maxWidth: width,
+          minWidth: width,
         ),
         child: _buildList(
-          widget.items.indexed.map((e) {
+          items.indexed.map((e) {
             final (index, item) = e;
+
             return _Option(
               item: item,
-              selected: widget.selectedIndex == index,
+              selected: selectedIndex == index,
               index: index,
               onPressed: (idx) {
-                widget.onItemSelected?.call(idx);
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context, idx);
+                }
               },
             );
           }).toList(),
@@ -344,8 +348,8 @@ class _OptionState extends State<_Option> {
   @override
   void initState() {
     super.initState();
+    if (!widget.selected) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!widget.selected) return;
       Scrollable.ensureVisible(context);
     });
   }
