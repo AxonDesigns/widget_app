@@ -35,7 +35,7 @@ class _SelectInputState extends State<SelectInput> {
   late FocusNode _focusNode;
   late LayerLink _layerLink;
 
-  final _duration = const Duration(milliseconds: 500);
+  final _duration = const Duration(milliseconds: 200);
 
   @override
   void initState() {

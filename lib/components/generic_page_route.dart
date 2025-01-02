@@ -1,6 +1,8 @@
+import 'package:sheet/route.dart';
 import 'package:widget_app/generic.dart';
 
-class GenericPageRoute<T> extends PageRoute<T> {
+class GenericPageRoute<T> extends PageRoute<T>
+    with DelegatedTransitionsRoute<T>, PreviousSheetRouteMixin<T> {
   GenericPageRoute({
     super.settings,
     required Function(BuildContext context) builder,
@@ -8,6 +10,7 @@ class GenericPageRoute<T> extends PageRoute<T> {
     this.curve = Curves.fastEaseInToSlowEaseOut,
     this.transitionBuilder,
     this.maintainState = true,
+    super.fullscreenDialog = false,
   }) : buildContent = builder;
 
   Function(BuildContext context) buildContent;
@@ -38,6 +41,11 @@ class GenericPageRoute<T> extends PageRoute<T> {
 
   @override
   String? get barrierLabel => null;
+
+  @override
+  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
+    return (nextRoute is GenericPageRoute && !nextRoute.fullscreenDialog);
+  }
 
   @override
   Widget buildPage(
@@ -122,3 +130,55 @@ class GenericPageRoute<T> extends PageRoute<T> {
     );
   }
 }
+
+class GenericPage<T> extends Page<T> {
+  const GenericPage({
+    super.key,
+    required this.builder,
+    this.transitionBuilder,
+    this.maintainState = true,
+    this.fullscreenDialog = false,
+    this.allowSnapshotting = true,
+    this.duration,
+    this.curve = Curves.fastEaseInToSlowEaseOut,
+  });
+
+  final bool maintainState;
+
+  final bool fullscreenDialog;
+
+  final bool allowSnapshotting;
+
+  final Widget Function(
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      Curve curve,
+      Widget child)? transitionBuilder;
+
+  final Duration? duration;
+
+  final Curve curve;
+
+  final Widget Function(BuildContext context) builder;
+
+  @override
+  Route<T> createRoute(BuildContext context) {
+    return GenericPageRoute(
+      settings: this,
+      builder: builder,
+      maintainState: maintainState,
+      fullscreenDialog: fullscreenDialog,
+      duration: duration,
+      curve: curve,
+      transitionBuilder: transitionBuilder != null
+          ? (context, animation, secondaryAnimation, curve, child) {
+              return transitionBuilder!
+                  .call(context, animation, secondaryAnimation, curve, child);
+            }
+          : null,
+    );
+  }
+}
+
+class _pageBasedGenericPageRoute<T> extends PageRoute<T> {}

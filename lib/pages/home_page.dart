@@ -1,5 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sheet/route.dart';
+import 'package:sheet/sheet.dart';
 import 'package:widget_app/components/sheet_route.dart';
 import 'package:widget_app/generic.dart';
 
@@ -186,32 +190,92 @@ class _HomePageState extends State<HomePage> {
                     message: "This button opens a bottom sheet",
                     child: Button.primary(
                       onPressed: () async {
-                        final result = Navigator.of(context).push<String>(
-                          CustomSheetRoute(
+                        final random = Random();
+                        final result = Navigator.of(context).push<bool>(
+                          GenericSheetRoute(
+                            draggable: true,
+                            barrierDismissible: true,
+                            animationCurve: Curves.fastEaseInToSlowEaseOut,
+                            duration: const Duration(milliseconds: 200),
+                            fit: SheetFit.loose,
+                            physics: const BouncingSheetPhysics(),
                             builder: (context) {
                               return Container(
-                                color: context.theme.backgroundColor,
-                                child: const Text("data"),
+                                clipBehavior: Clip.antiAlias,
+                                decoration: BoxDecoration(
+                                  color: context.theme.backgroundColor,
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(
+                                      context.theme.radiusSize * 2,
+                                    ),
+                                  ),
+                                ),
+                                child: SingleChildScrollView(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: GappedColumn(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    gap: 16.0,
+                                    children: [
+                                      Align(
+                                        alignment: Alignment.center,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: context
+                                                .theme.surfaceColor.highest,
+                                            borderRadius: BorderRadius.circular(
+                                              context.theme.radiusSize,
+                                            ),
+                                          ),
+                                          height: 3,
+                                          width: 50,
+                                        ),
+                                      ),
+                                      Text(
+                                        "Are you absolutely sure?",
+                                        style: context.theme.baseTextStyle
+                                            .copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                      Text(
+                                        "This will delete all your data from our servers, and you will not be able to recover it.",
+                                        style: context.theme.baseTextStyle,
+                                      ),
+                                      GappedRow(
+                                        mainAxisSize: MainAxisSize.max,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        gap: 8.0,
+                                        children: [
+                                          Button.outline(
+                                            onPressed: () {
+                                              Navigator.of(context).pop(false);
+                                            },
+                                            children: const [Text("Cancel")],
+                                          ),
+                                          Button.destructive(
+                                            onPressed: () {
+                                              Navigator.of(context).pop(true);
+                                            },
+                                            children: const [Text("Confirm")],
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               );
                             },
                           ),
                         );
                       },
                       children: const [
-                        AnimatedSpinner(size: 16),
-                        Text("Open Bottom Sheet"),
+                        Text("Open confirm sheet"),
                       ],
                     ),
-                  ),
-                  Button.primary(
-                    disabled: true,
-                    onPressed: () async {
-                      await context.push('/about');
-                    },
-                    children: const [
-                      AnimatedSpinner(size: 16),
-                      Text("Go to About Page"),
-                    ],
                   ),
                   Button.glass(
                     onPressed: () async {
@@ -225,7 +289,7 @@ class _HomePageState extends State<HomePage> {
 
                       print(result);
                     },
-                    children: const [Text("Open Confirm Dialog")],
+                    children: const [Text("Open confirm dialog")],
                   ),
                   Button.outline(
                     onPressed: () async {

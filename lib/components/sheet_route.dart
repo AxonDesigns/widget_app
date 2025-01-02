@@ -1,64 +1,38 @@
+import 'package:sheet/route.dart';
 import 'package:sheet/sheet.dart';
 import 'package:widget_app/generic.dart';
 
-class CustomSheetRoute<T> extends ModalRoute<T> {
-  CustomSheetRoute({
-    required this.builder,
+class GenericSheetRoute<T> extends SheetRoute<T> {
+  GenericSheetRoute({
+    required super.builder,
+    super.initialExtent,
+    super.stops,
+    super.draggable,
+    super.fit,
+    super.physics,
+    super.animationCurve,
+    super.duration,
+    super.sheetLabel,
+    super.barrierLabel,
+    super.barrierColor,
+    super.barrierDismissible,
+    super.maintainState,
+    super.willPopThreshold,
+    super.decorationBuilder,
+    super.settings,
   });
 
-  final WidgetBuilder builder;
-
   @override
-  bool get maintainState => true;
-
-  @override
-  Color? get barrierColor => Colors.black.withOpacity(0.5);
-
-  @override
-  bool get barrierDismissible => true;
-
-  @override
-  String? get barrierLabel => "";
-
-  AnimationController? _routeAnimationController;
-  late final SheetController _sheetController;
-  SheetController get sheetController => _sheetController;
-
-  @override
-  AnimationController createAnimationController() {
-    assert(_routeAnimationController == null);
-    _routeAnimationController = AnimationController(
-      vsync: navigator!,
-      duration: transitionDuration,
+  Widget buildSecondaryTransitionForPreviousRoute(BuildContext context,
+      Animation<double> secondaryAnimation, Widget child) {
+    final CurvedAnimation curvedAnimation = CurvedAnimation(
+      parent: secondaryAnimation,
+      curve: Curves.fastEaseInToSlowEaseOut,
     );
-    return _routeAnimationController!;
-  }
-
-  @override
-  void install() {
-    _sheetController = SheetController();
-    super.install();
-  }
-
-  @override
-  void dispose() {
-    _sheetController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
-    return Sheet(
-      controller: sheetController,
-      initialExtent: 0.5,
-      child: builder(context),
+    return ScaleTransition(
+      scale: Tween(begin: 1.0, end: 0.9).animate(curvedAnimation),
+      filterQuality: FilterQuality.high,
+      child: child,
     );
   }
-
-  @override
-  bool get opaque => false;
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 200);
 }
