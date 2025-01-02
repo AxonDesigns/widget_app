@@ -18,3 +18,6 @@ export 'components/animated_spinner.dart';
 export 'components/confirm_dialog.dart';
 export 'components/input_container.dart';
 export 'components/select_input.dart';
+export 'components/fractional_clip_r_rect.dart';
+export 'components/size_clip_r_rect.dart';
+export 'components/link.dart';

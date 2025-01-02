@@ -1,6 +1,6 @@
-import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:widget_app/components/pass_through_route.dart';
 import 'package:widget_app/generic.dart';
 
 class SelectInput extends StatefulWidget {
@@ -13,7 +13,7 @@ class SelectInput extends StatefulWidget {
     this.focusNode,
   });
 
-  final List<SelectItem> items;
+  final List<Option> items;
   final int selectedIndex;
   final Function(int index)? onItemSelected;
   final bool expanded;
@@ -23,18 +23,17 @@ class SelectInput extends StatefulWidget {
   State<SelectInput> createState() => _SelectInputState();
 }
 
-class _SelectInputState extends State<SelectInput>
-    with SingleTickerProviderStateMixin {
+class _SelectInputState extends State<SelectInput> {
   var hovered = false;
   var pressed = false;
   var focused = false;
   var opened = false;
+
+  var _popupOpened = false;
+
   bool get enabled => true;
   late FocusNode _focusNode;
-  late AnimationController _animationController;
   late LayerLink _layerLink;
-  OverlayEntry? _overlayEntry;
-  Timer? _timer;
 
   final _duration = const Duration(milliseconds: 150);
 
@@ -43,17 +42,12 @@ class _SelectInputState extends State<SelectInput>
     super.initState();
     _focusNode = widget.focusNode ?? FocusNode();
     _setUpFocusNode(_focusNode);
-    _animationController = AnimationController(
-      vsync: this,
-      duration: _duration,
-    );
     _layerLink = LayerLink();
   }
 
   @override
   void dispose() {
     _focusNode.dispose();
-    _animationController.dispose();
     super.dispose();
   }
 
@@ -74,21 +68,13 @@ class _SelectInputState extends State<SelectInput>
   }
 
   void _handleFocusChange() {
-    setState(() {
-      focused = _focusNode.hasFocus;
-      if (focused) {
-        _openOverlay();
-      } else {
-        _closeOverlay();
-      }
-    });
+    setState(() {});
   }
 
   void _setUpFocusNode(FocusNode node) {
     node.addListener(_handleFocusChange);
     node.onKeyEvent = (node, event) {
-      if (event is KeyDownEvent &&
-          event.logicalKey == LogicalKeyboardKey.escape) {
+      if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
         node.unfocus();
         return KeyEventResult.handled;
       }
@@ -102,65 +88,75 @@ class _SelectInputState extends State<SelectInput>
   }
 
   void _openOverlay() {
-    if (_timer != null) {
-      _timer!.cancel();
-      _timer = null;
-    }
-    _destroyOverlay();
+    if (_popupOpened) return;
+
+    _focusNode.requestFocus();
 
     final renderBox = context.findRenderObject() as RenderBox;
     final size = renderBox.size;
-
-    _overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        left: 0,
-        top: 0,
-        width: size.width,
-        child: CompositedTransformFollower(
-          link: _layerLink,
-          followerAnchor: Alignment.topCenter,
-          targetAnchor: Alignment.bottomCenter,
-          offset: const Offset(0, 4),
-          child: TapRegion(
-            groupId: SelectInput,
-            child: SelectOverlay(
-              items: widget.items,
-              selectedIndex: widget.selectedIndex,
-              animation: _animationController.view,
-              opened: opened,
-              onItemSelected: (index) {
-                _focusNode.unfocus();
-                widget.onItemSelected?.call(index);
-              },
-            ),
-          ),
-        ),
+    Navigator.of(context).push(
+      PassThroughRoute(
+        transitionDuration: _duration,
+        onPopCallback: () {
+          if (_popupOpened && !hovered) {
+            _closeOverlay();
+          }
+        },
+        builder: (context, animation, secondaryAnimation) {
+          final curvedAnimation = CurvedAnimation(
+            parent: animation,
+            curve: Curves.fastEaseInToSlowEaseOut,
+          );
+          return Stack(
+            children: [
+              Positioned(
+                left: 0,
+                top: 0,
+                width: size.width,
+                child: CompositedTransformFollower(
+                  link: _layerLink,
+                  followerAnchor: Alignment.topCenter,
+                  targetAnchor: Alignment.bottomCenter,
+                  offset: const Offset(0, 4),
+                  child: TapRegion(
+                    groupId: SelectInput,
+                    child: FadeTransition(
+                      opacity: curvedAnimation,
+                      child: SlideTransition(
+                        position: Tween(begin: const Offset(0, -0.1), end: Offset.zero).animate(curvedAnimation),
+                        child: _SelectOverlay(
+                          items: widget.items,
+                          selectedIndex: widget.selectedIndex,
+                          opened: opened,
+                          onItemSelected: (index) {
+                            if (_popupOpened) {
+                              _closeOverlay();
+                            }
+                            widget.onItemSelected?.call(index);
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
-
-    Overlay.of(context).insert(_overlayEntry!);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_overlayEntry == null) return;
-      setState(() => opened = true);
-      _overlayEntry!.markNeedsBuild();
-      _animationController.forward();
+    setState(() {
+      _popupOpened = true;
     });
   }
 
   void _closeOverlay() {
-    _timer = Timer(_duration, () {
-      _destroyOverlay();
-      _timer = null;
+    if (!_popupOpened) return;
+    Navigator.of(context).pop();
+    _focusNode.unfocus();
+    setState(() {
+      _popupOpened = false;
     });
-    setState(() => opened = false);
-    _overlayEntry?.markNeedsBuild();
-    _animationController.reverse();
-  }
-
-  void _destroyOverlay() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
   }
 
   @override
@@ -169,7 +165,9 @@ class _SelectInputState extends State<SelectInput>
       groupId: SelectInput,
       onTapOutside: (event) {
         if (isDesktop) {
-          //FocusScope.of(context).requestFocus(FocusNode());
+          if (_popupOpened) {
+            //_closeOverlay();
+          }
           _focusNode.unfocus();
         }
       },
@@ -181,18 +179,33 @@ class _SelectInputState extends State<SelectInput>
           onShowHoverHighlight: (value) => setState(() => hovered = value),
           //descendantsAreFocusable: false,
           //descendantsAreTraversable: false,
+          shortcuts: {
+            LogicalKeySet(LogicalKeyboardKey.enter): const ButtonActivateIntent(),
+          },
+          actions: {
+            ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(
+              onInvoke: (intent) {
+                if (_popupOpened) {
+                  _closeOverlay();
+                } else {
+                  _openOverlay();
+                }
+                return null;
+              },
+            ),
+          },
           child: GestureDetector(
             onTap: () {
-              if (!_focusNode.hasFocus) {
-                FocusScope.of(context).requestFocus(_focusNode);
+              if (_popupOpened) {
+                _closeOverlay();
               } else {
-                _focusNode.unfocus();
+                _openOverlay();
               }
             },
             child: InputContainer(
               hovered: hovered,
               pressed: pressed,
-              focused: focused,
+              focused: focused || _popupOpened,
               child: GappedRow(
                 gap: 4.0,
                 mainAxisSize: MainAxisSize.min,
@@ -230,8 +243,8 @@ class _SelectInputState extends State<SelectInput>
   }
 }
 
-class SelectItem {
-  const SelectItem({
+class Option {
+  const Option({
     required this.text,
     this.icon,
     this.onPressed,
@@ -242,108 +255,75 @@ class SelectItem {
   final void Function(int index)? onPressed;
 }
 
-class SelectOverlay extends StatefulWidget {
-  const SelectOverlay({
+class _SelectOverlay extends StatefulWidget {
+  const _SelectOverlay({
     super.key,
     required this.items,
     required this.selectedIndex,
-    this.animation,
     this.opened = false,
     this.onItemSelected,
   });
 
-  final List<SelectItem> items;
+  final List<Option> items;
   final int selectedIndex;
-  final Animation<double>? animation;
   final bool opened;
   final Function(int index)? onItemSelected;
 
   @override
-  State<SelectOverlay> createState() => _SelectOverlayState();
+  State<_SelectOverlay> createState() => _SelectOverlayState();
 }
 
-class _SelectOverlayState extends State<SelectOverlay> {
+class _SelectOverlayState extends State<_SelectOverlay> {
   final scrollController = ScrollController();
-  late final CurvedAnimation _animation;
 
   bool get isScrollable {
     if (!scrollController.hasClients) return false;
 
-    return scrollController.position.minScrollExtent !=
-        scrollController.position.maxScrollExtent;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _animation = CurvedAnimation(
-      parent: widget.animation ?? const AlwaysStoppedAnimation(1.0),
-      curve: Curves.fastEaseInToSlowEaseOut,
-    );
-  }
-
-  @override
-  void dispose() {
-    scrollController.dispose();
-    _animation.dispose();
-    super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(covariant SelectOverlay oldWidget) {
-    super.didUpdateWidget(oldWidget);
+    return scrollController.position.minScrollExtent != scrollController.position.maxScrollExtent;
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return FadeTransition(
-          opacity: _animation,
-          child: SlideTransition(
-            position: Tween(
-              begin: const Offset(0, 0.05),
-              end: Offset.zero,
-            ).animate(_animation),
-            child: child,
-          ),
-        );
-      },
-      child: Card(
-        padding: const EdgeInsets.all(4.0),
-        elevation: 8.0,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            maxHeight: 250.0,
-          ),
-          child: ListView.separated(
-            controller: scrollController,
-            shrinkWrap: !isScrollable,
-            padding: EdgeInsets.zero,
-            itemCount: widget.items.length,
-            separatorBuilder: (context, index) {
-              return const SizedBox(height: 4.0);
-            },
-            itemBuilder: (context, index) {
-              return _SelectItem(
-                item: widget.items[index],
-                selected: widget.selectedIndex == index,
-                index: index,
-                onPressed: (index) {
-                  widget.onItemSelected?.call(index);
-                },
-              );
-            },
-          ),
+    return Card(
+      padding: const EdgeInsets.all(4.0),
+      elevation: 8.0,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxHeight: 250.0,
+        ),
+        child: _buildList(
+          widget.items.indexed.map((e) {
+            final (index, item) = e;
+            return _Option(
+              item: item,
+              selected: widget.selectedIndex == index,
+              index: index,
+              onPressed: (idx) {
+                widget.onItemSelected?.call(idx);
+              },
+            );
+          }).toList(),
         ),
       ),
     );
   }
+
+  Widget _buildList(List<Widget> children) {
+    final content = GappedColumn(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      gap: 4.0,
+      children: children,
+    );
+
+    return SingleChildScrollView(
+      child: content,
+    );
+  }
 }
 
-class _SelectItem extends StatefulWidget {
-  const _SelectItem({
+class _Option extends StatefulWidget {
+  const _Option({
     super.key,
     required this.item,
     required this.index,
@@ -351,16 +331,16 @@ class _SelectItem extends StatefulWidget {
     required this.selected,
   });
 
-  final SelectItem item;
+  final Option item;
   final bool selected;
   final int index;
   final void Function(int index) onPressed;
 
   @override
-  State<_SelectItem> createState() => _SelectItemState();
+  State<_Option> createState() => _OptionState();
 }
 
-class _SelectItemState extends State<_SelectItem> {
+class _OptionState extends State<_Option> {
   @override
   void initState() {
     super.initState();
@@ -378,15 +358,19 @@ class _SelectItemState extends State<_SelectItem> {
           color: context.theme.foregroundColor.withOpacity(0.1),
           borderRadius: BorderRadius.circular(context.theme.radiusSize),
         ),
-        child: _buildButton(context),
+        child: _buildButton(
+          context,
+          autofocus: widget.selected,
+        ),
       );
     }
 
     return _buildButton(context);
   }
 
-  Widget _buildButton(BuildContext context) {
+  Widget _buildButton(BuildContext context, {bool autofocus = false}) {
     return Button.ghost(
+      autofocus: autofocus,
       alignment: MainAxisAlignment.start,
       onPressed: () {
         widget.onPressed.call(widget.index);

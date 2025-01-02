@@ -29,11 +29,11 @@ class GenericScrollBehavior extends ScrollBehavior {
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        return desktopPhysics ?? const ClampingScrollPhysics();
+        return desktopPhysics ?? const BouncingScrollPhysics();
     }
   }
 
-  @override
+  /*@override
   Widget buildOverscrollIndicator(
       BuildContext context, Widget child, ScrollableDetails details) {
     switch (getPlatform(context)) {
@@ -51,5 +51,5 @@ class GenericScrollBehavior extends ScrollBehavior {
           child: child,
         );
     }
-  }
+  }*/
 }
