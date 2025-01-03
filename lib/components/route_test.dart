@@ -1,11 +1,9 @@
-import 'dart:ui';
-
 import 'package:sheet/route.dart';
 import 'package:widget_app/generic.dart';
 
-class CustomModalRoute<T> extends ModalRoute<T>
+class GenericModalRoute<T> extends ModalRoute<T>
     with DelegatedTransitionsRoute<T> {
-  CustomModalRoute({
+  GenericModalRoute({
     super.settings,
     this.barrierColor,
     this.barrierDismissible = true,
@@ -46,15 +44,9 @@ class CustomModalRoute<T> extends ModalRoute<T>
               parent: effectiveAnimation,
               curve: context.theme.curve,
             );
-            return BackdropFilter(
-              filter: ImageFilter.blur(
-                sigmaX: curvedAnimation.value * 3,
-                sigmaY: curvedAnimation.value * 3,
-              ),
-              child: Container(
-                color: context.theme.backgroundColor
-                    .withOpacity(curvedAnimation.value * 0.5),
-              ),
+            return Container(
+              color: context.theme.backgroundColor
+                  .withOpacity(curvedAnimation.value * 0.5),
             );
           },
           child: const SizedBox(),
@@ -88,6 +80,7 @@ class CustomModalRoute<T> extends ModalRoute<T>
             end: 1.0,
           ),
         ),
+        filterQuality: FilterQuality.medium,
         child: child,
       ),
     );
@@ -95,7 +88,7 @@ class CustomModalRoute<T> extends ModalRoute<T>
 
   @override
   bool canTransitionTo(TransitionRoute nextRoute) {
-    return nextRoute is CustomModalRoute;
+    return nextRoute is GenericModalRoute;
   }
 
   @override
@@ -127,7 +120,6 @@ class CustomModalRoute<T> extends ModalRoute<T>
             1.0,
             0.95,
           ),
-          filterQuality: FilterQuality.high,
           child: child,
         );
       },

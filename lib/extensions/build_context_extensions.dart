@@ -68,7 +68,7 @@ extension GenericDialogExtension on BuildContext {
     Offset? anchorPoint,
   }) {
     return Navigator.of(this, rootNavigator: useRootNavigator).push<T>(
-      CustomModalRoute<T>(
+      GenericModalRoute<T>(
         barrierDismissible: dismissible,
         barrierLabel: barrierLabel,
         barrierColor: Colors.transparent,

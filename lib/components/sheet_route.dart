@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:sheet/route.dart';
 import 'package:widget_app/generic.dart';
 
@@ -45,7 +43,7 @@ class GenericSheetRoute<T> extends SheetRoute<T> {
         1.0,
         0.95,
       ),
-      filterQuality: FilterQuality.high,
+      filterQuality: FilterQuality.medium,
       child: child,
     );
   }
@@ -71,15 +69,9 @@ class GenericSheetRoute<T> extends SheetRoute<T> {
             var currentValue = _firstModalFrame ? 0.0 : curvedAnimation.value;
             _firstModalFrame = false;
 
-            return BackdropFilter(
-              filter: ImageFilter.blur(
-                sigmaX: currentValue * 3,
-                sigmaY: currentValue * 3,
-              ),
-              child: Container(
-                color: context.theme.backgroundColor
-                    .withOpacity(currentValue * 0.5),
-              ),
+            return Container(
+              color:
+                  context.theme.backgroundColor.withOpacity(currentValue * 0.5),
             );
           },
           child: const SizedBox(),
