@@ -256,7 +256,8 @@ class _ButtonState extends State<Button> {
     _focusNode.canRequestFocus = widget.focusable;
     _focusNode.skipTraversal = !widget.focusable;
     node.onKeyEvent = (node, event) {
-      if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
+      if (event is KeyDownEvent &&
+          event.logicalKey == LogicalKeyboardKey.escape) {
         node.unfocus();
         return KeyEventResult.handled;
       }
@@ -319,24 +320,32 @@ class _ButtonState extends State<Button> {
               }
 
               if (state.contains(WidgetState.pressed)) {
-                return colorHSV.withValue(colorHSV.value - pressedValue).toColor();
+                return colorHSV
+                    .withValue(colorHSV.value - pressedValue)
+                    .toColor();
               }
 
               if (state.contains(WidgetState.hovered)) {
-                return colorHSV.withValue(colorHSV.value - hoveredValue).toColor();
+                return colorHSV
+                    .withValue(colorHSV.value - hoveredValue)
+                    .toColor();
               }
 
               return colorHSV.toColor();
             }).resolve(state),
-          ButtonVariant.outline || ButtonVariant.ghost => WidgetStateColor.resolveWith((state) {
+          ButtonVariant.outline ||
+          ButtonVariant.ghost =>
+            WidgetStateColor.resolveWith((state) {
               if (!enabled) {
                 return context.theme.foregroundColor.withOpacity(0.0);
               }
               if (state.contains(WidgetState.pressed)) {
-                return context.theme.foregroundColor.withOpacity(context.isDarkMode ? 0.05 : 0.15);
+                return context.theme.foregroundColor
+                    .withOpacity(context.isDarkMode ? 0.05 : 0.15);
               }
               if (state.contains(WidgetState.hovered)) {
-                return context.theme.foregroundColor.withOpacity(context.isDarkMode ? 0.1 : 0.2);
+                return context.theme.foregroundColor
+                    .withOpacity(context.isDarkMode ? 0.1 : 0.2);
               }
               return context.theme.foregroundColor.withOpacity(0.0);
             }).resolve(state),
@@ -358,7 +367,9 @@ class _ButtonState extends State<Button> {
             }).resolve(state),
           ButtonVariant.destructive => WidgetStateColor.resolveWith((state) {
               var colorHSV = HSVColor.fromColor(
-                isDarkMode ? (const Color.fromARGB(255, 165, 36, 36)) : (const Color.fromARGB(255, 223, 56, 56)),
+                isDarkMode
+                    ? (const Color.fromARGB(255, 165, 36, 36))
+                    : (const Color.fromARGB(255, 223, 56, 56)),
               );
 
               if (!enabled) {
@@ -366,11 +377,15 @@ class _ButtonState extends State<Button> {
               }
 
               if (state.contains(WidgetState.pressed)) {
-                return colorHSV.withValue(colorHSV.value - pressedValue).toColor();
+                return colorHSV
+                    .withValue(colorHSV.value - pressedValue)
+                    .toColor();
               }
 
               if (state.contains(WidgetState.hovered)) {
-                return colorHSV.withValue(colorHSV.value - hoveredValue).toColor();
+                return colorHSV
+                    .withValue(colorHSV.value - hoveredValue)
+                    .toColor();
               }
 
               return colorHSV.toColor();
@@ -380,8 +395,11 @@ class _ButtonState extends State<Button> {
 
     final borderColor = widget.borderColor?.resolve(state) ??
         switch (widget.variant) {
-          ButtonVariant.primary || ButtonVariant.destructive => WidgetStateColor.resolveWith((state) {
-              return context.theme.foregroundColor.withOpacity(context.isDarkMode ? 0.1 : 0.2);
+          ButtonVariant.primary ||
+          ButtonVariant.destructive =>
+            WidgetStateColor.resolveWith((state) {
+              return context.theme.foregroundColor
+                  .withOpacity(context.isDarkMode ? 0.1 : 0.2);
             }).resolve(state),
           ButtonVariant.ghost => WidgetStateColor.resolveWith((state) {
               return context.theme.foregroundColor.withOpacity(0.0);
@@ -390,7 +408,8 @@ class _ButtonState extends State<Button> {
               if (state.contains(WidgetState.hovered)) {
                 return context.theme.foregroundColor.withOpacity(0.0);
               }
-              return context.theme.foregroundColor.withOpacity(context.isDarkMode ? 0.1 : 0.2);
+              return context.theme.foregroundColor
+                  .withOpacity(context.isDarkMode ? 0.1 : 0.2);
             }).resolve(state),
           ButtonVariant.glass => WidgetStateColor.resolveWith((state) {
               return theme.primaryColor.withOpacity(0.5);
@@ -404,7 +423,8 @@ class _ButtonState extends State<Button> {
               return Colors.white;
             }).resolve(state),
           ButtonVariant.glass => theme.primaryColor,
-          ButtonVariant.destructive => isDarkMode ? context.theme.foregroundColor : theme.backgroundColor,
+          ButtonVariant.destructive =>
+            isDarkMode ? context.theme.foregroundColor : theme.backgroundColor,
           _ => theme.foregroundColor,
         };
 
@@ -449,7 +469,15 @@ class _ButtonState extends State<Button> {
             : () {
                 _wasClicked = true;
                 widget.onPressed!.call();
-                setState(() => focused = false);
+                setState(() {
+                  focused = false;
+                  pressed = true;
+                });
+                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                  setState(() {
+                    pressed = false;
+                  });
+                });
               },
         child: DottedBorder(
           color: context.theme.foregroundColor.withOpacity(focused ? 0.5 : 0.0),
@@ -485,12 +513,14 @@ class _ButtonState extends State<Button> {
                   vertical: widget.squared ? 7.5 : 6.0, */
                   horizontal: widget.padding != null
                       ? widget.padding!.horizontal
-                      : widget.children.length == 1 && widget.children.first is! Text
+                      : widget.children.length == 1 &&
+                              widget.children.first is! Text
                           ? squarePadding
                           : horizontalPadding,
                   vertical: widget.padding != null
                       ? widget.padding!.vertical
-                      : widget.children.length == 1 && widget.children.first is! Text
+                      : widget.children.length == 1 &&
+                              widget.children.first is! Text
                           ? squarePadding
                           : verticalPadding,
                 ),
@@ -506,9 +536,13 @@ class _ButtonState extends State<Button> {
                         (widget.children.isNotEmpty
                             ? Row(
                                 mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: widget.alignment ?? MainAxisAlignment.center,
-                                children: List.generate((widget.children.length * 2) - 1,
-                                    (index) => index.isEven ? widget.children[index ~/ 2] : SizedBox(width: widget.gap)),
+                                mainAxisAlignment: widget.alignment ??
+                                    MainAxisAlignment.center,
+                                children: List.generate(
+                                    (widget.children.length * 2) - 1,
+                                    (index) => index.isEven
+                                        ? widget.children[index ~/ 2]
+                                        : SizedBox(width: widget.gap)),
                               )
                             : const SizedBox.shrink()),
                   ),

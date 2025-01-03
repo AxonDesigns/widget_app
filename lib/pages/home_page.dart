@@ -1,5 +1,4 @@
-import 'dart:math';
-
+import 'package:flutter/services.dart' hide TextInput;
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sheet/sheet.dart';
@@ -116,6 +115,10 @@ class _HomePageState extends State<HomePage> {
                             ),
                             Option(
                               icon: Icon(LucideIcons.building),
+                              text: "Does not",
+                            ),
+                            Option(
+                              icon: Icon(LucideIcons.building),
                               text: "Resizes",
                             ),
                             Option(
@@ -125,14 +128,6 @@ class _HomePageState extends State<HomePage> {
                             Option(
                               icon: Icon(LucideIcons.list),
                               text: "it's contents!",
-                            ),
-                            Option(
-                              icon: Icon(LucideIcons.list),
-                              text: "This one",
-                            ),
-                            Option(
-                              icon: Icon(LucideIcons.list),
-                              text: "Does not",
                             ),
                             Option(
                               icon: Icon(LucideIcons.list),
@@ -189,89 +184,105 @@ class _HomePageState extends State<HomePage> {
                     message: "This button opens a bottom sheet",
                     child: Button.primary(
                       onPressed: () async {
-                        final random = Random();
-                        final result = Navigator.of(context).push<bool>(
+                        final result = await Navigator.of(context).push<bool>(
                           GenericSheetRoute(
                             draggable: true,
                             barrierDismissible: true,
+                            fit: SheetFit.loose,
                             animationCurve: Curves.fastEaseInToSlowEaseOut,
                             duration: const Duration(milliseconds: 300),
-                            fit: SheetFit.loose,
+                            sheetLabel: "Test sheet",
                             physics: const BouncingSheetPhysics(
                               overflowViewport: true,
+                              parent: FixedExtentScrollPhysics(),
                             ),
                             builder: (context) {
-                              return Container(
-                                clipBehavior: Clip.antiAlias,
-                                decoration: BoxDecoration(
-                                  color: context.theme.backgroundColor,
-                                  borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(
-                                      context.theme.radiusSize * 2,
-                                    ),
-                                  ),
+                              return AnnotatedRegion(
+                                value: SystemUiOverlayStyle(
+                                  systemNavigationBarColor:
+                                      context.theme.surfaceColor.low,
                                 ),
-                                child: SingleChildScrollView(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: GappedColumn(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    gap: 16.0,
-                                    children: [
-                                      Align(
-                                        alignment: Alignment.center,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: context
-                                                .theme.surfaceColor.highest,
-                                            borderRadius: BorderRadius.circular(
-                                              context.theme.radiusSize,
+                                child: Container(
+                                  clipBehavior: Clip.antiAlias,
+                                  decoration: BoxDecoration(
+                                      color: context.theme.surfaceColor.low,
+                                      borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(
+                                          context.theme.radiusSize * 2,
+                                        ),
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.25),
+                                          blurRadius: 12.0,
+                                          offset: const Offset(0.0, 0.0),
+                                        ),
+                                      ]),
+                                  child: SingleChildScrollView(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: GappedColumn(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      gap: 16.0,
+                                      children: [
+                                        Align(
+                                          alignment: Alignment.center,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: context
+                                                  .theme.surfaceColor.highest,
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                context.theme.radiusSize,
+                                              ),
                                             ),
+                                            height: 3,
+                                            width: 50,
                                           ),
-                                          height: 3,
-                                          width: 50,
                                         ),
-                                      ),
-                                      Text(
-                                        "Are you absolutely sure?",
-                                        style: context.theme.baseTextStyle
-                                            .copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                                      Text(
-                                        "This will delete all your data from our servers, and you will not be able to recover it.",
-                                        style: context.theme.baseTextStyle,
-                                      ),
-                                      GappedRow(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        gap: 8.0,
-                                        children: [
-                                          Button.outline(
-                                            onPressed: () {
-                                              Navigator.of(context).pop(false);
-                                            },
-                                            children: const [Text("Cancel")],
+                                        Text(
+                                          "Are you absolutely sure?",
+                                          style: context.theme.baseTextStyle
+                                              .copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
                                           ),
-                                          Button.destructive(
-                                            onPressed: () {
-                                              Navigator.of(context).pop(true);
-                                            },
-                                            children: const [Text("Confirm")],
-                                          )
-                                        ],
-                                      ),
-                                    ],
+                                        ),
+                                        Text(
+                                          "This will delete all your data from our servers, and you will not be able to recover it.",
+                                          style: context.theme.baseTextStyle,
+                                        ),
+                                        GappedRow(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          gap: 8.0,
+                                          children: [
+                                            Button.outline(
+                                              onPressed: () {
+                                                Navigator.of(context)
+                                                    .pop(false);
+                                              },
+                                              children: const [Text("Cancel")],
+                                            ),
+                                            Button.destructive(
+                                              onPressed: () {
+                                                Navigator.of(context).pop(true);
+                                              },
+                                              children: const [Text("Confirm")],
+                                            )
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               );
                             },
                           ),
                         );
+                        print(result);
                       },
                       children: const [
                         Text("Open confirm sheet"),

@@ -117,6 +117,7 @@ class _TooltipState extends State<Tooltip> {
   }
 
   Future<void> _createOverlayEntry() async {
+    if (context.platformType == PlatformType.mobile) return;
     final overlayState = Overlay.of(context);
     final mousePos = await screenRetriever.getCursorScreenPoint();
     final window = await windowManager.getPosition();

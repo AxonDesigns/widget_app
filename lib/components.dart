@@ -20,3 +20,4 @@ export 'components/select_input.dart';
 export 'components/fractional_clip_r_rect.dart';
 export 'components/size_clip_r_rect.dart';
 export 'components/link.dart';
+export 'components/delegated_transitions_route.dart';

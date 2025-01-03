@@ -1,4 +1,5 @@
 import 'package:sheet/route.dart';
+import 'package:sheet/sheet.dart';
 import 'package:widget_app/generic.dart';
 
 class GenericSheetRoute<T> extends SheetRoute<T> {
@@ -7,7 +8,7 @@ class GenericSheetRoute<T> extends SheetRoute<T> {
     super.initialExtent,
     super.stops,
     super.draggable,
-    super.fit,
+    super.fit = SheetFit.loose,
     super.physics,
     super.animationCurve,
     super.duration,
@@ -61,7 +62,7 @@ class GenericSheetRoute<T> extends SheetRoute<T> {
         },
         child: AnimatedBuilder(
           animation: effectiveAnimation,
-          builder: (context, child) {
+          builder: (context, _) {
             final curvedAnimation = CurvedAnimation(
               parent: effectiveAnimation,
               curve: context.theme.curve,
@@ -74,9 +75,30 @@ class GenericSheetRoute<T> extends SheetRoute<T> {
                   context.theme.backgroundColor.withOpacity(currentValue * 0.5),
             );
           },
-          child: const SizedBox(),
         ),
       );
     });
+  }
+
+  @override
+  Widget buildSheet(BuildContext context, Widget child) {
+    SheetPhysics? effectivePhysics = SnapSheetPhysics(
+      stops: stops ?? <double>[0, 1],
+      relative: true,
+      parent: physics,
+    );
+    if (!draggable) {
+      effectivePhysics = const NeverDraggableSheetPhysics();
+    }
+
+    return Sheet.raw(
+      initialExtent: initialExtent,
+      decorationBuilder: decorationBuilder,
+      fit: fit,
+      resizable: false,
+      physics: effectivePhysics,
+      controller: sheetController,
+      child: child,
+    );
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:widget_app/components/route_test.dart';
 import 'package:widget_app/generic.dart';
 
@@ -10,6 +11,14 @@ extension ThemeModeStateExtension on BuildContext {
 
   bool get isDarkMode {
     return InheritedThemeMode.maybeOf(this)?.isDarkMode ?? false;
+  }
+
+  Brightness get brightness {
+    return isDarkMode ? Brightness.dark : Brightness.light;
+  }
+
+  Brightness get invertedBrightness {
+    return isDarkMode ? Brightness.light : Brightness.dark;
   }
 
   void setThemeMode(ThemeMode mode) {
@@ -72,45 +81,8 @@ extension GenericDialogExtension on BuildContext {
         barrierDismissible: dismissible,
         barrierLabel: barrierLabel,
         barrierColor: Colors.transparent,
-        /*transitionDuration: transitionDuration,
-        transitionBuilder: transitionBuilder,*/
         settings: routeSettings,
         builder: pageBuilder,
-        /*anchorPoint: anchorPoint,
-        pageBuilder: pageBuilder,*/
-      ),
-    );
-  }
-
-  Future<T?> showTestDialog<T>({
-    required RoutePageBuilder pageBuilder,
-    bool dismissible = true,
-    String barrierLabel = 'Dismiss',
-    Duration transitionDuration = const Duration(milliseconds: 200),
-    RouteTransitionsBuilder? transitionBuilder,
-    bool useRootNavigator = false,
-    RouteSettings? routeSettings,
-    Offset? anchorPoint,
-  }) {
-    return Navigator.of(this, rootNavigator: useRootNavigator).push<T>(
-      PageRouteBuilder<T>(
-        barrierDismissible: dismissible,
-        barrierLabel: barrierLabel,
-        barrierColor: Colors.transparent,
-        transitionDuration: transitionDuration,
-        reverseTransitionDuration: transitionDuration,
-        settings: routeSettings,
-        fullscreenDialog: false,
-        allowSnapshotting: true,
-        maintainState: true,
-        pageBuilder: (context, animation, secondaryAnimation) {
-          return pageBuilder(context, animation, secondaryAnimation);
-        },
-        opaque: false,
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          print(secondaryAnimation.value);
-          return child;
-        },
       ),
     );
   }

@@ -1,4 +1,3 @@
-import 'package:sheet/route.dart';
 import 'package:widget_app/generic.dart';
 
 class GenericPageRoute<T> extends PageRoute<T>
@@ -134,7 +133,7 @@ class _PageBasedGenericPageRoute<T> extends PageRoute<T>
 //Extended Routes
 
 class GenericExtendedPageRoute<T> extends GenericPageRoute<T>
-    with PreviousSheetRouteMixin<T>, DelegatedTransitionsRoute<T> {
+    with DelegatedTransitionsRoute<T> {
   GenericExtendedPageRoute({
     required super.builder,
     super.settings,
@@ -170,7 +169,7 @@ class GenericExtendedPage<T> extends Page<T> {
   }
 }
 
-// A page-based version of MaterialPageRoute.
+// A page-based version of GenericPageRoute.
 //
 // This route uses the builder from the page to build its content. This ensures
 // the content is up to date after page updates.

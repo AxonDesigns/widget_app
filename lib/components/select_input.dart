@@ -217,8 +217,8 @@ class _SelectInputState extends State<SelectInput> {
               pressed: pressed,
               focused: focused || _popupOpened,
               padding: EdgeInsets.symmetric(
-                horizontal: isDesktop ? 10.0 : 13.0,
-                vertical: isDesktop ? 9.0 : 12.0,
+                horizontal: isDesktop ? 10.0 : 14.0,
+                vertical: isDesktop ? 9.0 : 16.0,
               ),
               child: GappedRow(
                 gap: 4.0,

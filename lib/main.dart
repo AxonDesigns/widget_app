@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:widget_app/components/app_provider.dart';
@@ -56,7 +57,16 @@ class MainApp extends StatelessWidget {
             return Column(
               children: [
                 if (isDesktop && !kIsWeb) const WindowTitleBar(),
-                Expanded(child: child!),
+                Expanded(
+                  child: AnnotatedRegion(
+                    value: SystemUiOverlayStyle(
+                      statusBarColor: context.theme.backgroundColor,
+                      statusBarIconBrightness: context.invertedBrightness,
+                      systemNavigationBarColor: context.theme.backgroundColor,
+                    ),
+                    child: child!,
+                  ),
+                ),
               ],
             );
           },

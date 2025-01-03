@@ -1,7 +1,6 @@
-import 'package:sheet/route.dart';
 import 'package:widget_app/generic.dart';
 
-class GenericModalRoute<T> extends ModalRoute<T>
+class GenericModalRoute<T> extends PageRoute<T>
     with DelegatedTransitionsRoute<T> {
   GenericModalRoute({
     super.settings,
@@ -75,12 +74,9 @@ class GenericModalRoute<T> extends ModalRoute<T>
       opacity: curvedAnimation,
       child: ScaleTransition(
         scale: curvedAnimation.drive(
-          Tween(
-            begin: 1.1,
-            end: 1.0,
-          ),
+          Tween(begin: 1.1, end: 1.0),
         ),
-        filterQuality: FilterQuality.medium,
+        filterQuality: FilterQuality.high,
         child: child,
       ),
     );
@@ -101,17 +97,20 @@ class GenericModalRoute<T> extends ModalRoute<T>
     return true;
   }
 
+  var _firstFrame = true;
+
   @override
   Widget buildSecondaryTransitionForPreviousRoute(BuildContext context,
       Animation<double> secondaryAnimation, Widget child) {
-    final CurvedAnimation curvedAnimation = CurvedAnimation(
-      parent: secondaryAnimation,
-      curve: context.theme.curve,
-    );
     return AnimatedBuilder(
       animation: secondaryAnimation,
       builder: (context, child) {
-        var currentValue = curvedAnimation.value;
+        final curvedAnimation = CurvedAnimation(
+          parent: secondaryAnimation,
+          curve: context.theme.curve,
+        );
+        var currentValue = _firstFrame ? 0.0 : curvedAnimation.value;
+        _firstFrame = false;
 
         return Transform.scale(
           scale: currentValue.remap(
