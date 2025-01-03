@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sheet/route.dart';
 import 'package:sheet/sheet.dart';
 import 'package:widget_app/components/sheet_route.dart';
 import 'package:widget_app/generic.dart';
@@ -196,9 +195,11 @@ class _HomePageState extends State<HomePage> {
                             draggable: true,
                             barrierDismissible: true,
                             animationCurve: Curves.fastEaseInToSlowEaseOut,
-                            duration: const Duration(milliseconds: 200),
+                            duration: const Duration(milliseconds: 300),
                             fit: SheetFit.loose,
-                            physics: const BouncingSheetPhysics(),
+                            physics: const BouncingSheetPhysics(
+                              overflowViewport: true,
+                            ),
                             builder: (context) {
                               return Container(
                                 clipBehavior: Clip.antiAlias,

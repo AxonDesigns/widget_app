@@ -1,5 +1,4 @@
 export 'components/app.dart';
-export 'components/generic_page.dart';
 export 'components/generic_page_route.dart';
 export 'components/text_input.dart';
 export 'components/colors.dart';

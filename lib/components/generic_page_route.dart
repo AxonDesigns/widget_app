@@ -2,50 +2,42 @@ import 'package:sheet/route.dart';
 import 'package:widget_app/generic.dart';
 
 class GenericPageRoute<T> extends PageRoute<T>
-    with DelegatedTransitionsRoute<T>, PreviousSheetRouteMixin<T> {
+    with GenericRouteTransitionMixin<T> {
   GenericPageRoute({
     super.settings,
-    required Function(BuildContext context) builder,
+    required this.builder,
     this.duration,
     this.curve = Curves.fastEaseInToSlowEaseOut,
-    this.transitionBuilder,
     this.maintainState = true,
     super.fullscreenDialog = false,
-  }) : buildContent = builder;
-
-  Function(BuildContext context) buildContent;
+  });
 
   final Duration? duration;
   final Curve curve;
-
-  final Widget Function(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Curve curve,
-    Widget child,
-  )? transitionBuilder;
+  final Widget Function(BuildContext context) builder;
 
   @override
-  bool maintainState;
-
-  @override
-  Duration get transitionDuration =>
-      duration ?? const Duration(milliseconds: 400);
+  final bool maintainState;
 
   @override
   String get debugLabel => '${super.debugLabel}(${settings.name})';
+
+  @override
+  Widget buildContent(BuildContext context) => builder(context);
+}
+
+mixin GenericRouteTransitionMixin<T> on PageRoute<T> {
+  @protected
+  Widget buildContent(BuildContext context);
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 300);
 
   @override
   Color? get barrierColor => const Color(0x00000000);
 
   @override
   String? get barrierLabel => null;
-
-  @override
-  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
-    return (nextRoute is GenericPageRoute && !nextRoute.fullscreenDialog);
-  }
 
   @override
   Widget buildPage(
@@ -67,80 +59,33 @@ class GenericPageRoute<T> extends PageRoute<T>
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    final isFlipped = animation.status == AnimationStatus.reverse;
-    final isSecondaryFlipped =
-        secondaryAnimation.status == AnimationStatus.reverse;
-
-    final curvedAnimation = CurvedAnimation(
-      parent: animation,
-      curve: isFlipped ? curve.flipped : curve,
+    return context.theme.transitionsBuilder(
+      context,
+      animation,
+      secondaryAnimation,
+      child,
     );
-    final curvedSecondaryAnimation = CurvedAnimation(
-      parent: secondaryAnimation,
-      curve: isSecondaryFlipped ? curve.flipped : curve,
-    );
+  }
 
-    if (transitionBuilder != null) {
-      return transitionBuilder!.call(
-        context,
-        animation,
-        secondaryAnimation,
-        curve,
-        child,
-      );
-    }
-
-    // animation = next page
-    // secondaryAnimation = current page
-
-    const value = 0.075; // percentage of the screen height
-
-    return SlideTransition(
-      position: Tween<Offset>(
-        begin: Offset(0.0, isFlipped ? -value : value),
-        end: Offset.zero,
-      ).animate(curvedAnimation),
-      child: Opacity(
-        opacity: curvedAnimation.value
-            .remap(
-              isFlipped ? 0.25 : 0.0,
-              isFlipped ? 1.0 : 0.75,
-              0.0,
-              1.0,
-            )
-            .saturate(),
-        child: SlideTransition(
-          position: Tween<Offset>(
-            begin: Offset.zero,
-            end: Offset(0.0, isSecondaryFlipped ? value : -value),
-          ).animate(curvedSecondaryAnimation),
-          child: Opacity(
-            opacity: (1 - curvedSecondaryAnimation.value)
-                .remap(
-                  isSecondaryFlipped ? 0.0 : 0.5,
-                  isSecondaryFlipped ? 0.5 : 1.0,
-                  0.0,
-                  1.0,
-                )
-                .saturate(),
-            child: child,
-          ),
-        ),
-      ),
-    );
+  @override
+  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
+    return (nextRoute is GenericRouteTransitionMixin &&
+        !nextRoute.fullscreenDialog);
   }
 }
 
 class GenericPage<T> extends Page<T> {
   const GenericPage({
     super.key,
-    required this.builder,
-    this.transitionBuilder,
+    required this.child,
     this.maintainState = true,
     this.fullscreenDialog = false,
     this.allowSnapshotting = true,
-    this.duration,
-    this.curve = Curves.fastEaseInToSlowEaseOut,
+    super.canPop,
+    super.onPopInvoked,
+    super.name,
+    super.arguments,
+    super.restorationId,
   });
 
   final bool maintainState;
@@ -149,36 +94,108 @@ class GenericPage<T> extends Page<T> {
 
   final bool allowSnapshotting;
 
-  final Widget Function(
-      BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-      Curve curve,
-      Widget child)? transitionBuilder;
-
-  final Duration? duration;
-
-  final Curve curve;
-
-  final Widget Function(BuildContext context) builder;
+  final Widget child;
 
   @override
   Route<T> createRoute(BuildContext context) {
-    return GenericPageRoute(
-      settings: this,
-      builder: builder,
-      maintainState: maintainState,
-      fullscreenDialog: fullscreenDialog,
-      duration: duration,
-      curve: curve,
-      transitionBuilder: transitionBuilder != null
-          ? (context, animation, secondaryAnimation, curve, child) {
-              return transitionBuilder!
-                  .call(context, animation, secondaryAnimation, curve, child);
-            }
-          : null,
+    return _PageBasedGenericPageRoute(
+      page: this,
+      allowSnapshotting: allowSnapshotting,
     );
   }
 }
 
-class _pageBasedGenericPageRoute<T> extends PageRoute<T> {}
+class _PageBasedGenericPageRoute<T> extends PageRoute<T>
+    with GenericRouteTransitionMixin<T> {
+  _PageBasedGenericPageRoute({
+    required GenericPage<T> page,
+    super.allowSnapshotting,
+  }) : super(
+          settings: page,
+        );
+
+  GenericPage<T> get _page => settings as GenericPage<T>;
+
+  @override
+  Widget buildContent(BuildContext context) {
+    return _page.child;
+  }
+
+  @override
+  bool get maintainState => _page.maintainState;
+
+  @override
+  bool get fullscreenDialog => _page.fullscreenDialog;
+
+  @override
+  String get debugLabel => '${super.debugLabel}(${_page.name})';
+}
+
+//Extended Routes
+
+class GenericExtendedPageRoute<T> extends GenericPageRoute<T>
+    with PreviousSheetRouteMixin<T>, DelegatedTransitionsRoute<T> {
+  GenericExtendedPageRoute({
+    required super.builder,
+    super.settings,
+    super.maintainState = true,
+    super.fullscreenDialog = false,
+  });
+}
+
+class GenericExtendedPage<T> extends Page<T> {
+  /// Creates a material page.
+  const GenericExtendedPage({
+    required this.child,
+    this.maintainState = true,
+    this.fullscreenDialog = false,
+    super.key,
+    super.name,
+    super.arguments,
+    super.restorationId,
+  });
+
+  /// The content to be shown in the [Route] created by this page.
+  final Widget child;
+
+  /// {@macro flutter.widgets.ModalRoute.maintainState}
+  final bool maintainState;
+
+  /// {@macro flutter.widgets.PageRoute.fullscreenDialog}
+  final bool fullscreenDialog;
+
+  @override
+  Route<T> createRoute(BuildContext context) {
+    return _PageBasedGenericExtendedPageRoute<T>(page: this);
+  }
+}
+
+// A page-based version of MaterialPageRoute.
+//
+// This route uses the builder from the page to build its content. This ensures
+// the content is up to date after page updates.
+class _PageBasedGenericExtendedPageRoute<T>
+    extends GenericExtendedPageRoute<T> {
+  _PageBasedGenericExtendedPageRoute({
+    required GenericExtendedPage<T> page,
+  }) : super(
+          settings: page,
+          builder: (BuildContext context) => page.child,
+        );
+
+  GenericExtendedPage<T> get _page => settings as GenericExtendedPage<T>;
+
+  @override
+  Widget buildContent(BuildContext context) {
+    return _page.child;
+  }
+
+  @override
+  bool get maintainState => _page.maintainState;
+
+  @override
+  bool get fullscreenDialog => _page.fullscreenDialog;
+
+  @override
+  String get debugLabel => '${super.debugLabel}(${_page.name})';
+}

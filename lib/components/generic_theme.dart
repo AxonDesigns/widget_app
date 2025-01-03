@@ -84,6 +84,13 @@ extension type const RadiusSize._(double value) {
   }
 }
 
+typedef TransitionsBuilder = Widget Function(
+  BuildContext context,
+  Animation<double> animation,
+  Animation<double> secondaryAnimation,
+  Widget child,
+);
+
 /// The [ThemeData] used by [GenericTheme].
 class GenericThemeData {
   const GenericThemeData({
@@ -94,7 +101,10 @@ class GenericThemeData {
     required this.radiusSize,
     required this.baseTextStyle,
     required this.themeMode,
-  }) : _highestSurfaceColor = highestSurfaceColor;
+    this.curve = Curves.fastEaseInToSlowEaseOut,
+    TransitionsBuilder? transitionsBuilder,
+  })  : _transitionsBuilder = transitionsBuilder,
+        _highestSurfaceColor = highestSurfaceColor;
 
   factory GenericThemeData.light() => GenericThemeData(
       primaryColor: const Color.fromARGB(255, 0, 106, 212),
@@ -132,6 +142,8 @@ class GenericThemeData {
   final double radiusSize;
   final TextStyle baseTextStyle;
   final ThemeMode themeMode;
+  final Curve curve;
+  final TransitionsBuilder? _transitionsBuilder;
 
   final Color _highestSurfaceColor;
 
@@ -150,6 +162,72 @@ class GenericThemeData {
         },
       );
 
+  Widget _defaultTransitionsBuilder(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final curve = context.theme.curve;
+
+    final isFlipped = animation.status == AnimationStatus.reverse;
+    final isSecondaryFlipped =
+        secondaryAnimation.status == AnimationStatus.reverse;
+
+    final curvedAnimation = CurvedAnimation(
+      parent: animation,
+      curve: isFlipped ? curve.flipped : curve,
+    );
+    final curvedSecondaryAnimation = CurvedAnimation(
+      parent: secondaryAnimation,
+      curve: isSecondaryFlipped ? curve.flipped : curve,
+    );
+
+    // animation = next page
+    // secondaryAnimation = current page
+    const value = 0.075; // percentage of the screen height
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: Offset(0.0, isFlipped ? -value : value),
+        end: Offset.zero,
+      ).animate(curvedAnimation),
+      child: Opacity(
+        opacity: curvedAnimation.value
+            .remap(
+              isFlipped ? 0.25 : 0.0,
+              isFlipped ? 1.0 : 0.75,
+              0.0,
+              1.0,
+            )
+            .saturate(),
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: Offset.zero,
+            end: Offset(0.0, isSecondaryFlipped ? value : -value),
+          ).animate(curvedSecondaryAnimation),
+          child: Opacity(
+            opacity: (1 - curvedSecondaryAnimation.value)
+                .remap(
+                  isSecondaryFlipped ? 0.0 : 0.5,
+                  isSecondaryFlipped ? 0.5 : 1.0,
+                  0.0,
+                  1.0,
+                )
+                .saturate(),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+
+  TransitionsBuilder get transitionsBuilder {
+    if (_transitionsBuilder != null) {
+      return _transitionsBuilder;
+    }
+    return _defaultTransitionsBuilder;
+  }
+
   static GenericThemeData lerp(
       GenericThemeData a, GenericThemeData b, double t) {
     if (identical(a, b)) return a;
@@ -160,6 +238,7 @@ class GenericThemeData {
       foregroundColor: Color.lerp(a.foregroundColor, b.foregroundColor, t)!,
       baseTextStyle: b.baseTextStyle,
       radiusSize: lerpDouble(a.radiusSize, b.radiusSize, t)!,
+      curve: t <= 0.5 ? a.curve : b.curve,
       themeMode: b.themeMode,
       highestSurfaceColor:
           Color.lerp(a._highestSurfaceColor, b._highestSurfaceColor, t)!,

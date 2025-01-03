@@ -1,27 +1,33 @@
 import 'package:go_router/go_router.dart';
-import 'package:sheet/route.dart';
 import 'package:widget_app/generic.dart';
 import 'package:widget_app/pages/about_page.dart';
 import 'package:widget_app/pages/home_page.dart';
 
+class CustomGoRoute extends GoRoute {
+  CustomGoRoute({
+    required super.path,
+    super.name,
+    required Widget child,
+  }) : super(
+          pageBuilder: (context, state) => GenericExtendedPage(
+            key: state.pageKey,
+            child: child,
+          ),
+        );
+}
+
 var router = GoRouter(
-  initialLocation: "/",
+  initialLocation: '/',
   routes: [
-    GoRoute(
+    CustomGoRoute(
       path: '/',
-      name: "home",
-      pageBuilder: (context, state) => MaterialExtendedPage(
-        key: state.pageKey,
-        child: const HomePage(),
-      ),
+      name: 'home',
+      child: const HomePage(),
     ),
-    GoRoute(
+    CustomGoRoute(
       path: '/about',
-      name: "about",
-      pageBuilder: (context, state) => MaterialExtendedPage(
-        key: state.pageKey,
-        child: const AboutPage(),
-      ),
+      name: 'about',
+      child: const AboutPage(),
     ),
   ],
 );

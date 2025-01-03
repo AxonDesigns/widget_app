@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:widget_app/components/route_test.dart';
 import 'package:widget_app/generic.dart';
 
 extension ThemeModeStateExtension on BuildContext {
@@ -28,9 +29,10 @@ extension ContextExtensions on BuildContext {
       dismissible: true,
       barrierLabel: "Dismiss confirm dialog",
       transitionDuration: const Duration(milliseconds: 150),
-      pageBuilder: (context, animation, secondaryAnimation) {
+      useRootNavigator: false,
+      pageBuilder: (context) {
         return ConfirmDialog(
-          animation: animation,
+          animation: const AlwaysStoppedAnimation(1.0),
           title: title,
           content: content,
           type: type,
@@ -56,25 +58,59 @@ extension GenericUtilities on BuildContext {
 extension GenericDialogExtension on BuildContext {
   /// Shows a dialog above the current contents of the app.
   Future<T?> showGenericDialog<T>({
-    required RoutePageBuilder pageBuilder,
+    required WidgetBuilder pageBuilder,
     bool dismissible = true,
     String barrierLabel = 'Dismiss',
-    Duration transitionDuration = const Duration(milliseconds: 150),
+    Duration transitionDuration = const Duration(milliseconds: 200),
     RouteTransitionsBuilder? transitionBuilder,
-    bool useRootNavigator = true,
+    bool useRootNavigator = false,
     RouteSettings? routeSettings,
     Offset? anchorPoint,
   }) {
     return Navigator.of(this, rootNavigator: useRootNavigator).push<T>(
-      RawDialogRoute<T>(
+      CustomModalRoute<T>(
         barrierDismissible: dismissible,
         barrierLabel: barrierLabel,
-        barrierColor: const Color.fromARGB(0, 0, 0, 0),
-        transitionDuration: transitionDuration,
-        transitionBuilder: transitionBuilder,
+        barrierColor: Colors.transparent,
+        /*transitionDuration: transitionDuration,
+        transitionBuilder: transitionBuilder,*/
         settings: routeSettings,
-        anchorPoint: anchorPoint,
-        pageBuilder: pageBuilder,
+        builder: pageBuilder,
+        /*anchorPoint: anchorPoint,
+        pageBuilder: pageBuilder,*/
+      ),
+    );
+  }
+
+  Future<T?> showTestDialog<T>({
+    required RoutePageBuilder pageBuilder,
+    bool dismissible = true,
+    String barrierLabel = 'Dismiss',
+    Duration transitionDuration = const Duration(milliseconds: 200),
+    RouteTransitionsBuilder? transitionBuilder,
+    bool useRootNavigator = false,
+    RouteSettings? routeSettings,
+    Offset? anchorPoint,
+  }) {
+    return Navigator.of(this, rootNavigator: useRootNavigator).push<T>(
+      PageRouteBuilder<T>(
+        barrierDismissible: dismissible,
+        barrierLabel: barrierLabel,
+        barrierColor: Colors.transparent,
+        transitionDuration: transitionDuration,
+        reverseTransitionDuration: transitionDuration,
+        settings: routeSettings,
+        fullscreenDialog: false,
+        allowSnapshotting: true,
+        maintainState: true,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return pageBuilder(context, animation, secondaryAnimation);
+        },
+        opaque: false,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          print(secondaryAnimation.value);
+          return child;
+        },
       ),
     );
   }
