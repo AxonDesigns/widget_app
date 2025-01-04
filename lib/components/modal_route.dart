@@ -1,11 +1,12 @@
 import 'package:widget_app/generic.dart';
 
-class GenericModalRoute<T> extends PageRoute<T>
-    with GenericDelegatedTransitionsRoute<T> {
+class GenericModalRoute<T> extends PageRoute<T> with GenericDelegatedTransitionsRoute<T> {
   GenericModalRoute({
     super.settings,
+    super.fullscreenDialog = false,
+    super.allowSnapshotting = true,
+    super.barrierDismissible = true,
     this.barrierColor,
-    this.barrierDismissible = true,
     this.barrierLabel,
     required this.builder,
   });
@@ -16,19 +17,31 @@ class GenericModalRoute<T> extends PageRoute<T>
   Color? barrierColor;
 
   @override
-  bool barrierDismissible;
-
-  @override
   String? barrierLabel;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
+  bool get opaque => false;
+
+  @override
+  bool get maintainState => true;
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 300);
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return builder(context);
   }
 
-  var _firstBarrierFrame = true;
+  Animation<double> _buildCurveAnimation(Animation<double> animation, Curve curve) {
+    final effectiveCurve = animation.status == AnimationStatus.reverse ? curve.flipped : curve;
+    return CurvedAnimation(
+      parent: animation,
+      curve: effectiveCurve,
+    );
+  }
 
+  var _firstBarrierFrame = true;
   @override
   Widget buildModalBarrier() {
     final effectiveAnimation = animation ?? const AlwaysStoppedAnimation(1.0);
@@ -41,17 +54,13 @@ class GenericModalRoute<T> extends PageRoute<T>
         child: AnimatedBuilder(
           animation: effectiveAnimation,
           builder: (context, child) {
-            final curvedAnimation = CurvedAnimation(
-              parent: effectiveAnimation,
-              curve: context.theme.curve,
-            );
+            final curvedAnimation = _buildCurveAnimation(effectiveAnimation, context.theme.curve);
 
             var currentValue = _firstBarrierFrame ? 0.0 : curvedAnimation.value;
             _firstBarrierFrame = false;
 
             return Container(
-              color:
-                  context.theme.backgroundColor.withOpacity(currentValue * 0.5),
+              color: context.theme.backgroundColor.withOpacity(currentValue * 0.5),
             );
           },
           child: const SizedBox(),
@@ -61,21 +70,8 @@ class GenericModalRoute<T> extends PageRoute<T>
   }
 
   @override
-  bool get maintainState => true;
-
-  @override
-  bool get opaque => false;
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 300);
-
-  @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation, Widget child) {
-    final curvedAnimation = CurvedAnimation(
-      parent: animation,
-      curve: context.theme.curve,
-    );
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    final curvedAnimation = _buildCurveAnimation(animation, context.theme.curve);
     return FadeTransition(
       opacity: curvedAnimation,
       child: ScaleTransition(
@@ -106,15 +102,11 @@ class GenericModalRoute<T> extends PageRoute<T>
   var _firstFrame = true;
 
   @override
-  Widget buildSecondaryTransitionForPreviousRoute(BuildContext context,
-      Animation<double> secondaryAnimation, Widget child) {
+  Widget buildSecondaryTransitionForPreviousRoute(BuildContext context, Animation<double> secondaryAnimation, Widget child) {
     return AnimatedBuilder(
       animation: secondaryAnimation,
       builder: (context, child) {
-        final curvedAnimation = CurvedAnimation(
-          parent: secondaryAnimation,
-          curve: context.theme.curve,
-        );
+        final curvedAnimation = _buildCurveAnimation(secondaryAnimation, context.theme.curve);
         var currentValue = _firstFrame ? 0.0 : curvedAnimation.value;
         _firstFrame = false;
 

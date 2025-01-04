@@ -1,63 +1,29 @@
 import 'package:flutter/rendering.dart';
+import 'package:widget_app/components/modal_route.dart';
 import 'package:widget_app/generic.dart';
 import 'package:sheet/sheet.dart';
 
-extension on double {
-  /// Re-maps a number from one range to another.
-  ///
-  /// A value of fromLow would get mapped to toLow, a value of
-  /// fromHigh to toHigh, values in-between to values in-between, etc
-  double mapDistance({
-    required double fromLow,
-    required double fromHigh,
-    required double toLow,
-    required double toHigh,
-  }) {
-    final double offset = toLow;
-    final double ratio = (toHigh - toLow) / (fromHigh - fromLow);
-    return ratio * (this - fromLow) + offset;
-  }
-}
-
-class BetterSheetRoute<T> extends PageRoute<T>
-    with GenericDelegatedTransitionsRoute<T> {
-  BetterSheetRoute({
-    required this.builder,
-    this.maintainState = true,
-    this.barrierDismissible = true,
-    this.barrierColor,
-    this.barrierLabel,
+class GenericSheetRoute<T> extends GenericModalRoute<T> {
+  GenericSheetRoute({
+    super.settings,
+    required super.builder,
+    super.barrierDismissible = true,
+    super.barrierColor,
+    super.barrierLabel,
+    super.allowSnapshotting = true,
     this.initialExtent = 1,
     this.stops,
     this.draggable = true,
     this.fit = SheetFit.loose,
     this.physics,
     this.animationCurve,
-    this.transitionDuration = const Duration(milliseconds: 300),
+    Duration? duration,
     this.sheetLabel,
     this.willPopThreshold = 0.8,
     this.decorationBuilder,
-    super.settings,
   }) : super(
           fullscreenDialog: true,
         );
-
-  final WidgetBuilder builder;
-
-  @override
-  final Color? barrierColor;
-
-  @override
-  final String? barrierLabel;
-
-  @override
-  final bool barrierDismissible;
-
-  @override
-  final bool maintainState;
-
-  @override
-  final Duration transitionDuration;
 
   /// Relative extent up to where the sheet is animated when pushed for
   /// the first time.
@@ -90,9 +56,9 @@ class BetterSheetRoute<T> extends PageRoute<T>
   /// Curve for the transition animation
   final Curve? animationCurve;
 
-  /// Drag threshold to block any interaction if [Route.willPop] returns false
+  /// Drag threshold to block any interaction if [Route.popDisposition] returns false
   /// See also:
-  ///   * [WillPopScope], that allow to block an attempt to close a [ModalRoute]
+  ///   * [PopScope], that allow to block an attempt to close a [ModalRoute]
   final double willPopThreshold;
 
   /// The semantic label used for a sheet modal route.
@@ -137,36 +103,20 @@ class BetterSheetRoute<T> extends PageRoute<T>
   }
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return _SheetRouteContainer(this);
   }
 
   @override
-  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) =>
-      nextRoute is BetterSheetRoute;
+  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) => nextRoute is GenericSheetRoute;
 
   @override
-  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) =>
-      previousRoute is PageRoute;
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) => previousRoute is PageRoute;
 
   /// Returns true if the controller should prevent popping for a given extent
   @protected
   bool shouldPreventPopForExtent(double extent) {
-    return extent < willPopThreshold &&
-        hasScopedWillPopCallback &&
-        controller!.velocity <= 0;
-  }
-
-  @override
-  bool canDriveSecondaryTransitionForPreviousRoute(Route previousRoute) {
-    return true;
-  }
-
-  @override
-  Widget buildSecondaryTransitionForPreviousRoute(BuildContext context,
-      Animation<double> secondaryAnimation, Widget child) {
-    return child;
+    return extent < willPopThreshold && popDisposition == RoutePopDisposition.doNotPop && controller!.velocity <= 0;
   }
 
   @override
@@ -194,20 +144,18 @@ class BetterSheetRoute<T> extends PageRoute<T>
 class _SheetRouteContainer extends StatefulWidget {
   const _SheetRouteContainer(this.sheetRoute, {super.key});
 
-  final BetterSheetRoute<dynamic> sheetRoute;
+  final GenericSheetRoute<dynamic> sheetRoute;
 
   @override
   State<_SheetRouteContainer> createState() => __SheetRouteContainerState();
 }
 
-class __SheetRouteContainerState extends State<_SheetRouteContainer>
-    with TickerProviderStateMixin {
-  BetterSheetRoute<dynamic> get route => widget.sheetRoute;
+class __SheetRouteContainerState extends State<_SheetRouteContainer> with TickerProviderStateMixin {
+  GenericSheetRoute<dynamic> get route => widget.sheetRoute;
 
   SheetController get _sheetController => widget.sheetRoute._sheetController;
 
-  AnimationController get _routeController =>
-      widget.sheetRoute._routeAnimationController!;
+  AnimationController get _routeController => widget.sheetRoute._routeAnimationController!;
 
   @override
   void initState() {
@@ -236,18 +184,16 @@ class __SheetRouteContainerState extends State<_SheetRouteContainer>
           !_firstAnimation &&
           !_sheetController.position.preventingDrag &&
           route.shouldPreventPopForExtent(_sheetController.animation.value) &&
-          _sheetController.position.userScrollDirection ==
-              ScrollDirection.forward) {
+          _sheetController.position.userScrollDirection == ScrollDirection.forward) {
         preventPop();
         return;
       }
       if (!_routeController.isAnimating) {
-        final double animationValue =
-            _sheetController.animation.value.mapDistance(
-          fromLow: 0,
-          fromHigh: route.initialExtent,
-          toLow: 0,
-          toHigh: 1,
+        final double animationValue = _sheetController.animation.value.remap(
+          0,
+          route.initialExtent,
+          0,
+          1,
         );
         _routeController.value = animationValue;
         if (_sheetController.animation.value == 0) {
@@ -269,22 +215,21 @@ class __SheetRouteContainerState extends State<_SheetRouteContainer>
     }
     // widget.sheetRoute.navigator!.userGestureInProgressNotifier.value = false;
 
-    if (!_firstAnimation &&
-        _routeController.value != _sheetController.animation.value) {
+    if (!_firstAnimation && _routeController.value != _sheetController.animation.value) {
       if (_routeController.status == AnimationStatus.forward) {
-        final double animationValue = _routeController.value.mapDistance(
-          fromLow: 0,
-          fromHigh: 1,
-          toLow: _sheetController.animation.value,
-          toHigh: 1,
+        final double animationValue = _routeController.value.remap(
+          0,
+          1,
+          _sheetController.animation.value,
+          1,
         );
         _sheetController.relativeJumpTo(animationValue);
       } else {
-        final double animationValue = _routeController.value.mapDistance(
-          fromLow: 0,
-          fromHigh: 1,
-          toLow: 0,
-          toHigh: _sheetController.animation.value,
+        final double animationValue = _routeController.value.remap(
+          0,
+          1,
+          0,
+          _sheetController.animation.value,
         );
         _sheetController.relativeJumpTo(animationValue);
       }
@@ -318,7 +263,7 @@ class __SheetRouteContainerState extends State<_SheetRouteContainer>
 
   @override
   Widget build(BuildContext context) {
-    final BetterSheetRoute<dynamic> route = widget.sheetRoute;
+    final GenericSheetRoute<dynamic> route = widget.sheetRoute;
 
     return Semantics(
       scopesRoute: true,
@@ -332,183 +277,3 @@ class __SheetRouteContainerState extends State<_SheetRouteContainer>
     );
   }
 }
-
-class GenericSheetRoute<T> extends BetterSheetRoute<T> {
-  GenericSheetRoute({
-    required super.builder,
-    super.initialExtent,
-    super.stops,
-    super.draggable,
-    super.fit = SheetFit.loose,
-    super.physics,
-    super.animationCurve,
-    super.transitionDuration,
-    super.sheetLabel,
-    super.barrierLabel,
-    super.barrierColor,
-    super.barrierDismissible,
-    super.maintainState,
-    super.willPopThreshold,
-    super.decorationBuilder,
-    super.settings,
-  });
-
-  @override
-  bool canDriveSecondaryTransitionForPreviousRoute(Route previousRoute) {
-    return true;
-  }
-
-  @override
-  bool canTransitionTo(TransitionRoute nextRoute) {
-    return nextRoute is GenericSheetRoute;
-  }
-
-  @override
-  bool canTransitionFrom(TransitionRoute previousRoute) {
-    return previousRoute is PageRoute;
-  }
-
-  var _firstFrame = true;
-
-  @override
-  Widget buildSecondaryTransitionForPreviousRoute(
-    BuildContext context,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    return AnimatedBuilder(
-      animation: secondaryAnimation,
-      builder: (context, child) {
-        final CurvedAnimation curvedAnimation = CurvedAnimation(
-          parent: secondaryAnimation,
-          curve: context.theme.curve,
-        );
-
-        var currentValue = _firstFrame ? 0.0 : curvedAnimation.value;
-        _firstFrame = false;
-        return Transform.scale(
-          scale: currentValue.remap(
-            0.0,
-            1.0,
-            1.0,
-            0.95,
-          ),
-          filterQuality: FilterQuality.medium,
-          child: child,
-        );
-      },
-      child: child,
-    );
-  }
-
-  var _firstModalFrame = true;
-
-  @override
-  Widget buildModalBarrier() {
-    final effectiveAnimation = animation!;
-
-    return Builder(builder: (context) {
-      return GestureDetector(
-        onTap: () {
-          Navigator.of(context).pop();
-        },
-        child: AnimatedBuilder(
-          animation: effectiveAnimation,
-          builder: (context, _) {
-            final curvedAnimation = CurvedAnimation(
-              parent: effectiveAnimation,
-              curve: context.theme.curve,
-            );
-            var currentValue = _firstModalFrame ? 0.0 : curvedAnimation.value;
-            _firstModalFrame = false;
-
-            return Container(
-              color:
-                  context.theme.backgroundColor.withOpacity(currentValue * 0.5),
-            );
-          },
-        ),
-      );
-    });
-  }
-
-  @override
-  Widget buildSheet(BuildContext context, Widget child) {
-    SheetPhysics? effectivePhysics = SnapSheetPhysics(
-      stops: stops ?? <double>[0, 1],
-      relative: true,
-      parent: physics,
-    );
-    if (!draggable) {
-      effectivePhysics = const NeverDraggableSheetPhysics();
-    }
-
-    return Sheet.raw(
-      initialExtent: initialExtent,
-      decorationBuilder: decorationBuilder,
-      fit: fit,
-      resizable: false,
-      physics: effectivePhysics,
-      controller: sheetController,
-      child: child,
-    );
-  }
-}
-
-/*class BetterSheetRoute<T> extends ModalSheetRoute<T>
-    with DelegatedTransitionsRoute<T> {
-  BetterSheetRoute({
-    required super.builder,
-    super.swipeDismissible,
-    super.swipeDismissSensitivity,
-    super.barrierDismissible,
-    super.barrierColor,
-    super.barrierLabel,
-    super.maintainState,
-  });
-
-  @override
-  bool canTransitionTo(TransitionRoute nextRoute) {
-    return nextRoute is BetterSheetRoute;
-  }
-
-  @override
-  bool canTransitionFrom(TransitionRoute previousRoute) {
-    return previousRoute is PageRoute;
-  }
-
-  @override
-  bool canDriveSecondaryTransitionForPreviousRoute(Route previousRoute) {
-    return true;
-  }
-
-  var _firstFrame = true;
-
-  @override
-  Widget buildSecondaryTransitionForPreviousRoute(BuildContext context,
-      Animation<double> secondaryAnimation, Widget child) {
-    return AnimatedBuilder(
-      animation: secondaryAnimation,
-      builder: (context, child) {
-        final curvedAnimation = CurvedAnimation(
-          parent: secondaryAnimation,
-          curve: context.theme.curve,
-        );
-        var currentValue = _firstFrame ? 0.0 : curvedAnimation.value;
-        _firstFrame = false;
-
-        return Transform.scale(
-          scale: currentValue.remap(
-            0.0,
-            1.0,
-            1.0,
-            0.95,
-          ),
-          child: child,
-        );
-      },
-      child: child,
-    );
-  }
-}
-*/
