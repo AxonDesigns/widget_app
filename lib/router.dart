@@ -3,8 +3,6 @@ import 'package:widget_app/generic.dart';
 import 'package:widget_app/pages/about_page.dart';
 import 'package:widget_app/pages/home_page.dart';
 
-import 'components/custom_modal.dart';
-
 class CustomGoRoute extends GoRoute {
   CustomGoRoute({
     required super.path,
@@ -23,9 +21,7 @@ var router = GoRouter(
   routes: [
     ShellRoute(
       builder: (context, state, child) {
-        return CustomModal(
-          child: child,
-        );
+        return child;
       },
       routes: [
         CustomGoRoute(

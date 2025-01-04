@@ -1,7 +1,6 @@
 import 'package:flutter/services.dart' hide TextInput;
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sheet/sheet.dart';
 import 'package:widget_app/components/sheet_route.dart';
 import 'package:widget_app/generic.dart';
 
@@ -186,16 +185,11 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () async {
                         final result = await Navigator.of(context).push<bool>(
                           GenericSheetRoute(
-                            draggable: true,
                             barrierDismissible: true,
-                            fit: SheetFit.loose,
+                            draggable: true,
                             animationCurve: Curves.fastEaseInToSlowEaseOut,
-                            duration: const Duration(milliseconds: 300),
-                            sheetLabel: "Test sheet",
-                            physics: const BouncingSheetPhysics(
-                              overflowViewport: true,
-                              parent: FixedExtentScrollPhysics(),
-                            ),
+                            barrierColor:
+                                context.theme.backgroundColor.withOpacity(0.5),
                             builder: (context) {
                               return AnnotatedRegion(
                                 value: SystemUiOverlayStyle(

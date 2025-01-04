@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 ///
 /// From the [pub.dev](https://pub.dev/) package [sheet](https://pub.dev/packages/sheet)<br>
 /// by [Jaime Blasco](https://github.com/jamesblasco)
-mixin DelegatedTransitionsRoute<T> on ModalRoute<T> {
+mixin GenericDelegatedTransitionsRoute<T> on ModalRoute<T> {
   /// Override this method to wrap the [child] with one or more transition
   /// widgets that define how the previous route will hides/shows when this route
   /// is pushed on top of it or when then this route is popped off of it.
@@ -88,13 +88,13 @@ mixin DelegatedTransitionsRoute<T> on ModalRoute<T> {
           Route<dynamic> previousRoute) =>
       false;
 
-  List<DelegatedTransitionsRoute<dynamic>>? _nextRoutes;
+  List<GenericDelegatedTransitionsRoute<dynamic>>? _nextRoutes;
 
   @override
   void didChangeNext(Route<dynamic>? nextRoute) {
-    if (nextRoute is DelegatedTransitionsRoute &&
+    if (nextRoute is GenericDelegatedTransitionsRoute &&
         nextRoute.canDriveSecondaryTransitionForPreviousRoute(this)) {
-      _nextRoutes ??= <DelegatedTransitionsRoute<dynamic>>[];
+      _nextRoutes ??= <GenericDelegatedTransitionsRoute<dynamic>>[];
       _nextRoutes!.add(nextRoute);
 
       nextRoute.completed.then((dynamic value) {
@@ -106,9 +106,10 @@ mixin DelegatedTransitionsRoute<T> on ModalRoute<T> {
 
   @override
   void didReplace(Route<dynamic>? oldRoute) {
-    if (oldRoute is DelegatedTransitionsRoute && oldRoute._nextRoutes != null) {
-      _nextRoutes =
-          List<DelegatedTransitionsRoute<dynamic>>.from(oldRoute._nextRoutes!);
+    if (oldRoute is GenericDelegatedTransitionsRoute &&
+        oldRoute._nextRoutes != null) {
+      _nextRoutes = List<GenericDelegatedTransitionsRoute<dynamic>>.from(
+          oldRoute._nextRoutes!);
     }
     super.didReplace(oldRoute);
   }
@@ -122,7 +123,8 @@ mixin DelegatedTransitionsRoute<T> on ModalRoute<T> {
   ) {
     if (_nextRoutes != null && _nextRoutes!.isNotEmpty) {
       Widget proxyChild = child;
-      for (final DelegatedTransitionsRoute<dynamic> nextRoute in _nextRoutes!) {
+      for (final GenericDelegatedTransitionsRoute<dynamic> nextRoute
+          in _nextRoutes!) {
         final ProxyAnimation secondaryAnimation =
             ProxyAnimation(nextRoute.animation!);
         // assert(!nextRoute._transitionCompleter.isCompleted,  'Cannot reuse a ${nextRoute.runtimeType} after disposing it.');

@@ -133,7 +133,7 @@ class _PageBasedGenericPageRoute<T> extends PageRoute<T>
 //Extended Routes
 
 class GenericExtendedPageRoute<T> extends GenericPageRoute<T>
-    with DelegatedTransitionsRoute<T> {
+    with GenericDelegatedTransitionsRoute<T> {
   GenericExtendedPageRoute({
     required super.builder,
     super.settings,

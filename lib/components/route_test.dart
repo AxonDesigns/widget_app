@@ -1,7 +1,7 @@
 import 'package:widget_app/generic.dart';
 
 class GenericModalRoute<T> extends PageRoute<T>
-    with DelegatedTransitionsRoute<T> {
+    with GenericDelegatedTransitionsRoute<T> {
   GenericModalRoute({
     super.settings,
     this.barrierColor,
@@ -27,6 +27,8 @@ class GenericModalRoute<T> extends PageRoute<T>
     return builder(context);
   }
 
+  var _firstBarrierFrame = true;
+
   @override
   Widget buildModalBarrier() {
     final effectiveAnimation = animation ?? const AlwaysStoppedAnimation(1.0);
@@ -43,9 +45,13 @@ class GenericModalRoute<T> extends PageRoute<T>
               parent: effectiveAnimation,
               curve: context.theme.curve,
             );
+
+            var currentValue = _firstBarrierFrame ? 0.0 : curvedAnimation.value;
+            _firstBarrierFrame = false;
+
             return Container(
-              color: context.theme.backgroundColor
-                  .withOpacity(curvedAnimation.value * 0.5),
+              color:
+                  context.theme.backgroundColor.withOpacity(currentValue * 0.5),
             );
           },
           child: const SizedBox(),
