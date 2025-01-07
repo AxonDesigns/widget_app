@@ -1,7 +1,6 @@
 import 'package:widget_app/generic.dart';
 
-class GenericPageRoute<T> extends PageRoute<T>
-    with GenericRouteTransitionMixin<T> {
+class GenericPageRoute<T> extends PageRoute<T> with GenericRouteTransitionMixin<T> {
   GenericPageRoute({
     super.settings,
     required this.builder,
@@ -30,7 +29,7 @@ mixin GenericRouteTransitionMixin<T> on PageRoute<T> {
   Widget buildContent(BuildContext context);
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 300);
+  Duration get transitionDuration => const Duration(milliseconds: 450);
 
   @override
   Color? get barrierColor => const Color(0x00000000);
@@ -68,8 +67,7 @@ mixin GenericRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
-    return (nextRoute is GenericRouteTransitionMixin &&
-        !nextRoute.fullscreenDialog);
+    return (nextRoute is GenericRouteTransitionMixin && !nextRoute.fullscreenDialog);
   }
 }
 
@@ -104,8 +102,7 @@ class GenericPage<T> extends Page<T> {
   }
 }
 
-class _PageBasedGenericPageRoute<T> extends PageRoute<T>
-    with GenericRouteTransitionMixin<T> {
+class _PageBasedGenericPageRoute<T> extends PageRoute<T> with GenericRouteTransitionMixin<T> {
   _PageBasedGenericPageRoute({
     required GenericPage<T> page,
     super.allowSnapshotting,
@@ -132,8 +129,7 @@ class _PageBasedGenericPageRoute<T> extends PageRoute<T>
 
 //Extended Routes
 
-class GenericExtendedPageRoute<T> extends GenericPageRoute<T>
-    with GenericDelegatedTransitionsRoute<T> {
+class GenericExtendedPageRoute<T> extends GenericPageRoute<T> with GenericDelegatedTransitionsRoute<T> {
   GenericExtendedPageRoute({
     required super.builder,
     super.settings,
@@ -173,8 +169,7 @@ class GenericExtendedPage<T> extends Page<T> {
 //
 // This route uses the builder from the page to build its content. This ensures
 // the content is up to date after page updates.
-class _PageBasedGenericExtendedPageRoute<T>
-    extends GenericExtendedPageRoute<T> {
+class _PageBasedGenericExtendedPageRoute<T> extends GenericExtendedPageRoute<T> {
   _PageBasedGenericExtendedPageRoute({
     required GenericExtendedPage<T> page,
   }) : super(

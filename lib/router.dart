@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:widget_app/components/sheet_experiment.dart';
 import 'package:widget_app/generic.dart';
 import 'package:widget_app/pages/about_page.dart';
 import 'package:widget_app/pages/home_page.dart';
@@ -21,7 +22,9 @@ var router = GoRouter(
   routes: [
     ShellRoute(
       builder: (context, state, child) {
-        return child;
+        return SheetExperiment(
+          child: child,
+        );
       },
       routes: [
         CustomGoRoute(

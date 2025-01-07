@@ -21,6 +21,7 @@ class GenericSheetRoute<T> extends GenericModalRoute<T> {
     this.sheetLabel,
     this.willPopThreshold = 0.8,
     this.decorationBuilder,
+    this.maxExtent,
   }) : super(
           fullscreenDialog: true,
         );
@@ -68,6 +69,9 @@ class GenericSheetRoute<T> extends GenericModalRoute<T> {
   ///
   /// The default value is null.
   final SheetDecorationBuilder? decorationBuilder;
+
+  /// The maximum extent of the sheet
+  final double? maxExtent;
 
   AnimationController? _routeAnimationController;
 
@@ -120,6 +124,11 @@ class GenericSheetRoute<T> extends GenericModalRoute<T> {
   }
 
   @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    return child;
+  }
+
+  @override
   bool get opaque => false;
 
   Widget buildSheet(BuildContext context, Widget child) {
@@ -135,6 +144,7 @@ class GenericSheetRoute<T> extends GenericModalRoute<T> {
       decorationBuilder: decorationBuilder,
       fit: fit,
       physics: effectivePhysics,
+      maxExtent: maxExtent,
       controller: sheetController,
       child: child,
     );
@@ -165,7 +175,7 @@ class __SheetRouteContainerState extends State<_SheetRouteContainer> with Ticker
       _sheetController.relativeAnimateTo(
         route.initialExtent,
         duration: route.transitionDuration,
-        curve: route.animationCurve ?? Curves.easeOut,
+        curve: route.animationCurve ?? context.theme.curve,
       );
     });
     super.initState();

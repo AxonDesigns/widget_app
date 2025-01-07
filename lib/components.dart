@@ -21,3 +21,5 @@ export 'components/fractional_clip_r_rect.dart';
 export 'components/size_clip_r_rect.dart';
 export 'components/link.dart';
 export 'components/delegated_transitions_route.dart';
+export 'components/sheet_container.dart';
+export 'components/sheet_route.dart';

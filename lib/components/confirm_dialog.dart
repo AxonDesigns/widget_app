@@ -48,10 +48,7 @@ class ConfirmDialog extends StatelessWidget {
                 ),
               ],
             ),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 18.0,
-              vertical: 16.0,
-            ),
+            padding: const EdgeInsets.all(20.0),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 400.0),
               child: Column(
@@ -61,9 +58,9 @@ class ConfirmDialog extends StatelessWidget {
                   Text(
                     title,
                     style: const TextStyle(
-                        fontSize: 18.0,
-                        fontFamily: "Segoe UI",
-                        fontWeight: FontWeight.w600),
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 8.0),
                   Text(

@@ -1,8 +1,9 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart' show Scaffold, AppBar, DefaultMaterialLocalizations;
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
-import 'package:widget_app/components/pass_through_route.dart';
+import 'package:sheet/sheet.dart';
 import 'package:widget_app/generic.dart';
 
 class SelectInput extends StatefulWidget {
@@ -74,8 +75,7 @@ class _SelectInputState extends State<SelectInput> {
   void _setUpFocusNode(FocusNode node) {
     node.addListener(_handleFocusChange);
     node.onKeyEvent = (node, event) {
-      if (event is KeyDownEvent &&
-          event.logicalKey == LogicalKeyboardKey.escape) {
+      if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
         node.unfocus();
         return KeyEventResult.handled;
       }
@@ -93,66 +93,44 @@ class _SelectInputState extends State<SelectInput> {
 
     _focusNode.requestFocus();
 
-    final renderBox = context.findRenderObject() as RenderBox;
-    final size = renderBox.size;
     Navigator.of(context)
         .push(
-      PassThroughRoute(
-        transitionDuration: _duration,
-        onPopCallback: () {
-          if (_popupOpened && !hovered) {
-            _closeOverlay();
-          }
-        },
-        transitionBuilder: (context, animation, secondaryAnimation, child) {
-          final curvedAnimation = CurvedAnimation(
-            parent: animation,
-            curve: Curves.fastEaseInToSlowEaseOut,
-          );
-          return FadeTransition(
-            opacity: curvedAnimation,
-            child: child,
-          );
-        },
-        builder: (context, animation, __) {
-          return Stack(
-            children: [
-              AnimatedBuilder(
-                animation: animation,
-                builder: (context, child) {
-                  final curvedAnimation = CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.fastEaseInToSlowEaseOut,
-                  );
-                  return CompositedTransformFollower(
-                    link: _layerLink,
-                    followerAnchor: Alignment.topCenter,
-                    targetAnchor: Alignment.bottomCenter,
-                    offset: Offset(
-                      0,
-                      lerpDouble(
-                        -size.height,
-                        4,
-                        curvedAnimation.value,
-                      )!,
-                    ),
-                    child: child,
-                  );
-                },
-                child: TapRegion(
-                  groupId: SelectInput,
-                  child: SizedBox(
-                    width: size.width,
-                    child: _SelectOverlay(
-                      items: widget.items,
-                      width: size.width,
-                      selectedIndex: widget.selectedIndex,
-                    ),
-                  ),
+      GenericSheetRoute(
+        fit: SheetFit.expand,
+        barrierDismissible: true,
+        initialExtent: 0.5,
+        draggable: true,
+        stops: [0.0, 0.5, 0.9],
+        physics: const BouncingSheetPhysics(
+          overflowViewport: true,
+        ),
+        builder: (context) {
+          return SheetContainer(
+              padding: EdgeInsets.zero,
+              handleSpacing: 0.0,
+              child: SafeArea(
+                bottom: false,
+                top: false,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  primary: true,
+                  padding: EdgeInsets.zero,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: widget.items.length,
+                  itemBuilder: (context, index) {
+                    return _Option(
+                      item: widget.items[index],
+                      selected: widget.selectedIndex == index,
+                      index: index,
+                      onPressed: (idx) {
+                        if (Navigator.canPop(context)) {
+                          Navigator.pop(context, idx);
+                        }
+                      },
+                    );
+                  },
                 ),
-              ),
-            ],
-          );
+              ));
         },
       ),
     )
@@ -189,8 +167,7 @@ class _SelectInputState extends State<SelectInput> {
           onFocusChange: (value) => setState(() => focused = value),
           onShowHoverHighlight: (value) => setState(() => hovered = value),
           shortcuts: {
-            LogicalKeySet(LogicalKeyboardKey.enter):
-                const ButtonActivateIntent(),
+            LogicalKeySet(LogicalKeyboardKey.enter): const ButtonActivateIntent(),
           },
           actions: {
             ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(
@@ -356,26 +333,27 @@ class _OptionState extends State<_Option> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.selected) {
-      return Container(
-        decoration: BoxDecoration(
-          color: context.theme.foregroundColor.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(context.theme.radiusSize),
+    return Container(
+      decoration: BoxDecoration(
+        color: widget.selected ? context.theme.foregroundColor.withOpacity(0.1) : Colors.transparent,
+        border: Border(
+          bottom: BorderSide(
+            color: context.theme.foregroundColor.withOpacity(0.1),
+          ),
         ),
-        child: _buildButton(
-          context,
-          autofocus: widget.selected,
-        ),
-      );
-    }
-
-    return _buildButton(context);
+      ),
+      child: _buildButton(
+        context,
+        autofocus: widget.selected,
+      ),
+    );
   }
 
   Widget _buildButton(BuildContext context, {bool autofocus = false}) {
     return Button.ghost(
       autofocus: autofocus,
       alignment: MainAxisAlignment.start,
+      borderRadius: 0.0,
       onPressed: () {
         widget.onPressed.call(widget.index);
         widget.item.onPressed?.call(widget.index);

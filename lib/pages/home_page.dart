@@ -17,6 +17,7 @@ class _HomePageState extends State<HomePage> {
   bool _obscureText = false;
   int _selectedIndex = 0;
   int _selectedIndex2 = 0;
+  int _selectedIndex3 = 0;
 
   @override
   void initState() {
@@ -163,6 +164,24 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ],
                   ),
+                  SelectInput(
+                    expanded: true,
+                    selectedIndex: _selectedIndex3,
+                    onItemSelected: (index) {
+                      setState(() {
+                        _selectedIndex3 = index;
+                      });
+                    },
+                    items: List.generate(
+                      25,
+                      (index) {
+                        return Option(
+                          icon: const Icon(LucideIcons.user),
+                          text: "Option $index",
+                        );
+                      },
+                    ),
+                  ),
                   Tooltip(
                     message: "Example tooltip",
                     child: Button.primary(
@@ -183,82 +202,39 @@ class _HomePageState extends State<HomePage> {
                           GenericSheetRoute(
                             barrierDismissible: true,
                             draggable: true,
-                            animationCurve: Curves.fastEaseInToSlowEaseOut,
                             barrierColor: context.theme.backgroundColor.withOpacity(0.5),
                             builder: (context) {
-                              return AnnotatedRegion(
-                                value: SystemUiOverlayStyle(
-                                  systemNavigationBarColor: context.theme.surfaceColor.low,
-                                ),
-                                child: Container(
-                                  clipBehavior: Clip.antiAlias,
-                                  decoration: BoxDecoration(
-                                      color: context.theme.surfaceColor.low,
-                                      borderRadius: BorderRadius.vertical(
-                                        top: Radius.circular(
-                                          context.theme.radiusSize * 2,
-                                        ),
+                              return SheetContainer(
+                                child: GappedColumn(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  gap: 16.0,
+                                  children: [
+                                    Text(
+                                      "Are you absolutely sure?",
+                                      style: context.theme.baseTextStyle.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
                                       ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.25),
-                                          blurRadius: 12.0,
-                                          offset: const Offset(0.0, 0.0),
-                                        ),
-                                      ]),
-                                  child: SingleChildScrollView(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: GappedColumn(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                                      gap: 16.0,
-                                      children: [
-                                        Align(
-                                          alignment: Alignment.center,
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              color: context.theme.surfaceColor.highest,
-                                              borderRadius: BorderRadius.circular(
-                                                context.theme.radiusSize,
-                                              ),
-                                            ),
-                                            height: 6,
-                                            width: 80,
-                                          ),
-                                        ),
-                                        Text(
-                                          "Are you absolutely sure?",
-                                          style: context.theme.baseTextStyle.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 18,
-                                          ),
-                                        ),
-                                        Text(
-                                          "This will delete all your data from our servers, and you will not be able to recover it.",
-                                          style: context.theme.baseTextStyle,
-                                        ),
-                                        GappedRow(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment: MainAxisAlignment.end,
-                                          gap: 8.0,
-                                          children: [
-                                            Button.outline(
-                                              onPressed: () {
-                                                Navigator.of(context).pop(false);
-                                              },
-                                              children: const [Text("Cancel")],
-                                            ),
-                                            Button.destructive(
-                                              onPressed: () {
-                                                Navigator.of(context).pop(true);
-                                              },
-                                              children: const [Text("Confirm")],
-                                            )
-                                          ],
-                                        ),
-                                      ],
                                     ),
-                                  ),
+                                    Text(
+                                      "This will delete all your data from our servers, and you will not be able to recover it.",
+                                      style: context.theme.baseTextStyle,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Button.destructive(
+                                      onPressed: () {
+                                        Navigator.of(context).pop(true);
+                                      },
+                                      children: const [Text("Confirm")],
+                                    ),
+                                    Button.outline(
+                                      onPressed: () {
+                                        Navigator.of(context).pop(false);
+                                      },
+                                      children: const [Text("Cancel")],
+                                    ),
+                                  ],
                                 ),
                               );
                             },
@@ -278,6 +254,7 @@ class _HomePageState extends State<HomePage> {
                         content: "This will delete all your data from our servers, "
                             "and you will not be able to recover it.",
                         type: ConfirmDialogType.destructive,
+                        confirmButtonText: "Confirm",
                       );
 
                       print(result);
