@@ -1,6 +1,7 @@
 import 'dart:ui';
 
-import 'package:flutter/material.dart' show Scaffold, AppBar, DefaultMaterialLocalizations;
+import 'package:flutter/material.dart'
+    show Scaffold, AppBar, DefaultMaterialLocalizations;
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:sheet/sheet.dart';
@@ -75,7 +76,8 @@ class _SelectInputState extends State<SelectInput> {
   void _setUpFocusNode(FocusNode node) {
     node.addListener(_handleFocusChange);
     node.onKeyEvent = (node, event) {
-      if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
+      if (event is KeyDownEvent &&
+          event.logicalKey == LogicalKeyboardKey.escape) {
         node.unfocus();
         return KeyEventResult.handled;
       }
@@ -100,37 +102,38 @@ class _SelectInputState extends State<SelectInput> {
         barrierDismissible: true,
         initialExtent: 0.5,
         draggable: true,
-        stops: [0.0, 0.5, 0.9],
+        stops: [0.0, 0.5, 1.0],
         physics: const BouncingSheetPhysics(
           overflowViewport: true,
         ),
+        decorationBuilder: (context, child) {
+          return Container(
+            decoration: BoxDecoration(
+              color: context.theme.backgroundColor,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: child,
+          );
+        },
         builder: (context) {
-          return SheetContainer(
-              padding: EdgeInsets.zero,
-              handleSpacing: 0.0,
-              child: SafeArea(
-                bottom: false,
-                top: false,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  primary: true,
-                  padding: EdgeInsets.zero,
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: widget.items.length,
-                  itemBuilder: (context, index) {
-                    return _Option(
-                      item: widget.items[index],
-                      selected: widget.selectedIndex == index,
-                      index: index,
-                      onPressed: (idx) {
-                        if (Navigator.canPop(context)) {
-                          Navigator.pop(context, idx);
-                        }
-                      },
-                    );
-                  },
-                ),
-              ));
+          return ListView.builder(
+            primary: true,
+            padding: EdgeInsets.zero,
+            physics: const BouncingScrollPhysics(),
+            itemCount: widget.items.length,
+            itemBuilder: (context, index) {
+              return _Option(
+                item: widget.items[index],
+                selected: widget.selectedIndex == index,
+                index: index,
+                onPressed: (idx) {
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context, idx);
+                  }
+                },
+              );
+            },
+          );
         },
       ),
     )
@@ -167,7 +170,8 @@ class _SelectInputState extends State<SelectInput> {
           onFocusChange: (value) => setState(() => focused = value),
           onShowHoverHighlight: (value) => setState(() => hovered = value),
           shortcuts: {
-            LogicalKeySet(LogicalKeyboardKey.enter): const ButtonActivateIntent(),
+            LogicalKeySet(LogicalKeyboardKey.enter):
+                const ButtonActivateIntent(),
           },
           actions: {
             ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(
@@ -335,7 +339,9 @@ class _OptionState extends State<_Option> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: widget.selected ? context.theme.foregroundColor.withOpacity(0.1) : Colors.transparent,
+        color: widget.selected
+            ? context.theme.foregroundColor.withOpacity(0.1)
+            : Colors.transparent,
         border: Border(
           bottom: BorderSide(
             color: context.theme.foregroundColor.withOpacity(0.1),

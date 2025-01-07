@@ -454,14 +454,14 @@ class _ButtonState extends State<Button> {
       },
       child: GestureDetector(
         behavior: HitTestBehavior.deferToChild,
-        onTapDown: (details) => setState(() => pressed = true),
+        //onTapDown: (details) => setState(() => pressed = true),
         onTapUp: (details) {
           if (widget.focusable) {
             _focusNode.requestFocus();
           } else if (!widget.focusable && _focusNode.hasFocus) {
             _focusNode.unfocus();
           }
-          setState(() => pressed = false);
+          //setState(() => pressed = false);
         },
         onTapCancel: () => setState(() => pressed = false),
         onTap: !enabled
@@ -471,80 +471,84 @@ class _ButtonState extends State<Button> {
                 widget.onPressed!.call();
                 setState(() {
                   focused = false;
-                  pressed = true;
-                });
-                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                  setState(() {
-                    pressed = false;
-                  });
                 });
               },
-        child: DottedBorder(
-          color: context.theme.foregroundColor.withOpacity(focused ? 0.5 : 0.0),
-          strokeWidth: 1.0,
-          padding: EdgeInsets.zero,
-          stackFit: StackFit.passthrough,
-          borderPadding: const EdgeInsets.symmetric(
-            horizontal: -2.5,
-            vertical: -2.5,
-          ),
-          radius: Radius.circular(context.theme.radiusSize + 2.5),
-          dashPattern: const [1, 0],
-          borderType: BorderType.RRect,
-          child: Opacity(
-            opacity: enabled ? 1.0 : 0.65,
-            child: AnimatedContainer(
-              duration: Duration(milliseconds: pressed || hovered ? 0 : 200),
-              curve: Curves.fastEaseInToSlowEaseOut,
-              decoration: BoxDecoration(
-                color: bgColor,
-                borderRadius: BorderRadius.circular(
-                  widget.borderRadius ?? context.theme.radiusSize,
-                ),
-                border: Border.all(
-                  strokeAlign: BorderSide.strokeAlignInside,
-                  width: 1.0,
-                  color: borderColor,
-                ),
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  /* horizontal: widget.squared ? 7.5 : 12.0,
-                  vertical: widget.squared ? 7.5 : 6.0, */
-                  horizontal: widget.padding != null
-                      ? widget.padding!.horizontal
-                      : widget.children.length == 1 &&
-                              widget.children.first is! Text
-                          ? squarePadding
-                          : horizontalPadding,
-                  vertical: widget.padding != null
-                      ? widget.padding!.vertical
-                      : widget.children.length == 1 &&
-                              widget.children.first is! Text
-                          ? squarePadding
-                          : verticalPadding,
-                ),
-                child: IconTheme(
-                  data: IconTheme.of(context).copyWith(
-                    color: fgColor,
+        child: Listener(
+          behavior: HitTestBehavior.translucent,
+          onPointerDown: (event) {
+            setState(() => pressed = true);
+          },
+          onPointerUp: (event) {
+            setState(() => pressed = false);
+          },
+          child: DottedBorder(
+            color:
+                context.theme.foregroundColor.withOpacity(focused ? 0.5 : 0.0),
+            strokeWidth: 1.0,
+            padding: EdgeInsets.zero,
+            stackFit: StackFit.passthrough,
+            borderPadding: const EdgeInsets.symmetric(
+              horizontal: -2.5,
+              vertical: -2.5,
+            ),
+            radius: Radius.circular(context.theme.radiusSize + 2.5),
+            dashPattern: const [1, 0],
+            borderType: BorderType.RRect,
+            child: Opacity(
+              opacity: enabled ? 1.0 : 0.65,
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: pressed || hovered ? 0 : 200),
+                curve: Curves.fastEaseInToSlowEaseOut,
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(
+                    widget.borderRadius ?? context.theme.radiusSize,
                   ),
-                  child: DefaultTextStyle(
-                    style: context.theme.baseTextStyle.copyWith(
+                  border: Border.all(
+                    strokeAlign: BorderSide.strokeAlignInside,
+                    width: 1.0,
+                    color: borderColor,
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    /* horizontal: widget.squared ? 7.5 : 12.0,
+                    vertical: widget.squared ? 7.5 : 6.0, */
+                    horizontal: widget.padding != null
+                        ? widget.padding!.horizontal
+                        : widget.children.length == 1 &&
+                                widget.children.first is! Text
+                            ? squarePadding
+                            : horizontalPadding,
+                    vertical: widget.padding != null
+                        ? widget.padding!.vertical
+                        : widget.children.length == 1 &&
+                                widget.children.first is! Text
+                            ? squarePadding
+                            : verticalPadding,
+                  ),
+                  child: IconTheme(
+                    data: IconTheme.of(context).copyWith(
                       color: fgColor,
                     ),
-                    child: widget.builder?.call(hovered, pressed, false) ??
-                        (widget.children.isNotEmpty
-                            ? Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: widget.alignment ??
-                                    MainAxisAlignment.center,
-                                children: List.generate(
-                                    (widget.children.length * 2) - 1,
-                                    (index) => index.isEven
-                                        ? widget.children[index ~/ 2]
-                                        : SizedBox(width: widget.gap)),
-                              )
-                            : const SizedBox.shrink()),
+                    child: DefaultTextStyle(
+                      style: context.theme.baseTextStyle.copyWith(
+                        color: fgColor,
+                      ),
+                      child: widget.builder?.call(hovered, pressed, false) ??
+                          (widget.children.isNotEmpty
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: widget.alignment ??
+                                      MainAxisAlignment.center,
+                                  children: List.generate(
+                                      (widget.children.length * 2) - 1,
+                                      (index) => index.isEven
+                                          ? widget.children[index ~/ 2]
+                                          : SizedBox(width: widget.gap)),
+                                )
+                              : const SizedBox.shrink()),
+                    ),
                   ),
                 ),
               ),
