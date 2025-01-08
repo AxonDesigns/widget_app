@@ -63,8 +63,8 @@ class _ScrollableSheetState extends State<ScrollableSheet>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
-      value: 1.0,
+      duration: const Duration(milliseconds: 150),
+      value: 0.0,
     );
     _scrollController = widget.sheetController ?? ScrollController();
     _scrollController.addListener(_onScroll);
@@ -200,18 +200,24 @@ class _ScrollableSheetState extends State<ScrollableSheet>
                     ),
                   ),
                 ),
-                Positioned.fill(
+                Positioned(
+                  bottom: 0.0,
+                  left: 0.0,
+                  right: 0.0,
+                  height: _animationController.value.remap(
+                        0.0,
+                        1.0,
+                        0.0,
+                        maxHeight,
+                      ) +
+                      70.0,
                   child: GestureDetector(
                     behavior: HitTestBehavior.translucent,
-                    onVerticalDragDown: (details) {
-                      if (!_scrollController.hasClients) return;
-                    },
+                    onVerticalDragDown: (details) {},
                     onVerticalDragStart: (details) {
-                      if (!_scrollController.hasClients) return;
                       _dragDetails = details;
                     },
                     onVerticalDragUpdate: (details) {
-                      if (!_scrollController.hasClients) return;
                       if (shouldScroll) {
                         if (!_scrolling) {
                           _drag = _scrollController.position.drag(_dragDetails!,
