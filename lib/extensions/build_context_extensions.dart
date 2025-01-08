@@ -62,6 +62,8 @@ extension GenericUtilities on BuildContext {
         'web' => PlatformType.web,
         _ => PlatformType.web,
       };
+
+  Size get screenSize => MediaQuery.sizeOf(this);
 }
 
 extension GenericDialogExtension on BuildContext {

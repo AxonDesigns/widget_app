@@ -50,4 +50,9 @@ extension DoubleExtension on double {
   double saturate() {
     return clamp(0.0, 1.0) as double;
   }
+
+  /// Returns true if the value is between min and max
+  bool isBetween(double min, double max) {
+    return this >= min && this <= max;
+  }
 }

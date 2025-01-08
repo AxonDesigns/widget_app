@@ -1,5 +1,4 @@
 import 'package:go_router/go_router.dart';
-import 'package:widget_app/components/sheet_experiment.dart';
 import 'package:widget_app/generic.dart';
 import 'package:widget_app/pages/about_page.dart';
 import 'package:widget_app/pages/home_page.dart';
@@ -22,7 +21,32 @@ var router = GoRouter(
   routes: [
     ShellRoute(
       builder: (context, state, child) {
-        return SheetExperiment(
+        return ScrollableSheet(
+          maxHeightFactor: 1.0,
+          padding: const EdgeInsets.all(16.0),
+          sheetBuilder: (context, shrinkWrap) {
+            return CustomScrollView(
+              shrinkWrap: shrinkWrap,
+              slivers: [
+                const SliverToBoxAdapter(
+                  child: Text(
+                      """Quam ducimus voluptatem qui mollitia est a illum quae. Laudantium magni est eum explicabo dolor aut consectetur quia. Dolores fugiat repudiandae qui et exercitationem. Sit ullam ad in fugiat consequatur sint nisi. Aut similique ut maxime.
+              Possimus doloremque necessitatibus sed pariatur consequuntur soluta rerum. Deserunt natus qui voluptas commodi. Quia dolorem voluptatem optio sed dolores deserunt sunt."""),
+                ),
+                SliverToBoxAdapter(
+                  child: Button.primary(
+                    onPressed: () {},
+                    children: const [Text("Test")],
+                  ),
+                ),
+                const SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 16.0,
+                  ),
+                ),
+              ],
+            );
+          },
           child: child,
         );
       },

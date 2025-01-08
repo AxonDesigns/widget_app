@@ -23,3 +23,6 @@ export 'components/link.dart';
 export 'components/delegated_transitions_route.dart';
 export 'components/sheet_container.dart';
 export 'components/sheet_route.dart';
+export 'components/sheet_experiment.dart';
+export 'components/after_layout_mixin.dart';
+export 'components/scrollable_sheet.dart';
