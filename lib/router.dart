@@ -22,10 +22,11 @@ var router = GoRouter(
     ShellRoute(
       builder: (context, state, child) {
         return ScrollableSheet(
-          maxHeightFactor: 1.0,
+          maxHeightFactor: 0.9,
           padding: const EdgeInsets.all(16.0),
           sheetBuilder: (context, shrinkWrap) {
             return CustomScrollView(
+              primary: true,
               shrinkWrap: shrinkWrap,
               slivers: [
                 const SliverToBoxAdapter(
@@ -38,6 +39,31 @@ var router = GoRouter(
                     onPressed: () {},
                     children: const [Text("Test")],
                   ),
+                ),
+                const SliverToBoxAdapter(
+                  child: Text(
+                      """Quam ducimus voluptatem qui mollitia est a illum quae. Laudantium magni est eum explicabo dolor aut consectetur quia. Dolores fugiat repudiandae qui et exercitationem. Sit ullam ad in fugiat consequatur sint nisi. Aut similique ut maxime.
+              Possimus doloremque necessitatibus sed pariatur consequuntur soluta rerum. Deserunt natus qui voluptas commodi. Quia dolorem voluptatem optio sed dolores deserunt sunt."""),
+                ),
+                const SliverToBoxAdapter(
+                  child: Text(
+                      """Quam ducimus voluptatem qui mollitia est a illum quae. Laudantium magni est eum explicabo dolor aut consectetur quia. Dolores fugiat repudiandae qui et exercitationem. Sit ullam ad in fugiat consequatur sint nisi. Aut similique ut maxime.
+              Possimus doloremque necessitatibus sed pariatur consequuntur soluta rerum. Deserunt natus qui voluptas commodi. Quia dolorem voluptatem optio sed dolores deserunt sunt."""),
+                ),
+                const SliverToBoxAdapter(
+                  child: Text(
+                      """Quam ducimus voluptatem qui mollitia est a illum quae. Laudantium magni est eum explicabo dolor aut consectetur quia. Dolores fugiat repudiandae qui et exercitationem. Sit ullam ad in fugiat consequatur sint nisi. Aut similique ut maxime.
+              Possimus doloremque necessitatibus sed pariatur consequuntur soluta rerum. Deserunt natus qui voluptas commodi. Quia dolorem voluptatem optio sed dolores deserunt sunt."""),
+                ),
+                const SliverToBoxAdapter(
+                  child: Text(
+                      """Quam ducimus voluptatem qui mollitia est a illum quae. Laudantium magni est eum explicabo dolor aut consectetur quia. Dolores fugiat repudiandae qui et exercitationem. Sit ullam ad in fugiat consequatur sint nisi. Aut similique ut maxime.
+              Possimus doloremque necessitatibus sed pariatur consequuntur soluta rerum. Deserunt natus qui voluptas commodi. Quia dolorem voluptatem optio sed dolores deserunt sunt."""),
+                ),
+                const SliverToBoxAdapter(
+                  child: Text(
+                      """Quam ducimus voluptatem qui mollitia est a illum quae. Laudantium magni est eum explicabo dolor aut consectetur quia. Dolores fugiat repudiandae qui et exercitationem. Sit ullam ad in fugiat consequatur sint nisi. Aut similique ut maxime.
+              Possimus doloremque necessitatibus sed pariatur consequuntur soluta rerum. Deserunt natus qui voluptas commodi. Quia dolorem voluptatem optio sed dolores deserunt sunt."""),
                 ),
                 const SliverToBoxAdapter(
                   child: SizedBox(

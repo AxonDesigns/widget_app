@@ -1,7 +1,3 @@
-import 'dart:ui';
-
-import 'package:flutter/material.dart'
-    show Scaffold, AppBar, DefaultMaterialLocalizations;
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:sheet/sheet.dart';
@@ -36,8 +32,6 @@ class _SelectInputState extends State<SelectInput> {
   bool get enabled => true;
   late FocusNode _focusNode;
   late LayerLink _layerLink;
-
-  final _duration = const Duration(milliseconds: 200);
 
   @override
   void initState() {
