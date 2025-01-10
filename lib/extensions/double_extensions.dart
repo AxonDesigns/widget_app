@@ -1,4 +1,4 @@
-extension DoubleExtension on double {
+/*extension DoubleExtension on double {
   /// Linear interpolation.
   ///
   /// e.g.
@@ -31,28 +31,37 @@ extension DoubleExtension on double {
   /// Remaps the value from one range to another.
   ///
   /// The result value is not clamped by default.<br>
-  /// set [clamp] to ```true``` to clamp the result value to the output range.
+  /// set [clampOutput] to ```true``` to clamp the result value to the output range.
   double remap(
     double iMin,
     double iMax,
     double oMin,
-    double oMax, {
-    bool clamp = false,
-  }) {
-    if (clamp) {
-      return invLerp(iMin, iMax).lerp(oMin, oMax).clamp(oMin, oMax);
-    }
-
+    double oMax,
+  ) {
     return invLerp(iMin, iMax).lerp(oMin, oMax);
   }
 
-  /// Clamps the value between 0.0 and 1.0
+  /// Clamps the value between 0.0 and 1.0.
   double saturate() {
     return clamp(0.0, 1.0) as double;
   }
 
-  /// Returns true if the value is between min and max
+  /// Wraps a value within the [min] and [max] range.
+  ///
+  /// e.g.
+  /// ```dart
+  /// final value = 15.0;
+  ///
+  /// print(value.wrap(0.0, 10.0)); // 5.0
+  /// ```
+  ///
+  double wrap(double min, double max) {
+    return ((this - min) % (max - min)) + min;
+  }
+
+  /// Returns true if the value is between [min] and [max].
   bool isBetween(double min, double max) {
     return this >= min && this <= max;
   }
 }
+*/

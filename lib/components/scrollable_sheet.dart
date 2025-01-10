@@ -1,8 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:widget_app/components.dart';
-import 'package:widget_app/extensions.dart';
+import 'package:widget_app/components/components.dart';
+import 'package:widget_app/extensions/extensions.dart';
 
 class ScrollableSheet extends StatefulWidget {
   const ScrollableSheet({
@@ -271,6 +271,7 @@ class _ScrollableSheetState extends State<ScrollableSheet>
                             );
                             _animationController.duration = duration;
                             _animationController.forward(from: 0.0);
+                            //_animationController.fling(velocity: velocity);
                           }
                         },
                         onVerticalDragCancel: () {

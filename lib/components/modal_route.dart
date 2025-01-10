@@ -1,6 +1,10 @@
 import 'package:widget_app/generic.dart';
 
-class GenericModalRoute<T> extends PageRoute<T> with GenericDelegatedTransitionsRoute<T> {
+typedef ModalTransitionBuilder = Widget Function(
+    BuildContext context, Animation<double> animation, Widget child);
+
+class GenericModalRoute<T> extends PageRoute<T>
+    with GenericDelegatedTransitionsRoute<T> {
   GenericModalRoute({
     super.settings,
     super.fullscreenDialog = false,
@@ -9,9 +13,11 @@ class GenericModalRoute<T> extends PageRoute<T> with GenericDelegatedTransitions
     this.barrierColor,
     this.barrierLabel,
     required this.builder,
+    this.modalTransitionBuilder,
   });
 
   final WidgetBuilder builder;
+  final ModalTransitionBuilder? modalTransitionBuilder;
 
   @override
   Color? barrierColor;
@@ -29,12 +35,15 @@ class GenericModalRoute<T> extends PageRoute<T> with GenericDelegatedTransitions
   Duration get transitionDuration => const Duration(milliseconds: 300);
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
     return builder(context);
   }
 
-  Animation<double> _buildCurveAnimation(Animation<double> animation, Curve curve) {
-    final effectiveCurve = animation.status == AnimationStatus.reverse ? curve.flipped : curve;
+  Animation<double> _buildCurveAnimation(
+      Animation<double> animation, Curve curve) {
+    final effectiveCurve =
+        animation.status == AnimationStatus.reverse ? curve.flipped : curve;
     return CurvedAnimation(
       parent: animation,
       curve: effectiveCurve,
@@ -54,13 +63,15 @@ class GenericModalRoute<T> extends PageRoute<T> with GenericDelegatedTransitions
         child: AnimatedBuilder(
           animation: effectiveAnimation,
           builder: (context, child) {
-            final curvedAnimation = _buildCurveAnimation(effectiveAnimation, context.theme.curve);
+            final curvedAnimation =
+                _buildCurveAnimation(effectiveAnimation, context.theme.curve);
 
             var currentValue = _firstBarrierFrame ? 0.0 : curvedAnimation.value;
             _firstBarrierFrame = false;
 
             return Container(
-              color: context.theme.backgroundColor.withOpacity(currentValue * 0.5),
+              color:
+                  context.theme.backgroundColor.withOpacity(currentValue * 0.5),
             );
           },
           child: const SizedBox(),
@@ -70,18 +81,22 @@ class GenericModalRoute<T> extends PageRoute<T> with GenericDelegatedTransitions
   }
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    final curvedAnimation = _buildCurveAnimation(animation, context.theme.curve);
-    return FadeTransition(
-      opacity: curvedAnimation,
-      child: ScaleTransition(
-        scale: curvedAnimation.drive(
-          Tween(begin: 1.1, end: 1.0),
-        ),
-        filterQuality: FilterQuality.high,
-        child: child,
-      ),
-    );
+  Widget buildTransitions(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation, Widget child) {
+    final curvedAnimation =
+        _buildCurveAnimation(animation, context.theme.curve);
+
+    return modalTransitionBuilder?.call(context, curvedAnimation, child) ??
+        FadeTransition(
+          opacity: curvedAnimation,
+          child: ScaleTransition(
+            scale: curvedAnimation.drive(
+              Tween(begin: 1.1, end: 1.0),
+            ),
+            filterQuality: FilterQuality.high,
+            child: child,
+          ),
+        );
   }
 
   @override
@@ -102,21 +117,25 @@ class GenericModalRoute<T> extends PageRoute<T> with GenericDelegatedTransitions
   var _firstFrame = true;
 
   @override
-  Widget buildSecondaryTransitionForPreviousRoute(BuildContext context, Animation<double> secondaryAnimation, Widget child) {
+  Widget buildSecondaryTransitionForPreviousRoute(BuildContext context,
+      Animation<double> secondaryAnimation, Widget child) {
     return AnimatedBuilder(
       animation: secondaryAnimation,
       builder: (context, child) {
-        final curvedAnimation = _buildCurveAnimation(secondaryAnimation, context.theme.curve);
+        final curvedAnimation =
+            _buildCurveAnimation(secondaryAnimation, context.theme.curve);
         var currentValue = _firstFrame ? 0.0 : curvedAnimation.value;
         _firstFrame = false;
 
         return Transform.scale(
-          scale: currentValue.remap(
-            0.0,
-            1.0,
-            1.0,
-            0.95,
-          ),
+          scale: currentValue
+              .remap(
+                0.0,
+                1.0,
+                1.0,
+                0.95,
+              )
+              .toDouble(),
           child: child,
         );
       },

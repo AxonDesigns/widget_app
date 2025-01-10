@@ -71,7 +71,11 @@ class _HomePageState extends State<HomePage> {
                             _obscureText = !_obscureText;
                           });
                         },
-                        children: [Icon(_obscureText ? LucideIcons.eye : LucideIcons.eye_off)],
+                        children: [
+                          Icon(_obscureText
+                              ? LucideIcons.eye
+                              : LucideIcons.eye_off)
+                        ],
                       ),
                     ),
                   ),
@@ -202,17 +206,20 @@ class _HomePageState extends State<HomePage> {
                           GenericSheetRoute(
                             barrierDismissible: true,
                             draggable: true,
-                            barrierColor: context.theme.backgroundColor.withOpacity(0.5),
+                            barrierColor:
+                                context.theme.backgroundColor.withOpacity(0.5),
                             builder: (context) {
                               return SheetContainer(
                                 child: GappedColumn(
                                   mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   gap: 16.0,
                                   children: [
                                     Text(
                                       "Are you absolutely sure?",
-                                      style: context.theme.baseTextStyle.copyWith(
+                                      style:
+                                          context.theme.baseTextStyle.copyWith(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 20,
                                       ),
@@ -247,11 +254,28 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                   ),
+                  Button.destructive(
+                    children: const [Text("Do some crazy SHEET")],
+                    onPressed: () {
+                      Navigator.of(context).push(GenericModalRoute(
+                        modalTransitionBuilder: (context, animation, child) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          );
+                        },
+                        builder: (context) {
+                          return BottomSheet();
+                        },
+                      ));
+                    },
+                  ),
                   Button.glass(
                     onPressed: () async {
                       final result = await context.showConfirmDialog(
                         title: "Are you absolutely sure?",
-                        content: "This will delete all your data from our servers, "
+                        content:
+                            "This will delete all your data from our servers, "
                             "and you will not be able to recover it.",
                         type: ConfirmDialogType.destructive,
                         confirmButtonText: "Confirm",
