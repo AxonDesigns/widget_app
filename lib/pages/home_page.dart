@@ -1,7 +1,6 @@
-import 'package:flutter/services.dart' hide TextInput;
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
-import 'package:widget_app/components/sheet_route.dart';
+import 'package:widget_app/components/bottom_sheet/sheet_controller.dart';
 import 'package:widget_app/generic.dart';
 
 class HomePage extends StatefulWidget {
@@ -257,17 +256,7 @@ class _HomePageState extends State<HomePage> {
                   Button.destructive(
                     children: const [Text("Do some crazy SHEET")],
                     onPressed: () {
-                      Navigator.of(context).push(GenericModalRoute(
-                        modalTransitionBuilder: (context, animation, child) {
-                          return FadeTransition(
-                            opacity: animation,
-                            child: child,
-                          );
-                        },
-                        builder: (context) {
-                          return BottomSheet();
-                        },
-                      ));
+                      _showCustomSheet(context);
                     },
                   ),
                   Button.glass(
@@ -322,5 +311,82 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  void _showCustomSheet(BuildContext context) {
+    Navigator.of(context).push(GenericModalRoute(
+      modalTransitionBuilder: (context, animation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+      builder: (context) {
+        return BottomSheet(
+          maxHeightFactor: 0.9,
+          builder: (context) => ListView.builder(
+            controller: SheetController.of(context).scrollController,
+            itemCount: 100,
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                  ),
+                  child: Center(
+                    child: Container(
+                      height: 6,
+                      width: 100,
+                      decoration: BoxDecoration(
+                        color: context.theme.foregroundColor.withOpacity(0.25),
+                        borderRadius: BorderRadius.circular(200),
+                      ),
+                    ),
+                  ),
+                );
+              }
+              return Button.custom(
+                backgroundColor: WidgetStateColor.resolveWith(
+                  (states) {
+                    var value = 1.0;
+                    if (states.contains(WidgetState.hovered)) {
+                      value = 0.9;
+                    }
+
+                    if (states.contains(WidgetState.pressed)) {
+                      value = 0.8;
+                    }
+                    return HSVColor.fromAHSV(
+                      1.0,
+                      index.toDouble().wrap(0, 14).remap(0, 14, 0, 360),
+                      0.7,
+                      value,
+                    ).toColor();
+                  },
+                ),
+                borderColor: WidgetStateColor.resolveWith(
+                  (states) {
+                    return Colors.transparent;
+                  },
+                ),
+                foregroundColor: WidgetStateColor.resolveWith(
+                  (states) {
+                    return HSVColor.fromAHSV(
+                      1.0,
+                      (index + 7).toDouble().wrap(0, 14).remap(0, 14, 0, 360),
+                      0.7,
+                      1.0,
+                    ).toColor();
+                  },
+                ),
+                borderRadius: 0,
+                onPressed: () {},
+                children: [Text("Item #${index + 1}")],
+              );
+            },
+          ),
+        );
+      },
+    ));
   }
 }

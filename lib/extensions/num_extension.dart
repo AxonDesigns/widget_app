@@ -71,4 +71,9 @@ extension NumExtension<T extends num> on T {
   bool isBetween(T min, T max) {
     return this >= min && this <= max;
   }
+
+  /// performs an arbitrary operation on the value.
+  T chain(T Function(T value) callback) {
+    return callback(this);
+  }
 }

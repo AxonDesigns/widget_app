@@ -476,9 +476,11 @@ class _ButtonState extends State<Button> {
         child: Listener(
           behavior: HitTestBehavior.translucent,
           onPointerDown: (event) {
+            if (!mounted) return;
             setState(() => pressed = true);
           },
           onPointerUp: (event) {
+            if (!mounted) return;
             setState(() => pressed = false);
           },
           child: DottedBorder(
