@@ -1,6 +1,7 @@
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 import 'package:widget_app/components/bottom_sheet/sheet_controller.dart';
+import 'package:widget_app/components/dynamic_sheet.dart';
 import 'package:widget_app/generic.dart';
 
 class HomePage extends StatefulWidget {
@@ -319,11 +320,12 @@ class _HomePageState extends State<HomePage> {
         return child;
       },
       builder: (context) {
-        return BottomSheet(
+        return DynamicSheet(
           maxHeightFactor: 1.0,
-          builder: (context) => ListView.builder(
+          builder: (context, controller, physics) => ListView.builder(
+            controller: controller,
+            physics: physics,
             padding: EdgeInsets.zero,
-            controller: SheetController.of(context).scrollController,
             itemCount: 100,
             itemBuilder: (context, index) {
               return Button.custom(
