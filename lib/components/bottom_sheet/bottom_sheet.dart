@@ -18,22 +18,25 @@ class BottomSheet extends StatefulWidget {
 }
 
 class _BottomSheetState extends State<BottomSheet>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, AfterLayoutMixin {
   final _scrollController = ScrollController();
   late final AnimationController _animationController;
+  final _childKey = GlobalKey();
 
   Drag? _drag;
   DragStartDetails? _startDetails;
 
-  Curve _curve = const SuspendedCurve(
-    curve: Curves.fastEaseInToSlowEaseOut,
-  );
+  final _curve = Curves.fastEaseInToSlowEaseOut;
 
   bool _isScrolling = false;
+  bool _isDragging = false;
   double _availableHeight = 0.0;
+  double _currentHeight = 0.0;
+  double _lastHeight = 0.0;
+  double _targetHeight = 0.0;
 
   double get _progress {
-    return _curve.transform(_animationController.value);
+    return _currentHeight / maxHeight;
   }
 
   double get maxHeight {
@@ -47,7 +50,6 @@ class _BottomSheetState extends State<BottomSheet>
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    _animationController.forward();
   }
 
   @override
@@ -58,23 +60,22 @@ class _BottomSheetState extends State<BottomSheet>
   }
 
   @override
+  void afterLayout(Duration timeStamp) {
+    super.afterLayout(timeStamp);
+    open();
+    /*WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      final renderBox =
+          _childKey.currentContext?.findRenderObject() as RenderBox?;
+      print(renderBox?.size.height);
+    });*/
+  }
+
+  @override
   Widget build(BuildContext context) {
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) {
-          final difference = (0.0 - _progress).abs();
-
-          final duration = Duration(
-            milliseconds: difference.remap(0.0, 1.0, 150, 600.0).toInt(),
-          );
-          _animationController.duration = duration;
-          _curve = SuspendedCurve(
-            curve: Curves.fastEaseInToSlowEaseOut,
-            from: _progress,
-            isReverse: true,
-          );
-
-          _animationController.reverse();
+          close();
         }
       },
       child: SheetController(
@@ -84,6 +85,20 @@ class _BottomSheetState extends State<BottomSheet>
           return AnimatedBuilder(
             animation: _animationController,
             builder: (context, child) {
+              if (_animationController.isAnimating) {
+                _currentHeight =
+                    _curve.transform(_animationController.value).remap(
+                          0.0,
+                          1.0,
+                          _lastHeight,
+                          _targetHeight,
+                        );
+              }
+              if (_animationController.isCompleted &&
+                  _currentHeight != _targetHeight &&
+                  !_isDragging) {
+                _currentHeight = _targetHeight;
+              }
               return CustomSingleChildLayout(
                 delegate: SheetLayoutDelegate(
                   progress: _progress,
@@ -103,7 +118,34 @@ class _BottomSheetState extends State<BottomSheet>
               child: Stack(
                 fit: StackFit.passthrough,
                 children: [
-                  widget.builder(context),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: 64,
+                    ),
+                    child: KeyedSubtree(
+                      key: _childKey,
+                      child: widget.builder(context),
+                    ),
+                  ),
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: SizedBox(
+                      height: 64,
+                      child: Center(
+                        child: Container(
+                          height: 6,
+                          width: 100,
+                          decoration: BoxDecoration(
+                            color:
+                                context.theme.foregroundColor.withOpacity(0.25),
+                            borderRadius: BorderRadius.circular(200),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                   Positioned.fill(
                     right: 6.0, // account for scroll bar
                     child: GestureDetector(
@@ -129,20 +171,24 @@ class _BottomSheetState extends State<BottomSheet>
 
                         final canScrollDown = _scrollController.offset > 0 &&
                             details.delta.dy > 0;
-                        final canScrollUp = _animationController.value >= 1.0 &&
-                            details.delta.dy < 0;
-
+                        final canScrollUp =
+                            _progress >= 1.0 && details.delta.dy < 0;
                         if (canScrollDown || canScrollUp) {
+                          _isDragging = false;
+
                           _drag?.update(details);
                         } else {
-                          if (_scrollController.offset < 0 &&
-                              details.delta.dy < 0) {
-                            _scrollController.jumpTo(0.0);
+                          _isDragging = true;
+                          final newHeight = (_currentHeight - details.delta.dy)
+                              .clamp(0.0, maxHeight);
+                          if (_currentHeight != newHeight) {
+                            /*if (_scrollController.offset < 0) {
+                              _scrollController.
+                            }*/
+                            setState(() {
+                              _currentHeight = newHeight;
+                            });
                           }
-
-                          _curve = Curves.linear;
-                          _animationController.value -=
-                              details.delta.dy / maxHeight;
                         }
                       },
                       onVerticalDragEnd: (details) {
@@ -152,7 +198,7 @@ class _BottomSheetState extends State<BottomSheet>
                             return;
                           }
 
-                          final velocity = _animationController.value < 1.0
+                          final velocity = _isDragging
                               ? 0.0
                               : details.velocity.pixelsPerSecond.dy;
 
@@ -169,44 +215,35 @@ class _BottomSheetState extends State<BottomSheet>
                           _isScrolling = false;
                         }
 
+                        if (_isDragging) {
+                          _isDragging = false;
+                        }
+
                         final velocity = details.velocity.pixelsPerSecond.dy;
                         final canDismiss = _scrollController.hasClients
                             ? _scrollController.offset <= 0.0
                             : true;
 
-                        bool dismiss = false;
                         if (velocity.abs() > 400.0) {
                           if (velocity > 0.0 && canDismiss) {
-                            dismiss = true;
+                            _targetHeight = 0.0;
+                          } else {
+                            _targetHeight = maxHeight;
                           }
                         } else {
                           if (_progress < 0.5) {
-                            dismiss = true;
+                            _targetHeight = 0.0;
+                          } else {
+                            _targetHeight = maxHeight;
                           }
                         }
 
-                        var targetProgress = dismiss ? 0.0 : 1.0;
-
-                        if (targetProgress != _progress) {
-                          final difference = (targetProgress - _progress).abs();
-
-                          final duration = Duration(
-                            milliseconds:
-                                difference.remap(0.0, 1.0, 150, 600.0).toInt(),
-                          );
-                          _animationController.duration = duration;
-                          _curve = SuspendedCurve(
-                            curve: Curves.fastEaseInToSlowEaseOut,
-                            from: _progress,
-                            isReverse: dismiss,
-                          );
-
-                          if (!dismiss) {
-                            _animationController.forward();
-                          } else {
-                            _animationController.reverse();
-                            Navigator.of(context).pop();
-                          }
+                        _lastHeight = _currentHeight;
+                        if (_lastHeight != _targetHeight) {
+                          _startAnimation();
+                        }
+                        if (_targetHeight <= 0) {
+                          Navigator.of(context).pop();
                         }
                       },
                       onVerticalDragCancel: () {
@@ -224,44 +261,30 @@ class _BottomSheetState extends State<BottomSheet>
     );
   }
 
-  Button _buildButton(int index) {
-    return Button.custom(
-      backgroundColor: WidgetStateColor.resolveWith(
-        (states) {
-          var value = 1.0;
-          if (states.contains(WidgetState.hovered)) {
-            value = 0.9;
-          }
+  void open() {
+    if (_animationController.isAnimating) {
+      _animationController.stop();
+    }
+    _lastHeight = _currentHeight;
+    _targetHeight = maxHeight;
+    _startAnimation();
+  }
 
-          if (states.contains(WidgetState.pressed)) {
-            value = 0.8;
-          }
-          return HSVColor.fromAHSV(
-            1.0,
-            index.toDouble().wrap(0, 14).remap(0, 14, 0, 360),
-            0.7,
-            value,
-          ).toColor();
-        },
-      ),
-      borderColor: WidgetStateColor.resolveWith(
-        (states) {
-          return Colors.transparent;
-        },
-      ),
-      foregroundColor: WidgetStateColor.resolveWith(
-        (states) {
-          return HSVColor.fromAHSV(
-            1.0,
-            (index + 7).toDouble().wrap(0, 14).remap(0, 14, 0, 360),
-            0.7,
-            1.0,
-          ).toColor();
-        },
-      ),
-      borderRadius: 0,
-      onPressed: () {},
-      children: [Text("Item #${index + 1}")],
+  void close() {
+    if (_animationController.isAnimating) {
+      _animationController.stop();
+    }
+    _lastHeight = _currentHeight;
+    _targetHeight = 0.0;
+    _startAnimation();
+  }
+
+  void _startAnimation() {
+    final difference = (_targetHeight - _lastHeight).abs();
+    final duration = Duration(
+      milliseconds: difference.remap(0.0, maxHeight, 150, 600.0).toInt(),
     );
+    _animationController.duration = duration;
+    _animationController.forward(from: 0.0);
   }
 }

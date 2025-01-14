@@ -316,35 +316,16 @@ class _HomePageState extends State<HomePage> {
   void _showCustomSheet(BuildContext context) {
     Navigator.of(context).push(GenericModalRoute(
       modalTransitionBuilder: (context, animation, child) {
-        return FadeTransition(
-          opacity: animation,
-          child: child,
-        );
+        return child;
       },
       builder: (context) {
         return BottomSheet(
-          maxHeightFactor: 0.9,
+          maxHeightFactor: 1.0,
           builder: (context) => ListView.builder(
+            padding: EdgeInsets.zero,
             controller: SheetController.of(context).scrollController,
             itemCount: 100,
             itemBuilder: (context, index) {
-              if (index == 0) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                  ),
-                  child: Center(
-                    child: Container(
-                      height: 6,
-                      width: 100,
-                      decoration: BoxDecoration(
-                        color: context.theme.foregroundColor.withOpacity(0.25),
-                        borderRadius: BorderRadius.circular(200),
-                      ),
-                    ),
-                  ),
-                );
-              }
               return Button.custom(
                 backgroundColor: WidgetStateColor.resolveWith(
                   (states) {
