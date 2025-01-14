@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:widget_app/components/bottom_sheet/bottom_sheet_layout.dart';
 import 'package:widget_app/generic.dart';
 
@@ -15,9 +14,6 @@ class _BottomSheetNotificationState extends State<BottomSheetNotification>
   final _scrollController = ScrollController();
   late final AnimationController _animationController;
   ScrollPhysics? _physics;
-
-  Drag? _drag;
-  DragStartDetails? _startDetails;
 
   Curve _curve = const SuspendedCurve(
     curve: Curves.fastEaseInToSlowEaseOut,

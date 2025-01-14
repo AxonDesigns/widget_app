@@ -2,8 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:widget_app/components/app_provider.dart';
-import 'package:widget_app/components/window_title_bar.dart';
 import 'package:widget_app/router.dart';
 import 'package:window_manager/window_manager.dart';
 import 'generic.dart';
