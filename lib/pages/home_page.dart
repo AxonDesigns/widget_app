@@ -320,51 +320,63 @@ class _HomePageState extends State<HomePage> {
         return child;
       },
       builder: (context) {
-        return DynamicSheet(
-          maxHeightFactor: 1.0,
-          builder: (context, controller, physics) => ListView.builder(
-            controller: controller,
-            physics: physics,
-            padding: EdgeInsets.zero,
-            itemCount: 100,
-            itemBuilder: (context, index) {
-              return Button.custom(
-                backgroundColor: WidgetStateColor.resolveWith(
-                  (states) {
-                    var value = 1.0;
-                    if (states.contains(WidgetState.hovered)) {
-                      value = 0.9;
-                    }
+        return NotificationListener<DraggableScrollableNotification>(
+          onNotification: (notification) {
+            if (notification.extent <= 0) {
+              Navigator.of(context).pop();
+            }
+            return false;
+          },
+          child: DynamicSheet(
+            maxHeightFactor: 0.9,
+            builder: (context, scrollController) {
+              return ListView.builder(
+                controller: scrollController,
+                padding: EdgeInsets.zero,
+                itemCount: 100,
+                itemBuilder: (context, index) {
+                  return Button.custom(
+                    backgroundColor: WidgetStateColor.resolveWith(
+                      (states) {
+                        var value = 1.0;
+                        if (states.contains(WidgetState.hovered)) {
+                          value = 0.9;
+                        }
 
-                    if (states.contains(WidgetState.pressed)) {
-                      value = 0.8;
-                    }
-                    return HSVColor.fromAHSV(
-                      1.0,
-                      index.toDouble().wrap(0, 14).remap(0, 14, 0, 360),
-                      0.7,
-                      value,
-                    ).toColor();
-                  },
-                ),
-                borderColor: WidgetStateColor.resolveWith(
-                  (states) {
-                    return Colors.transparent;
-                  },
-                ),
-                foregroundColor: WidgetStateColor.resolveWith(
-                  (states) {
-                    return HSVColor.fromAHSV(
-                      1.0,
-                      (index + 7).toDouble().wrap(0, 14).remap(0, 14, 0, 360),
-                      0.7,
-                      1.0,
-                    ).toColor();
-                  },
-                ),
-                borderRadius: 0,
-                onPressed: () {},
-                children: [Text("Item #${index + 1}")],
+                        if (states.contains(WidgetState.pressed)) {
+                          value = 0.8;
+                        }
+                        return HSVColor.fromAHSV(
+                          1.0,
+                          index.toDouble().wrap(0, 14).remap(0, 14, 0, 360),
+                          0.7,
+                          value,
+                        ).toColor();
+                      },
+                    ),
+                    borderColor: WidgetStateColor.resolveWith(
+                      (states) {
+                        return Colors.transparent;
+                      },
+                    ),
+                    foregroundColor: WidgetStateColor.resolveWith(
+                      (states) {
+                        return HSVColor.fromAHSV(
+                          1.0,
+                          (index + 7)
+                              .toDouble()
+                              .wrap(0, 14)
+                              .remap(0, 14, 0, 360),
+                          0.7,
+                          1.0,
+                        ).toColor();
+                      },
+                    ),
+                    borderRadius: 0,
+                    onPressed: () {},
+                    children: [Text("Item #${index + 1}")],
+                  );
+                },
               );
             },
           ),
