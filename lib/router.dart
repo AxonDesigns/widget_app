@@ -21,7 +21,17 @@ var router = GoRouter(
   routes: [
     ShellRoute(
       builder: (context, state, child) {
-        return child;
+        return Listener(
+          behavior: HitTestBehavior.translucent,
+          onPointerDown: (event) {
+            if (event.buttons == 8) {
+              if (context.canPop()) {
+                context.pop();
+              }
+            }
+          },
+          child: child,
+        );
       },
       routes: [
         CustomGoRoute(
