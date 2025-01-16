@@ -7,14 +7,14 @@ class DraggableSheetController extends ChangeNotifier {
 
   void _attach(DraggableScrollController controller) {
     _controller = controller;
-    _controller!.extent._extent.addListener(notifyListeners);
+    _controller!.extent._data.addListener(notifyListeners);
   }
 
   void _detach({disposeExtent = false}) {
     if (disposeExtent) {
       _controller?.extent.dispose();
     } else {
-      _controller?.extent._extent.removeListener(notifyListeners);
+      _controller?.extent._data.removeListener(notifyListeners);
     }
     _controller = null;
   }
@@ -43,22 +43,30 @@ class DynamicSheet extends StatefulWidget {
   State<DynamicSheet> createState() => _DynamicSheetState();
 }
 
-class _DynamicSheetState extends State<DynamicSheet>
-    with SingleTickerProviderStateMixin, AfterLayoutMixin {
+class _DynamicSheetState extends State<DynamicSheet> with SingleTickerProviderStateMixin, AfterLayoutMixin {
   late DraggableScrollController _scrollController;
   late DraggableSheetExtent _extent;
   late AnimationController _animationController;
 
+  final _contentKey = GlobalKey(debugLabel: 'draggable sheet content');
+
+  double _contentHeight = double.infinity;
   double _lastExtent = 0.0;
   double _targetExtent = 0.0;
 
-  double get maxExtent => widget.maxHeightFactor;
+  double get maxExtent {
+    if (_contentHeight < _extent.availablePixels * widget.maxHeightFactor) {
+      return _contentHeight / _extent.availablePixels;
+    }
+    return widget.maxHeightFactor;
+  }
 
   @override
   void initState() {
     super.initState();
     _extent = DraggableSheetExtent(
-      currentSize: ValueNotifier<double>(0.0),
+      initialSize: 0.0,
+      overscroll: 0.0,
       minExtent: 0.0,
       maxExtent: widget.maxHeightFactor,
     );
@@ -69,34 +77,31 @@ class _DynamicSheetState extends State<DynamicSheet>
           _animationController.stop();
         }
       },
+      onHoldEnd: () {
+        _startAnimation(getTargetExtent(0.0));
+      },
       onDragEnd: (velocity) {
         if (_animationController.isAnimating) {
           _animationController.stop();
         }
-        final canDismiss = _scrollController.hasClients
-            ? _scrollController.offset <= 0.0
-            : true;
-
+        final canDismiss = _scrollController.hasClients ? _scrollController.offset <= 0.0 : true;
+        double targetExtent = 0.0;
         if (velocity.abs() > 500.0) {
           if (velocity < 0.0 && canDismiss) {
-            _targetExtent = 0.0;
+            targetExtent = 0.0;
           } else {
-            _targetExtent = maxExtent;
+            targetExtent = maxExtent;
           }
         } else {
           if (_extent.extent < 0.5) {
-            _targetExtent = 0.0;
+            targetExtent = 0.0;
           } else {
-            _targetExtent = maxExtent;
+            targetExtent = maxExtent;
           }
         }
 
-        _lastExtent = _extent.extent;
-        if (_lastExtent != _targetExtent) {
-          _animationController.forward(from: 0.0);
-        }
-        if (_targetExtent <= 0) {
-          Navigator.of(context).pop();
+        if (_extent.extent != targetExtent) {
+          _startAnimation(targetExtent);
         }
       },
     );
@@ -122,12 +127,12 @@ class _DynamicSheetState extends State<DynamicSheet>
   @override
   void afterLayout(Duration timeStamp) {
     super.afterLayout(timeStamp);
-    if (_animationController.isAnimating) {
-      _animationController.reset();
+    final renderBox = _contentKey.currentContext?.findRenderObject() as RenderBox?;
+    final height = renderBox?.size.height;
+    if (height != null && height < _extent.availablePixels) {
+      _contentHeight = height;
     }
-    _lastExtent = _extent.extent;
-    _targetExtent = widget.maxHeightFactor;
-    _animationController.forward(from: 0.0);
+    _startAnimation(maxExtent);
   }
 
   @override
@@ -144,10 +149,21 @@ class _DynamicSheetState extends State<DynamicSheet>
     super.didChangeDependencies();
   }
 
+  void _startAnimation(double target) {
+    if (_animationController.isAnimating) {
+      _animationController.stop();
+    }
+    _lastExtent = _extent.extent;
+    _targetExtent = target;
+    _animationController.forward(from: 0.0);
+
+    if (_targetExtent <= 0.0) {
+      //Navigator.of(context).pop();
+    }
+  }
+
   void _onAnimate() {
-    final value = Curves.fastEaseInToSlowEaseOut
-        .transform(_animationController.value)
-        .remap(
+    final value = Curves.fastEaseInToSlowEaseOut.transform(_animationController.value).remap(
           0.0,
           1.0,
           _lastExtent,
@@ -155,11 +171,30 @@ class _DynamicSheetState extends State<DynamicSheet>
         );
 
     if (_animationController.isAnimating) {
-      _extent._extent.value = value;
+      _extent._data.size = value;
     }
     if (_animationController.isCompleted && !_scrollController.isDragging) {
-      _extent._extent.value = value;
+      _extent._data.size = value;
     }
+  }
+
+  double getTargetExtent(double velocity) {
+    final canDismiss = _scrollController.hasClients ? _scrollController.offset <= 0.0 : true;
+    double targetExtent = 0.0;
+    if (velocity.abs() > 500.0) {
+      if (velocity < 0.0 && canDismiss) {
+        targetExtent = 0.0;
+      } else {
+        targetExtent = maxExtent;
+      }
+    } else {
+      if (_extent.extent < 0.5) {
+        targetExtent = 0.0;
+      } else {
+        targetExtent = maxExtent;
+      }
+    }
+    return targetExtent;
   }
 
   @override
@@ -167,69 +202,124 @@ class _DynamicSheetState extends State<DynamicSheet>
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) {
-          if (_animationController.isAnimating) {
-            _animationController.reset();
-          }
-          _lastExtent = _extent.extent;
-          _targetExtent = 0.0;
-          _animationController.forward(from: 0.0);
+          _startAnimation(0.0);
         }
       },
-      child: LayoutBuilder(builder: (context, constraints) {
-        _extent.availablePixels = constraints.maxHeight;
-        return ValueListenableBuilder<double>(
-          valueListenable: _extent._extent,
-          builder: (context, value, child) {
-            //print("value $value");
-            return Stack(
-              fit: StackFit.passthrough,
-              children: [
-                Positioned.fill(
-                  top: _extent.availablePixels -
-                      (value * _extent.availablePixels),
-                  child: Container(
-                    color: context.theme.surfaceColor,
-                  ),
+      child: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            if (_extent.availablePixels != constraints.maxHeight) {
+              _extent.availablePixels = constraints.maxHeight;
+            }
+            return ListenableBuilder(
+              listenable: _extent._data,
+              builder: (context, child) {
+                final size = _extent._data.size;
+                final overscroll = _extent._data._overscroll;
+                return Stack(
+                  fit: StackFit.passthrough,
+                  children: [
+                    Positioned.fill(
+                      top: _extent.availablePixels - (size * _extent.availablePixels) - overscroll,
+                      child: Container(
+                        color: context.theme.surfaceColor,
+                      ),
+                    ),
+                    FractionallySizedBox(
+                      alignment: AlignmentDirectional.bottomCenter,
+                      heightFactor: _extent.extent,
+                      child: child,
+                    ),
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: Offstage(
+                          child: OverflowBox(
+                            child: Center(
+                              child: KeyedSubtree(
+                                key: _contentKey,
+                                child: widget.builder(
+                                  context,
+                                  ScrollController(),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+              child: GestureDetector(
+                onVerticalDragUpdate: (details) {
+                  if (_animationController.isAnimating) {
+                    _animationController.stop();
+                  }
+                  _extent.addPixelDelta(-details.delta.dy, context);
+                },
+                onVerticalDragEnd: (details) {
+                  _startAnimation(getTargetExtent(-details.velocity.pixelsPerSecond.dy));
+                },
+                child: widget.builder(
+                  context,
+                  _scrollController,
                 ),
-                FractionallySizedBox(
-                  alignment: AlignmentDirectional.bottomCenter,
-                  heightFactor: _extent.extent,
-                  child: child,
-                ),
-              ],
+              ),
             );
           },
-          child: widget.builder(
-            context,
-            _scrollController,
-          ),
-        );
-      }),
+        ),
+      ),
     );
   }
 }
 
+/// Stores a notifies if any value changes
+class ExtentData extends ChangeNotifier {
+  ExtentData({
+    required double size,
+    required double overscroll,
+  })  : _size = size,
+        _overscroll = overscroll;
+
+  double _size;
+  double _overscroll;
+
+  set size(value) {
+    _size = value;
+    notifyListeners();
+  }
+
+  set overscroll(value) {
+    _overscroll = value;
+    notifyListeners();
+  }
+
+  double get size => _size;
+  double get overscroll => _overscroll;
+}
+
 class DraggableSheetExtent {
   DraggableSheetExtent({
-    ValueNotifier<double>? currentSize,
+    double? initialSize,
+    double? overscroll,
     this.minExtent = 0.0,
     this.maxExtent = 1.0,
     this.availablePixels = double.infinity,
-  }) : _extent = currentSize ?? ValueNotifier<double>(0.0);
+  }) : _data = ExtentData(size: initialSize ?? 0.0, overscroll: overscroll ?? 0.0);
 
   VoidCallback? _cancelActivity;
 
-  final ValueNotifier<double> _extent;
+  final ExtentData _data;
   final double minExtent;
   final double maxExtent;
   double availablePixels;
   bool hasDragged = false;
   bool hasChanged = false;
 
-  double get extent => _extent.value;
+  double get extent => _data.size;
 
-  bool get isAtMin => minExtent >= _extent.value;
-  bool get isAtMax => maxExtent <= _extent.value;
+  bool get isAtMin => minExtent >= _data.size;
+  bool get isAtMax => maxExtent <= _data.size;
 
   void startActivity(VoidCallback onCanceled) {
     _cancelActivity?.call();
@@ -238,8 +328,8 @@ class DraggableSheetExtent {
 
   void update(double value, BuildContext context) {
     final clamped = value.clamp(minExtent, maxExtent);
-    if (clamped == _extent.value) return;
-    _extent.value = clamped;
+    if (clamped == _data.size) return;
+    _data.size = clamped;
     // TODO: Dispatch notification
   }
 
@@ -260,17 +350,19 @@ class DraggableSheetExtent {
   }
 
   void dispose() {
-    _extent.dispose();
+    _data.dispose();
   }
 
   DraggableSheetExtent copyWith({
-    ValueNotifier<double>? currentSize,
+    double? initialSize,
+    double? overscroll,
     double? minExtend,
     double? maxExtend,
     double? availablePixels,
   }) {
     return DraggableSheetExtent(
-      currentSize: currentSize ?? _extent,
+      initialSize: initialSize ?? _data.size,
+      overscroll: overscroll ?? _data._overscroll,
       minExtent: minExtend ?? minExtent,
       maxExtent: maxExtend ?? maxExtent,
       availablePixels: availablePixels ?? this.availablePixels,
@@ -282,6 +374,7 @@ class DraggableScrollController extends ScrollController {
   DraggableScrollController({
     required this.extent,
     this.onHold,
+    this.onHoldEnd,
     this.onDrag,
     this.onDragEnd,
     this.onDragStart,
@@ -289,6 +382,7 @@ class DraggableScrollController extends ScrollController {
 
   final DraggableSheetExtent extent;
   final Function()? onHold;
+  final Function()? onHoldEnd;
   final Function()? onDragStart;
   final Function(double delta, bool isScrolling)? onDrag;
   final Function(double velocity)? onDragEnd;
@@ -296,8 +390,7 @@ class DraggableScrollController extends ScrollController {
   bool isDragging = false;
 
   @override
-  DraggableScrollPosition get position =>
-      super.position as DraggableScrollPosition;
+  DraggableScrollPosition get position => super.position as DraggableScrollPosition;
 
   @override
   DraggableScrollPosition createScrollPosition(
@@ -311,6 +404,7 @@ class DraggableScrollController extends ScrollController {
       oldPosition: oldPosition,
       extent: extent,
       onHold: onHold,
+      onHoldEnd: onHoldEnd,
       onDragStart: () {
         onDragStart?.call();
         isDragging = true;
@@ -331,6 +425,7 @@ class DraggableScrollPosition extends ScrollPositionWithSingleContext {
     super.oldPosition,
     required this.extent,
     this.onHold,
+    this.onHoldEnd,
     this.onDrag,
     this.onDragEnd,
     this.onDragStart,
@@ -338,6 +433,7 @@ class DraggableScrollPosition extends ScrollPositionWithSingleContext {
 
   final DraggableSheetExtent extent;
   final Function()? onHold;
+  final Function()? onHoldEnd;
   final Function()? onDragStart;
   final Function(double delta, bool isScrolling)? onDrag;
   final Function(double velocity)? onDragEnd;
@@ -347,10 +443,7 @@ class DraggableScrollPosition extends ScrollPositionWithSingleContext {
 
   @override
   void applyUserOffset(double delta) {
-    if (!_shouldScroll &&
-        (!(extent.isAtMin || extent.isAtMax) ||
-            (extent.isAtMin && delta < 0) ||
-            (extent.isAtMax && delta > 0))) {
+    if (!_shouldScroll && (!(extent.isAtMin || extent.isAtMax) || (extent.isAtMin && delta < 0) || (extent.isAtMax && delta > 0))) {
       extent.addPixelDelta(-delta, context.notificationContext!);
       onDrag?.call(delta, false);
     } else {
@@ -358,6 +451,17 @@ class DraggableScrollPosition extends ScrollPositionWithSingleContext {
       onDrag?.call(delta, true);
     }
     _dragging = true;
+  }
+
+  bool _wasHold = false;
+  @override
+  void beginActivity(ScrollActivity? newActivity) {
+    if (_wasHold && newActivity is IdleScrollActivity) {
+      onHoldEnd?.call();
+    }
+
+    _wasHold = newActivity is HoldScrollActivity;
+    super.beginActivity(newActivity);
   }
 
   @override
@@ -391,25 +495,16 @@ class DraggableScrollPosition extends ScrollPositionWithSingleContext {
       extent.addPixelDelta(pixels, context.notificationContext!);
       forcePixels(0.0);
     }
+
     return super.hold(holdCancelCallback);
   }
 
-  /*@override
+  @override
   void didUpdateScrollMetrics() {
     super.didUpdateScrollMetrics();
-    // Predict if next position will be an overscroll.
-    // If it is, then jump to 0 to avoid it.
-    final deltaSeconds =
-        (DateTime.now().millisecondsSinceEpoch - lastime) / 1000;
-    final deltaPos = pixels - _lastPos;
-    final velocity = deltaPos / deltaSeconds;
-    final nextPos = pixels + (velocity * deltaSeconds);
-
-    if (nextPos < 0 && !_dragging) {
-      jumpTo(0);
+    if (pixels <= 0.0) {
+      if (extent._data.overscroll == pixels) return;
+      extent._data.overscroll = pixels;
     }
-
-    lastime = DateTime.now().millisecondsSinceEpoch;
-    _lastPos = pixels;
-  }*/
+  }
 }
